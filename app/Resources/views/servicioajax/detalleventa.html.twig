@@ -1,0 +1,32 @@
+<div class="row mt-2 ">
+    <div class="col-lg-12">
+        <table id="dtTable" class="table ">
+            <thead>
+                <tr>
+                    <th>Ítem</th>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+
+                </tr>
+            </thead>
+            <tbody>
+            {% set item = 1 %}
+            {% for detalleVenta in detallesVenta %}
+                <tr>
+                    <td>{{ item }}</td>
+                    <td>{{ detalleVenta.productoXLocal.producto.codigo }}</td>
+                    <td>{{ detalleVenta.productoXLocal.producto.nombre }}</td>
+                    <td>{{ detalleVenta.cantidad }}</td>
+                    <td>{{ detalleVenta.subtotal }}</td>
+
+
+                </tr>
+                {% set item = item + 1 %}
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>

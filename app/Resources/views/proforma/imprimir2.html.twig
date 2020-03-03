@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <meta charset="utf-8">
+    <head>
+        <title>Proforma</title>
+        <style type="text/css">
+
+            body {
+                font-family:"Myriad Pro";
+                font-size:12pt;
+                background-image: url({{ 'http://' ~ host ~ '/formatos/' ~ app.session.get('empresa') ~ '/proforma.jpg' }});
+                background-repeat: no-repeat;
+                background-size: 100%;
+            }
+
+       
+        </style>
+    </head>
+
+    <body>
+
+
+
+        {% set item = 1 %}
+        {% set impuesto = 0 %}
+        {% set total = 0 %}
+        {% set marcador = 400 %}
+
+        <div style="position:absolute; top: 15px; left: 60px; color: black;">
+
+            <table  width="850" border="0" style="border-spacing: .5em;">
+                <tr>
+                    <td width="25%" style="">
+                        {% if localObj.empresa.logo %}
+                            <img src="{{ app.request.getSchemeAndHttpHost() ~ '/uploads/imagenes/' ~ localObj.empresa.logo }}" alt="" >{#width="320px" height="80px"#}
+                        {% endif %}
+
+                    </td>
+
+                    <td width="30%" align="center" style="padding:5px;font-weight:bold;font-size:16pt;">
+                        {{ 'COTIZACIÓN ' ~ facturaVenta.numeroProforma }}
+                    </td>
+
+                    <td width="45%" align="center" style="">
+
+                        <table border="0" >
+                            <tr>
+                                <th align="left" style="font-size:14pt;" colspan="3">{{ localObj.empresa.nombreCorto | upper }}</th>          
+                            </tr>
+
+                            <tr>
+                                <th align="right" width="5%" style="font-size:14pt;">RUC</th>
+                                <th width="1%" style="font-size:14pt;">:</th>
+                                <td width="94%" style="font-size:12pt;">{{ localObj.empresa.ruc  }}</td>              
+                            </tr>
+                            <tr>
+                                <th align="right" width="5%" style="font-size:14pt;">Dirección</th>
+                                <th width="1%" style="font-size:14pt;">:</th>
+                                <td width="94%" style="font-size:12pt;">
+                                    {% if localObj.empresa.direccion %}
+                                        {{ localObj.empresa.direccion }}
+                                    {% endif %}
+                                </td>              
+                            </tr>
+                            <tr>
+                                <th align="right" width="5%" style="font-size:14pt;">Teléfono</th>
+                                <th width="1%" style="font-size:14pt;">:</th>
+                                <td width="94%" style="font-size:12pt;">        
+                                    {% if localObj.telefono %}
+                                        {{ localObj.telefono ~ ' ' }}
+                                    {% endif %}
+                                </td>              
+                            </tr>
+                            <tr>
+                                <th align="right" width="5%" style="font-size:14pt;">E-mail</th>
+                                <th width="1%" style="font-size:14pt;">:</th>
+                                <td width="94%" style="font-size:12pt;">{{ localObj.email ? localObj.email : '' }} {{ localObj.empresa.direccionWeb ? ' ' ~ localObj.empresa.direccionWeb : ''}}</td>              
+                            </tr>                                                        
+                                        
+                        </table>
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+            <br>
+
+            <table  width="850" border="0" >
+                <tr>
+                    <th align="left" width="5%" style="font-size:14pt;">Señores</th>
+                    <th width="1%" style="font-size:14pt;">:</th>
+                    <td width="57%" style="font-size:14pt;">{{ facturaVenta.cliente  }}</td>
+                    <th width="5%" align="left" style="font-size:14pt;">Teléfono</th>
+                    <th width="1%" style="font-size:14pt;">:</th>
+                    <td width="31%" style="font-size:14pt;">{{ facturaVenta.telefonoCliente  }}</td>                    
+                </tr>
+                <tr>
+                    <th align="left" width="5%" style="font-size:14pt;">Fecha</th>
+                    <th width="1%" style="font-size:14pt;">:</th>
+                    <td width="57%" style="font-size:14pt;">{{ facturaVenta.fecha | date('d/m/Y') }}</td>
+                    <th width="5%" align="left" style="font-size:14pt;"></th>
+                    <th width="1%" style="font-size:14pt;"></th>
+                    <td width="31%" style="font-size:14pt;"></td>                      
+                </tr>
+                            
+            </table>
+            <br>
+
+
+
+            <div style="font-size:14pt;">Nos es grato saludarlos y a la vez hacerles llegar nuestra cotización de acuerdo a lo solicitado.</div>
+            <div style="height:10px;"></div>
+
+            <table  width="850" border="0" style="border-top: 1px solid;border-bottom: 1px solid;border-left: 1px solid;border-right: 1px solid;">
+    
+                <tr style="background-color:#E73942;">
+                    <th width="4%" align="center" style="border-bottom: 1px solid;color:#FFFFFF;font-size:14pt;" >Item</th>
+                    <th width="5%" align="center" style="border-bottom: 1px solid;color:#FFFFFF;font-size:14pt;">Cód</th>
+                    <th width="45%" align="center" style="border-bottom: 1px solid;color:#FFFFFF;font-size:14pt;">Descripción</th>
+                    <th width="8%" align="center" style="border-bottom: 1px solid;color:#FFFFFF;font-size:14pt;">Marca</th>
+                    <th width="9%" align="center" style="border-bottom: 1px solid;color:#FFFFFF;font-size:14pt;">Cantidad</th>
+                    <th width="15%" align="center" style="border-bottom: 1px solid;color:#FFFFFF;font-size:14pt;">P.Unitario</th>
+                    <th align="center" style="border-bottom: 1px solid;color:#FFFFFF;font-size:14pt;">P.Total</th>                    
+                </tr>
+
+
+                {% for d in facturaVenta.venta.detalleVenta %}
+                    <tr>
+                        <td width="4%" align="center" style="">{{ item }}</td>
+                        <td width="5%" align="center" style="">{{ d.productoXLocal.producto.codigo }}</td>
+                        <td width="45%" align="left" style="">{{ d.productoXLocal.producto.nombre | upper  }} {{ d.descripcion ? ' - ' ~  d.descripcion | upper  : ''  }}</td>
+                        <td width="8%" align="center" style="">{{ d.productoXLocal.producto.marca | upper }}</td>
+                        <td width="9%" align="center " style="">{{ d.cantidad }}</td>
+
+                        {% set precio = d.subtotal / d.cantidad %}
+                        <td width="15%" align="center" style="">{{ precio | number_format(2, '.', ',') }}</td>
+                        <td align="center" style="">{{ d.subtotal | number_format(2, '.', ',') }}</td>                    
+                    </tr>
+                    {% set item = item + 1 %}
+                    {% set total = total + d.subtotal %}
+                {% endfor %}
+                
+
+            </table>
+
+            <table  width="850" border="0" >
+
+                {% if facturaVenta.incluirIgv %}
+        
+                    {% set subtotal = total/1.18 %}
+                    {% set igvtotal = subtotal * 0.18 %}
+
+                {% else %}
+
+                    {% set subtotal = total %}
+                    {% set igvtotal = 0.18 * subtotal %}
+                    {% set total = igvtotal +  subtotal %}
+
+                {% endif %}
+                <tr>
+                    <td width="71%" ></td>
+                    <th width="15%" align="right" style="font-size:16px;border-color:#5e5c5c;background-color:#5e5c5c;color:white; border-left: 1px solid;border-top: 1px solid;border-right: 1px solid;border-bottom: 0;">Subtotal {{ facturaVenta.venta.ventaFormaPago[0].moneda.id == 1 ? ' S./ ' : ' $ ' }}</th>
+                    <th align="center" style="font-size:16px;border-left: 1px solid;border-right: 1px solid;border-top: 1px solid;">{{ subtotal | number_format(2, '.', ',')  }}</th>                    
+                </tr>
+
+                <tr>
+                    <td ></td>
+                    <th align="right" style="font-size:16px;border-color:#5e5c5c;background-color:#5e5c5c;color:white;border-left: 1px solid;border-right: 1px solid;border-bottom: 0;">I.G.V. 18%</th>
+                    <th align="center" style="font-size:16px;border-left: 1px solid;border-right: 1px solid;">{{ igvtotal | number_format(2, '.', ',')  }}</th>                    
+                </tr>
+
+                <tr>
+                    <td ></td>
+                    <th align="right" style="font-size:16px;border-color:#5e5c5c;background-color:#5e5c5c;color:white;border-left: 1px solid;border-bottom: 1px solid;border-right: 1px solid;">Total {{ facturaVenta.venta.ventaFormaPago[0].moneda.id == 1 ? ' S./ ' : ' $ ' }}</th>
+                    <th align="center" style="font-size:16px;border-left: 1px solid;border-bottom: 1px solid;border-right: 1px solid;">{{ total | number_format(2, '.', ',')  }}</th>                    
+                </tr>
+
+            </table>
+
+            <br>
+
+            <table  width="500" border="0" style="float: left;">
+                <tr>
+                    <th width="100%" align="left" colspan="2" style="font-weight:bold;">CONDICIONES COMERCIALES</th>              
+                </tr>
+                
+                <tr>
+                    <td width="35%">Validez de la oferta :</td>
+                    <td>{{ facturaVenta.validezOferta | upper }}</td>
+                </tr>
+
+                <tr>
+                    <td>Plazo de entrega :</td>
+                    <td>{{ facturaVenta.plazoEntrega | upper }}</td>
+                </tr>
+                <tr>
+                    <td>Forma de pago :</td>
+                    <td>{{ facturaVenta.venta.ventaFormaPago[0].formaPago | upper }}</td>
+                </tr>
+               
+                <tr>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td colspan="2">Atentamente,</td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                </tr>                                
+                <tr>
+                    <th colspan="2" align="left">{{ facturaVenta.empleadoCotiza | upper }}</th>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ facturaVenta.correoEmpleadoCotiza }}</td>
+                </tr>
+            </table>
+
+            <table  width="300" border="0">
+                <tr>
+                    <th width="100%" align="left" style="font-weight:bold;">CUENTAS BANCARIAS</th>              
+                </tr>
+                
+                {% for cuentaBanco in  cuentasBancarias  if cuentaBanco.estado %}
+
+                    <tr>
+                        <td>{{ cuentaBanco | upper ~ ' ' ~ cuentaBanco.moneda | upper ~ '  ' ~ cuentaBanco.numero | upper }}</td>
+                    </tr>
+                    
+                {% endfor %}
+
+
+            </table>
+
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+
+
+            <div style="width:850px;text-align:center;">
+                {#<img src="{{ 'http://' ~ host ~ '/formatos/' ~ app.session.get('empresa') ~ '/cotizacion.jpg' }}" alt="" width="850px" height="52px">#}
+            </div>
+            
+
+        </div>
+
+
+
+
+    </body>
+</html>

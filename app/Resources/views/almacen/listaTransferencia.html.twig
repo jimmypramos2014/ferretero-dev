@@ -1,0 +1,569 @@
+{% extends 'base.html.twig' %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+    <style>
+        .fecha-transporte {
+            z-index: 100000 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="container">
+
+        <div class="card mx-auto mt-2">
+            <div class="card-header">Filtros</div>
+            <div class="card-body">
+                <div class="row mb-2 ">
+                    <div class="col-lg-12">
+                    
+                        <div class="form-row">
+                            <div class="form-group  col-md-4">
+                                {{ form_row(form.local) }}
+
+                            </div>
+
+                            <p class="pull-right" style="margin-top:27px;"> 
+                                <input type="button" class="btn btn-small btn-primary" id="buscar" value="Buscar" />           
+                            </p>
+                        </div>
+
+                    </form>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card mx-auto mt-2">
+            <div class="card-body">
+
+                <div class="row pr-3">
+                    <div class="col-lg-12 ">
+                        <a href="{{ path('almacen_transferencia') }}" class="btn btn-primary pull-right">Registrar transferencia</a>
+                    </div>
+                </div>
+                <div class="row mt-2 ">
+                    <div class="col-lg-12">
+                        <table id="dtTransferencia" class="table table-striped table-bordered " style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Local inicial</th>
+                                    <th>Local final</th>                                    
+                                    <th>Fecha</th>
+                                    <th>Documento</th>
+                                    <th>Motivo traslado</th>
+
+                                    <th class="no-sort">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% set item = 1 %}
+                            {% for transferencia in transferencias %}
+                                <tr>
+                                    {% set localInicial = 'proveedor' %}
+                                    {% if transferencia.localInicio %} {% set localInicial = transferencia.localInicio %} {% endif %}
+                                    <td>{{ localInicial | upper }}</td>
+                                    {% set localFinal = 'cliente' %}
+                                    {% if transferencia.localFin %} {% set localFinal = transferencia.localFin %} {% endif %}                                    
+                                    <td>{{ localFinal | upper}}</td>
+                                    <td data-sort="<%= {{ transferencia.fecha | date('Y-m-d H:i') }} %>" >{{ transferencia.fecha | date('d/m/Y H:i') }}</td>
+                                    <td>{{ transferencia.numeroDocumento }}</td>
+                                    <td>{{ transferencia.motivoTraslado | upper }}</td>
+
+                                    <td class="text-center">
+                                        {% if transferencia.motivoTraslado == 'venta' %}
+                                            <a href="#" data-toggle="modal" data-target="#modalTransporte" data-transferencia="{{ transferencia.id }}">
+                                                <i class="fa fa-car fa-lg" data-toggle="tooltip" title="Completar datos para generar guía de remisión."></i>                                            
+                                            </a>
+                                        {% endif %}    
+
+                                        {% if transferencia.motivoTraslado == 'venta' %}
+{#                                             <a href="{{ path('almacen_show_guiaremision', { 'id': transferencia.id }) }}" target="_blank">
+                                                <i class="fa fa-print fa-lg" data-toggle="tooltip" title="Guia de remisión"></i>                                                
+                                            </a> #}
+
+                                            {% set datosTransporte =  obtenerDatosTransporte(transferencia.id) %}
+                                            {% if datosTransporte | length > 0 %}
+                                                <a href="{{ path('almacen_show_guiaremision', { 'id': transferencia.id }) }}" target="_blank" id="mostrar_guia" >
+                                                    <i class="fa fa-print fa-lg"  data-toggle="tooltip" title="Guia de remisión"></i>                                                
+                                                </a>
+                                            {% endif %}
+
+                                        {% endif %}                                       
+                                    </td>
+    
+                                </tr>
+                                {% set item = item + 1 %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade " tabindex="-1" role="dialog" aria-labelledby="transporteModalLabel" id="modalTransporte" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Datos de guía de remisión</h5>
+                    <button type="button" class="close" onclick="$('#modalTransporte').modal('hide');" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>                    
+                </div>
+
+                <form id="form_transporte"  action="{{ path('registrar_datos_transporte') }}" class="form" role="form" method="post"  novalidate>
+                    <div class="modal-body">
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-4">
+                    
+                                {{ form_row(formTransporte.tipoGuia) }}
+
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.puntoPartida) }}              
+                             
+                            </div>
+                           
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.puntoLlegada) }}              
+                             
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-4 transportista">
+                             
+                                {{ form_label(formTransporte.transporte) }}
+                                
+                                <div class="input-group mb-3">
+                                    {{ form_widget(formTransporte.transporte) }}
+
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="agregar_empresa_transporte" data-toggle="modal" data-target="#empresaTransporteModal">
+                                            <i class="fa fa-plus fa-lg " data-toggle="tooltip" title="Agregar empresa de transporte"></i>
+                                                
+                                        </span>
+                                    </div>
+                                                                 
+                                </div>
+
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.remitente) }}                                       
+                            </div>
+                           
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.destinatario) }}                                       
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-4 transportista">
+                             
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.rucRemitente) }}                                       
+                            </div>
+                           
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.rucDestinatario) }}                                       
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.fechaTraslado) }}
+                            </div>
+                           
+                            <div class="form-group col-md-3 transportista">
+                                {{ form_row(formTransporte.costoMinimo) }}                                       
+                            </div>
+
+                        </div>
+
+                        <div class="form-row transportista" >
+
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.marca) }}
+                            </div>
+
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.placa) }}                                       
+                            </div>
+                           
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.constanciaInscripcion) }}                                       
+                            </div>
+
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.licenciaConducir) }}                                       
+                            </div>
+
+                        </div>
+                        
+                        {{ form_widget(formTransporte._token) }}
+
+                        {{ form_widget(formTransporte.transferencia_id) }}
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="guardar_transporte">Guardar</button>
+                        <button type="button" class="btn btn-secondary" onclick="$('#modalTransporte').modal('hide');">Cerrar</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal hide fade" id="empresaTransporteModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Agregar Empresa de transporte</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+            <form id="form_empresatransporte"  action="{{ path('transporte_new') }}" class="form needs-validation" role="form" method="post"  novalidate>
+                <div class="modal-body">
+
+                    <div class="form-row">
+                        <div class="col-md-8">
+                            {{ form_row(formEmpresaTransporte.nombre) }}
+                                                                         
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            {{ form_row(formEmpresaTransporte.ruc) }}
+                            
+                        </div>                                       
+                    </div>
+
+                    {{ form_widget(formEmpresaTransporte.estado) }}
+                    {{ form_widget(formEmpresaTransporte.empresa) }}
+                    {{ form_widget(formEmpresaTransporte._token) }}
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btn_empresatransporte" >Guardar</button>                  
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="http://malsup.github.com/jquery.form.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+    <script type="text/javascript">
+
+        function eliminar(id) {
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                    },
+                    cancel: {
+                        label: 'Cancelar',
+                    }
+                },                
+                size: 'small',
+                message: "¿Está seguro de eliminar el registro?", 
+                callback: function(res){ 
+                    if(res){
+                        location = id+'/delete';
+                    }
+                }
+            });
+        } 
+
+        $(document).ready(function() {
+
+            var btn_buscar = $('#buscar');
+
+            var table = $('#dtTransferencia').DataTable({
+
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtered from _MAX_ total records)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },
+                "columnDefs": [ {
+                    "targets": 'no-sort',
+                    "orderable": false,
+                } ],
+                "order": [[ 2, "desc" ]],
+                dom: 'Bfrtip',
+                responsive: true,
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'print',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    }
+                ]        
+
+            });
+           
+            btn_buscar.on('click',function(e){
+
+                var local = $("#appbundle_ventatrabajadormensual_filtro_local :selected").text();
+
+                table.search( local ).draw();
+
+            });
+
+            $('#modalTransporte').on('shown.bs.modal', function (event) {
+
+                var button = $(event.relatedTarget);
+                var transferencia = button.data('transferencia');
+                var modal = $(this);
+
+                $('#appbundle_transferenciaxtransporte_transferencia_id').val(transferencia);
+
+                $.ajax({
+                    method: "POST",
+                    url:"{{ path('obtener_datos_transporte')}}",
+                    data: { 'transferencia':transferencia},
+                    dataType: 'json',
+                    success: function(data){
+
+                        if(data["fechaTraslado"] != ''){
+
+                            $('#appbundle_transferenciaxtransporte_fechaTraslado').val(data['fechaTraslado']);
+
+                        }else{
+
+                            var d           = new Date();
+                            var currDay     = d.getDate();
+                            var currMonth   = d.getMonth();
+                            var currYear    = d.getFullYear();
+                            var startDate   = new Date(currYear, currMonth, currDay);
+
+                            $("#appbundle_transferenciaxtransporte_fechaTraslado").datepicker("setDate", startDate);
+
+                        }
+
+                        $('#appbundle_transferenciaxtransporte_puntoPartida').val(data['puntoPartida']);
+                        $('#appbundle_transferenciaxtransporte_puntoLlegada').val(data['puntoLlegada']);
+                        $('#appbundle_transferenciaxtransporte_remitente').val(data['remitente']);
+                        $('#appbundle_transferenciaxtransporte_destinatario').val(data['destinatario']);
+                        $('#appbundle_transferenciaxtransporte_rucRemitente').val(data['rucRemitente']);
+                        $('#appbundle_transferenciaxtransporte_rucDestinatario').val(data['rucDestinatario']);
+                        $('#appbundle_transferenciaxtransporte_costoMinimo').val(data['costoMinimo']);
+                        $('#appbundle_transferenciaxtransporte_marca').val(data['marca']);
+                        $('#appbundle_transferenciaxtransporte_placa').val(data['placa']);
+                        $('#appbundle_transferenciaxtransporte_constanciaInscripcion').val(data['constanciaInscripcion']);
+                        $('#appbundle_transferenciaxtransporte_licenciaConducir').val(data['licenciaConducir']);
+                        $('#appbundle_transferenciaxtransporte_transporte').val(data['transporte']);
+                    }
+                });
+
+
+            });
+
+
+
+            $(".fecha-transporte").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true,
+              
+            });
+
+            $( ".transportista" ).each(function( index ) {
+
+               $( this ).addClass('d-none');
+
+            });
+
+            //$(".fecha-transporte").datepicker("setDate", startDate);
+
+            var btn_guardar         = $('#guardar_transporte');
+            var form_transporte     = $("#form_transporte");
+            var form_empresatransporte     = $("#form_empresatransporte");
+            var empresatransporte   = $("#appbundle_transferenciaxtransporte_transporte");
+            var tipo_guia   = $("#appbundle_transferenciaxtransporte_tipoGuia");
+
+            var mostrar_guia        = $('#mostrar_guia');
+
+            tipo_guia.on('change',function(){
+
+                if($( this ).val() == 'REMITENTE'){
+
+                    $( ".transportista" ).each(function( index ) {
+
+                       $( this ).addClass('d-none');
+
+                    });
+
+                }else{
+
+                    $( ".transportista" ).each(function( index ) {
+
+                       $( this ).removeClass('d-none');
+
+                    });
+
+                }
+
+            })
+
+
+            btn_guardar.on('click',function(){
+
+                $.ajax({
+                    method: form_transporte.attr('method'),
+                    url:form_transporte.attr('action'),
+                    data: form_transporte.serialize(),
+                    dataType: 'json',
+                    success: function(data)
+                    {
+                        //console.log(data);
+                        if(data.hasOwnProperty("response") && data.response === "success")
+                        {
+
+                            if(data.hasOwnProperty("empresatransporte"))
+                            {
+                                //empresatransporte.append(data.empresatransporte);
+                                $('#transporteModal').modal('hide');
+                                bootbox.alert("Los datos de transporte fueron agregados correctamente.");
+                                location.reload();
+
+                                                            
+                            }
+                            else
+                            {
+                                console.log("Transporte no agregado");
+                            }
+                        }
+                    },
+                    error: function(jqXHR, exception)
+                    {
+                        if(jqXHR.status === 405)
+                        {
+                            console.error("Metodo no permitido!");
+                        }
+                    }
+                });
+
+            });
+
+            var btn_empresatransporte    = $("#btn_empresatransporte");
+
+            btn_empresatransporte.on('click',function(e){
+
+                if(form_empresatransporte[0].checkValidity() === false) {
+                    bootbox.alert("Completar todos los campos...");
+                }else{
+
+                    $.ajax({
+                        method: form_empresatransporte.attr('method'),
+                        url:form_empresatransporte.attr('action'),
+                        data: form_empresatransporte.serialize(),
+                        dataType: 'json',
+                        success: function(data)
+                        {
+                            //console.log(data);
+                            if(data.hasOwnProperty("response") && data.response === "success")
+                            {
+
+                                if(data.hasOwnProperty("empresatransporte"))
+                                {
+                                    empresatransporte.append(data.empresatransporte);
+                                    $('#empresaTransporteModal').modal('hide');
+                                    bootbox.alert("La empresa de transporte fue agregada correctamente.");
+                                                                 
+                                }
+                                else
+                                {
+                                    console.log("Categoria no agregada");
+                                }
+                            }
+                        },
+                        error: function(jqXHR, exception)
+                        {
+                            if(jqXHR.status === 405)
+                            {
+                                console.error("Metodo no permitido!");
+                            }
+                        }
+                    });
+
+
+                }
+
+            });
+
+            // mostrar_guia.on('click',function(){
+
+            //     window.open('');
+            // })
+        });
+
+
+    </script>
+          
+{% endblock %}

@@ -1,0 +1,2036 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="https://printjs-4de6.kxcdn.com/print.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+
+    <style>
+        #resultado, #existente {
+            background-color: red;
+            color: white;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #resultado.ok, #existente.ok {
+            background-color: green;
+        }
+
+        .no-border {
+            border: 0;
+            box-shadow: none;
+        }
+
+        div.dataTables_filter{
+            text-align: left !important;
+        }
+
+        .punto-venta{
+            min-width: 960px;
+        }
+
+        .producto .caracteristicas{
+            background-color: #000000;
+            color: #FFFFFF;
+            text-align: center;
+            font-size: 0.75rem;
+
+        }
+
+        .producto a{
+            color: #FFFFFF;
+        }        
+
+        .producto .caracteristicas .precio{
+            
+        }        
+
+        .producto .caracteristicas .nombre{
+            min-height: 45px;
+        }
+
+        .fila-producto{
+            margin-bottom: 10px;
+        }
+
+        .borde{
+            border-left: 1px solid #CCCCCC;
+        }
+
+        .venta-cuenta .cabecera{
+            font-weight: bold;
+        }
+
+        .venta-total{
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .venta-impuestos{
+            font-size: 2rem;
+            font-weight: bold;
+        }        
+
+        .linea-separadora{
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .categorias{
+            margin-left: 0px;
+        }
+
+        .scrollable {
+          height:350px;
+          overflow-y: scroll;
+        }
+
+        .producto img{
+            border: 1px solid #000000;
+        }
+
+        .categorias img{
+            border: 1px solid #ea9f43;
+        }
+
+        .productos-slider{
+            overflow: auto;
+            overflow-x: hidden;
+            height: 400px;
+            padding-right: 10px;
+        }
+
+        /* width */
+        .productos-slider::-webkit-scrollbar {
+            width: 40px;
+        }
+        /* Track */
+        .productos-slider::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+         
+        /* Handle */
+        .productos-slider::-webkit-scrollbar-thumb {
+            background: #888; 
+        }
+
+        /* Handle on hover */
+        .productos-slider::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }        
+    
+        .puntoVenta{
+            width:960px;
+            /*margin-left:-200px;*/
+        }  
+
+        .producto{
+            width: 100px;
+        }  
+
+        #guiaHtml { 
+
+            height:297mm; 
+            width:210mm; 
+            margin-left:auto; 
+            margin-right:auto; 
+        }
+
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="{{asset('js/slick/slick.css')}}"/>        
+    <link rel="stylesheet" type="text/css" href="{{asset('js/slick/slick-theme.css')}}"/>
+{% endblock %}
+
+{% block body %}
+
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>                
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {% set tipo_de_cambio_compra = '' %}
+    {% set tipo_de_cambio_venta = '' %}
+    {% set alerta = 'warning' %}
+    {% if tipoCambio %}
+        {% set tipo_de_cambio_compra = tipoCambio.compra %}
+        {% set tipo_de_cambio_venta = tipoCambio.venta %}
+        {% set alerta = 'info' %}
+    {% endif %}
+
+    <div class="alert alert-{{ alerta }}" role="alert">
+        Dólar : {{ tipo_de_cambio_compra != '' and tipo_de_cambio_venta != ''  ? 'Compra = S/. ' ~ tipo_de_cambio_compra ~ ';' ~ ' Venta = S/. ' ~ tipo_de_cambio_venta  : 'Definir el valor del dólar para el día de HOY. Ir a Contabilidad >> Tipo de cambio'}}
+
+    </div>
+
+    <div class="container">
+        <form id="form"  action="#" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data"  novalidate>
+
+            <div class="punto-venta"  >
+
+                <hr class="">
+
+                <div class="row">
+                    <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                        <div class="form-row">
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_row(formCliente.fecha) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                
+                            </div> 
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+
+                                {{ form_row(formCliente.forma_pago,{'value':'1'}) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                
+
+                            </div>
+
+                            <div class="form-group col-sm-6 col-lg-6 col-xs-12">
+
+                                {{ form_label(formCliente.cliente_select) }}
+                                <div class="input-group">
+                                    {{ form_widget(formCliente.cliente_select) }}
+                                  
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="agregar_cliente" ><i class="fa fa-plus fa-lg" data-toggle="tooltip" title="Agregar cliente"></i></span>
+                                        <span class="input-group-text" id="editar_cliente"><i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar cliente"></i></span>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div>
+     
+                            </div>   
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_label(formCliente.incluirIgv) }}
+                                {{ form_widget(formCliente.incluirIgv) }}
+                                 
+                            </div> 
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-1 col-lg-1 col-xs-12">
+                                {{ form_row(formCliente.moneda,{'value':'1'} ) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                   
+                            </div> 
+
+                            <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                {{ form_row(formCliente.validezOferta) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                
+                            </div> 
+
+                            <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                {{ form_row(formCliente.plazoEntrega) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                
+                            </div> 
+
+                            <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                {{ form_row(formCliente.empleadoCotiza) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                
+                            </div> 
+
+                            <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                {{ form_row(formCliente.correoEmpleadoCotiza) }}
+                              
+                            </div> 
+
+                            <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                {{ form_row(formCliente.telefonoCliente) }}
+                                 
+                            </div> 
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="row d-none">
+                    <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                        <div class="form-row">
+
+
+                            <div class="form-group col-sm-1 col-lg-1 col-xs-12 ">
+
+                                {{ form_row(formCliente.monto_acuenta) }}
+
+                            </div>
+
+                            <div class="form-group col-sm-1 col-lg-1 col-xs-12 ">
+
+                                {{ form_row(formCliente.numero_dias) }}
+
+                            </div> 
+                            <div class="form-group col-sm-5 col-lg-5 col-xs-12">
+
+
+                            </div>
+
+                            <div class="form-group col-sm-1 col-lg-1 col-xs-12 d-none">
+                                {{ form_row(formCliente.numero_voucher) }}
+                            </div> 
+
+                            {{ form_widget(formCliente.vendedor) }}
+                            {{ form_widget(formCliente.estado) }}
+                            {{ form_widget(formCliente.documento) }}
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                 
+                            </div>
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_row(formCliente.numero_documento) }}                           
+                            </div> 
+
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_label(formCliente.numero_guiaremision) }}
+                                {{ form_widget(formCliente.numero_guiaremision) }}
+                            </div> 
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_label(formCliente.condicion) }}
+                                {{ form_widget(formCliente.condicion) }}
+                            </div> 
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_label(formCliente.enviarFactura) }}
+                                {{ form_widget(formCliente.enviarFactura) }}
+                            </div>
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_label(formCliente.detraccion) }}
+                                {{ form_widget(formCliente.detraccion) }}
+                            </div>                          
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <hr class="" style="margin-top: 0px">
+
+                <div class="row">
+                    <div class="col-sm-6 col-lg-6 col-xs-12">
+                        <div class="row">
+                            <div class="col-sm-9 col-md-9 col-xs-12">
+
+                                <div class="input-group">
+                                  <input type="text" class="form-control" placeholder="Buscar productos" name="txtbuscar" id="txtbuscar" aria-describedby="limpiar_buscador" onkeypress="return event.keyCode != 13;" /> 
+                                  <div class="input-group-append">
+                                    <span class="input-group-text" id="limpiar_buscador" onclick="$('#txtbuscar').val('');"><i class="fa fa-times fa-lg"></i></span>
+                                  </div>
+                                </div>
+
+                                                       
+                            </div>
+                            <div class="col-sm-2 col-md-2 col-xs-12 ">
+                                <button type="button" class="btn btn-primary" id="buscar" >Buscar</button>
+                            </div>
+
+                            <div class="col-sm-1 col-md-1 col-xs-12 ">
+                                <div id="modo_lista">
+                                  <i class="fa fa-list fa-lg " data-toggle="tooltip" title="Cambiar modo de visualización"></i>
+                                </div>                                                       
+                            </div>       
+
+                        </div>
+
+                        <hr class="linea-separadora">
+
+                        <div class="row categorias">
+                            {# Categorías #}
+                            <div class="col-sm-12 col-lg-12 col-xs-12">
+                                <div class="categorias-slider ">
+
+                                    {% for categoria in categorias %}
+                                        
+                                        <a href="javascript:buscar({{categoria.id}})" class="nav-link text-center">
+                                            <span class="small font-weight-bold text-capitalize ">{{ categoria.nombre }}</span>
+
+                                            {% if categoria.imagen %}
+
+                                                <img class="img-fluid" data-lazy="{{ asset('uploads/imagenes/categoria/' ~ categoria.imagen ) }}" src="{{ asset('uploads/imagenes/categoria/' ~ categoria.imagen ) }}"   />
+
+                                            {% else %}
+
+                                                {% set imagen_categoria_default = obtenerImagenCategoriaDefault(app.session.get('local')) %}
+
+                                                <img class="img-fluid" data-lazy="{{ asset('uploads/imagenes/100x100/' ~ imagen_categoria_default ) }}" src="{{ asset('uploads/imagenes/100x100/' ~ imagen_categoria_default ) }}"   />
+
+                                            {% endif %}
+
+
+                                        </a>
+
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="linea-separadora">
+
+
+
+                        <div class="col-md-12 productos-slider d-none" id="producto-lista">
+                           
+                            {% set total = productoXLocals | length %}
+                            {% for producto in productoXLocals %}
+
+                                    <div class="col-md-12 imgproductos"  title="{{ 'Stock: ' ~ producto.stock }}"  >
+                                      <div class="producto" id="" style="width:auto;">
+                                        <a href="#" >
+
+                                            <div class=" caracteristicas " style="background-color: #ffffff;text-align: left;font-size: 1rem;">
+                                                <div class="nombre d-inline" style="color:black;">{{ producto.nombre ~ ' [' ~ producto.marca | slice(0, 15) ~ ']'}}  </div>
+                                                <div class=" d-inline pull-right" style="color:black;"><span class="precio" >{{ producto.precio | number_format(2,'.','')  }}</span></div>
+                                                
+
+                                                {% if producto.precio_x_mayor > 0 %}
+                                                    <div class="d-inline pull-right mr-2" style="color:black;"> {{ producto.precio_x_mayor | number_format(2,'.','')  }}</div>
+                                                {% endif %}
+                                                            
+                
+
+                                                <input type="hidden" class="atributos" id="{{ producto.id }}" />
+                                                <input type="hidden" class="unidades" id="{{ producto.unidad }}" />
+                                                <input type="hidden" class="stock" id="{{ producto.stock }}" />
+                                            </div>
+                                        </a>
+                                      </div>
+                                    </div>
+
+                            {% endfor %}                        
+
+                        </div>
+
+
+
+                        <div class="productos-slider" id="producto-slider" >
+
+
+                                {% set item = 1 %}
+                                {% set cierre = 0 %}
+                                {% set total = productoXLocals | length %}
+                                {% for producto in productoXLocals %}
+
+                                    {% if  cierre == 1 or item == 1 %}
+
+                                        {% set cierre = 0 %}
+                                        <div class="row fila-producto" >
+
+                                    {% endif %} 
+
+                                    {% set imagen_ruta = 'noimage.png' %}
+        
+                                    {% if producto.imagen %}
+
+                                        {% set imagen_ruta = producto.imagen %}
+
+                                    {% else %}
+
+                                        {% set imagen_ruta = obtenerImagenProductoDefault(app.session.get('local')) %}                                   
+
+                                    {% endif %}                          
+
+                                        <div class="col-lg-3 imgproductos"  title="{{ 'Stock: ' ~ producto.stock }}"  >
+                                          <div class="producto" id="" >
+                                            <a href="javascript:void(0)" >
+
+                                                <img imgnombre="{{ producto.nombre }}" imglink="{{ asset('uploads/imagenes/500x500/' ~ imagen_ruta ) }}" class="img-fluid imagen" src="{{ asset('uploads/imagenes/100x100/' ~ imagen_ruta ) }}"  />
+
+
+                                                <div class=" caracteristicas">
+                                                    <div class="nombre">{{ producto.nombre }}</div>
+                                                    <div><em class="simbolo_moneda">S./ </em><span class="precio">{{ producto.precio | number_format(2,'.','') }}</span></div>
+
+                                                    {% if producto.precio_x_mayor > 0 %}
+                                                        <div><em class="x_mayor">X Mayor: </em> <em class="simbolo_moneda">S./ </em> {{ producto.precio_x_mayor | number_format(2,'.','')  }}</div>
+                                                    {% endif %}
+
+                                                    <input type="hidden" class="atributos" id="{{ producto.id }}" />
+                                                    <input type="hidden" class="unidades" id="{{ producto.unidad }}" />
+                                                    <input type="hidden" class="stock" id="{{ producto.stock }}" />
+                                                </div>
+                                            </a>
+                                          </div>
+                                        </div>
+
+                                    {% if item is divisible by(4) or  item == total %}
+
+                                        {% set cierre = 1 %}
+
+                                        </div>
+
+                                    {% endif %}                            
+
+                                    {% set item = item + 1 %}
+
+                                {% endfor %}
+
+                        </div>
+
+
+                    </div>  
+
+
+                    <div class="col-sm-6 col-lg-6 col-xs-12 borde venta-cuenta" >
+                        <div class="row cabecera">
+                            <div class="col-sm-1 col-lg-1">
+                                
+                            </div>
+                            <div class="col-sm-5 col-lg-4">
+                                Producto
+                            </div>
+                            <div class="col-sm-2 col-lg-2">
+                                Precio
+                            </div>
+                            <div class="col-sm-2 col-lg-2">
+                                Cant.
+                            </div>
+                            <div class="col-sm-2 col-lg-1">
+                                Und.
+                            </div>                        
+                            <div class="col-sm-2 col-lg-2">
+                                Tot.
+                            </div>
+                        </div>
+
+                        <hr class="linea-separadora">
+
+
+                        <div class="row venta-impuestos">
+                            <div class="col-sm-5 col-md-5 col-xs-12">
+                               <span>IGV </span><em id="igv_simbolo_moneda">S./ </em>
+                            </div>
+                            <div class="col-sm-4 col-md-4 col-xs-12">
+                                <span id="impuestos">0.00</span>
+                            </div>                    
+                        </div>
+
+                        <hr class="linea-separadora">
+
+                        <div class="row venta-total">
+                            <div class="col-sm-5 col-md-5 col-xs-12">
+                                <span>TOTAL </span>  <em id="total_simbolo_moneda">S./ </em>
+                            </div>
+                            <div class="col-sm-4 col-md-4 col-xs-12">
+                                <span id="total">0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4" style="z-index:1000;">
+
+                            <div class="col-sm-6 col-lg-6 col-xs-12">
+                                <input type="button" value="Cancelar" class="btn btn-lg btn-block"  onclick="location.href='{{ path('proforma_index')}}'" />
+                            </div>
+                            <div class="col-sm-6 col-lg-6 col-xs-12">
+                                <button type="button" id="proforma" class="btn btn-primary btn-lg btn-block" >Registrar</button>
+                            </div>
+
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-4 ">
+                                <button type="button" id="limpiar" class="btn btn-primary btn-lg " ><i class="fa fa-refresh fa-lg"></i>Limpiar</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+
+
+
+    <div class="modal cliente_factura" tabindex="-1" role="dialog" id="modalClienteFactura">
+      <div class="modal-dialog " role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Cliente</h5>
+            <button type="button" class="close" onclick="$('#modalClienteFactura').modal('hide');" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <div class="form-row">
+
+                <div class="form-group col-md-6">
+                    {{ form_row(formClientePv.tipoDocumento) }}
+                </div>
+
+                <div class="form-group col-md-6">
+
+                    {{ form_label(formClientePv.ruc) }}               
+                    <div class="input-group mb-3">
+                        {{ form_widget(formClientePv.ruc) }}
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="buscar_ruc">
+                                <i class="fa fa-search fa-lg " data-toggle="tooltip" title="Buscar por número de RUC"></i>
+                            </span>
+                        </div>
+                          
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group col-md-12">
+                    {{ form_label(formClientePv.razonSocial) }}
+                    {{ form_widget(formClientePv.razonSocial) }}
+                </div>
+
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    {{ form_label(formClientePv.direccion) }}
+                    {{ form_widget(formClientePv.direccion) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    {{ form_label(formClientePv.email) }}
+                    {{ form_widget(formClientePv.email) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    {{ form_label(formClientePv.telefono) }}
+                    {{ form_widget(formClientePv.telefono) }}
+                </div>
+                <div class="form-group col-md-6">
+                    {{ form_label(formClientePv.tipo) }}
+                    {{ form_widget(formClientePv.tipo) }}
+                </div>                
+            </div>    
+
+
+            <input type="hidden" id="distrito" name="distrito" class="form-control">
+            <input type="hidden" id="cliente_id" name="cliente_id" class="form-control">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="guardar_cliente">Guardar</button>
+            <button type="button" class="btn btn-secondary" onclick="$('#modalClienteFactura').modal('hide');">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Modal -->
+    <div class="modal fade imagen" id="modalImagen" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalImagenTitle">Modal title</h5>
+                    <button type="button" class="close" onclick="$('#modalImagen').modal('hide');" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" >
+                    <div class="row justify-content-center">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="$('#modalImagen').modal('hide');">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <button type="button" onclick="printJS('{{ rutaPdf }}')"  id="imprimir" class="d-none">
+        PDF
+    </button>
+
+    <button type="button" onclick="printJS('guiaHtml','html')"  id="imprimirGuia" class="d-none">
+        HTML
+    </button>
+
+    <div id="guiaHtml" class="d-none">
+        {% if guiaHtml == 'si' %}
+
+            {{ render(controller(
+                'AppBundle:FacturaVenta:showGuia',
+                { 'facturaId': facturaId }
+            )) }}
+
+        {% endif %}
+    </div>
+
+
+
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }} 
+    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="{{asset('js/es.js')}}" ></script>
+    <script src="{{asset('js/jquery.number.min.js')}}" ></script>
+
+    <script type="text/javascript" src="{{asset('js/slick/slick.min.js')}}"></script>
+
+    <script type="text/javascript">
+
+
+        $('.categorias-slider').slick({
+            /*lazyLoad: 'ondemand',
+            /*verticalSwiping: true,*/
+            //vertical: false,
+            infinite: true,
+            slidesToShow: 5,
+            slidesToScroll: 5
+        });
+
+
+    </script>
+
+    
+
+    <script type="text/javascript">
+
+        function eliminar(id) {
+
+            var total       = $('#total').text();
+            var subtotal    = $('#subtotal_'+id).html();
+        
+            $("#row_"+id).remove();
+            $("#linea_"+id).remove();   
+
+            var total_act = Number(total) - Number(subtotal);
+         
+            //var impuestos = total_act*0.18;
+
+            var impuestos = 0;
+            var total = 0;
+            $(".subtotal").each( function () {
+                var subt = Number($(this).html());
+                total += subt;
+
+                if($('#appbundle_detalleventa_cliente_incluirIgv').is(":checked")){
+                    impuestos += 0.18*(subt/1.18);
+                }
+
+            });
+
+            if(!$('#appbundle_detalleventa_cliente_incluirIgv').is(":checked")){
+                impuestos = total * 0.18;
+                total_act = total + impuestos;
+            } 
+
+            $('#total').html($.number( total_act, 2, '.', ',' ));
+            $('#impuestos').html($.number( impuestos, 2, '.', ',' ));    
+        } 
+
+        function agregarDescripcion(id) {
+
+            var proddescripcion = $('#productodescripcion_'+id).val();
+
+            if(proddescripcion == ''){
+                bootbox.prompt({
+                    title: "Ingrese descripción.",
+                    inputType: 'textarea',
+                    closeButton: false,
+                    //backdrop: false,
+                    onEscape:false,
+                    buttons: {
+                        confirm: {
+                            label: 'Guardar',
+                        },
+                        cancel: {
+                            label: 'Cancelar',
+                        }
+                    },                
+                    callback: function (result) {
+                        //console.log(result);
+                        if(result){
+                            $('#productodescripcion_'+id).val(result);
+                        }                                        
+                    }
+                });
+
+            }else{
+
+                bootbox.prompt({
+                    title: "Ingrese descripción.",
+                    inputType: 'textarea',
+                    value: proddescripcion,
+                    onEscape:false,                  
+                    closeButton: false,
+                    buttons: {
+                        confirm: {
+                            label: 'Guardar',
+                        },
+                        cancel: {
+                            label: 'Cancelar',
+                        }
+                    },                
+                    callback: function (result) {
+                        //console.log(result);
+                        if(result){
+                            $('#productodescripcion_'+id).val(result);
+                        }                                              
+                    }
+                });
+
+            }
+        }
+
+        function obtenerCliente() {
+
+            var cliente = $('#appbundle_detalleventa_cliente_cliente_select').val();
+            var respuesta = '';
+
+            $.ajax({
+                method: "POST",
+                async : false ,
+                url: "{{ path('obtenercliente')}}",
+                data: { id: cliente}
+            })
+            .done(function( data ) {
+
+                respuesta = data;
+
+            });
+
+            return respuesta;
+        }
+
+        function obtenerPrecioXRango(id,cantidad) {
+
+            var respuesta = null;
+
+            $.ajax({
+                method: "POST",
+                async : false ,
+                url: "{{ path('obtenerprecioxrango')}}",
+                data: { producto: id,cantidad: cantidad}
+            })
+            .done(function( data ) {
+
+                if(data.precio)
+                {
+                    respuesta = data.precio;
+                }
+
+            });
+
+            return respuesta;
+        }
+        
+        function buscar(id) {
+
+            var fecha = $('#appbundle_detalleventa_cliente_fecha').val();
+            var moneda = $('#appbundle_detalleventa_cliente_moneda').val();
+
+            var cliente = obtenerCliente();
+            var tipo_cliente = cliente.tipo;
+
+            var modo = 'false';
+            if ($("#producto-slider").hasClass("d-none")) {
+               modo = 'true';
+            }
+
+            var cargandoTexto = '<div class="text-center"><i class="fa fa-circle-o-notch fa-spin"></i>Buscando.....</div>';
+        
+            //$('.productos-slider').html(cargandoTexto);
+
+            if(modo == 'false'){
+                $('#producto-slider').html(cargandoTexto);
+            }else{
+                $('#producto-lista').html(cargandoTexto);
+            }
+
+            $.ajax({
+              method: "POST",
+              url: "{{ path('buscar_productos')}}",
+              data: { categoria: id,modo:modo,moneda:moneda,fecha:fecha,tipo_cliente:tipo_cliente}
+            })
+              .done(function( data ) {
+
+                if(data.error){
+
+                    bootbox.alert(data.error);
+                    $('#appbundle_detalleventa_cliente_moneda').val(1);
+                    $('#buscar').trigger("click");               
+
+                }
+                else
+                {
+
+                    if(modo == 'false'){
+                        $('#producto-slider').html(data);
+                    }else{
+                        $('#producto-lista').html(data);
+                    }
+
+                }
+
+                if(moneda == 2){
+                    $('.simbolo_moneda').html('$ ');
+                    $('#total_simbolo_moneda').html(' $');
+                    $('#igv_simbolo_moneda').html(' $');
+                }else
+                {
+                    $('.simbolo_moneda').html('S./ ');
+                    $('#total_simbolo_moneda').html(' S./');
+                    $('#igv_simbolo_moneda').html(' S./');                    
+                }
+
+                if(tipo_cliente == 'mayorista')
+                {
+                    $('.x_mayor').html('P.Un.: ');
+                }
+                else
+                {
+                    $('.x_mayor').html('X Mayor: ');
+                }
+
+            });               
+        } 
+
+        var item = 1;
+        var total = 0;
+        var ventaNegativo = '{{ permiteVentaConStockNegativo(local) }}';
+        $(document).ready(function(){
+
+            var txtcliente          = $('#appbundle_detalleventa_cliente_cliente_select');
+            var txtclientenuevo     = $('#appbundle_detalleventa_cliente_cliente_nuevo');
+            var txttipodocumento    = $('#appbundle_detalleventa_cliente_documento');
+            var txtformapago        = $('#appbundle_detalleventa_cliente_forma_pago');
+            var txtnrovoucher       = $('#appbundle_detalleventa_cliente_numero_voucher');
+            var txtmontoacuenta     = $('#appbundle_detalleventa_cliente_monto_acuenta');
+            var btnguardarcliente   = $('#guardar_cliente');
+            var btnguardarclienteboleta   = $('#guardar_cliente_boleta');
+            var btnvender           = $('#vender');
+            var btnproforma         = $('#proforma');
+            var btnbuscar           = $('#buscar');
+            var incluirIgv          = $('#appbundle_detalleventa_cliente_incluirIgv');
+
+            //Datos para proforma
+            var txtvalidezoferta        = $('#appbundle_detalleventa_cliente_validezOferta');
+            var txtplazoentrega         = $('#appbundle_detalleventa_cliente_plazoEntrega');
+            var txtempleadocotiza       = $('#appbundle_detalleventa_cliente_empleadoCotiza');
+            var txtcorreoempleadocotiza = $('#appbundle_detalleventa_cliente_correoEmpleadoCotiza');
+            var txttelefonocliente      = $('#appbundle_detalleventa_cliente_telefonoCliente');
+            var txtmoneda               = $('#appbundle_detalleventa_cliente_moneda');
+
+            //Valores de cliente nuevo
+            var selectipodocumento      = $('#appbundle_cliente_pv_tipoDocumento');
+            var txtnombrerazonsocial    = $('#appbundle_cliente_pv_razonSocial');
+            var txtdniruc               = $('#appbundle_cliente_pv_ruc');
+            var txtdireccion            = $('#appbundle_cliente_pv_direccion');
+            var txtemail                = $('#appbundle_cliente_pv_email');
+            var txttelefono             = $('#appbundle_cliente_pv_telefono');
+            var txttipo                 = $('#appbundle_cliente_pv_tipo');
+            var txtdistrito             = $('#distrito');
+            var txtclienteid            = $('#cliente_id');            
+
+            //Valor a buscar 
+            var txtbuscar           = $('#txtbuscar');
+
+            //Buscar RUC
+            var btn_buscar          = $("#buscar_ruc");
+
+            //Boton limpiar
+            var btnlimpiar          = $('#limpiar');
+
+            //Agregar cliente
+            var btnagregarcliente   = $('#agregar_cliente');
+            //Editar cliente
+            var btneditarcliente    = $('#editar_cliente');
+
+
+
+            $('body').on('keydown','.solonumeros',function (event) {
+
+
+                if (event.shiftKey == true) {
+                  event.preventDefault();
+                }
+
+                if ((event.keyCode >= 48 && event.keyCode <= 57) || 
+                  (event.keyCode >= 96 && event.keyCode <= 105) || 
+                  event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 ||
+                  event.keyCode == 39 || event.keyCode == 46 || event.keyCode == 190 || event.keyCode == 110) {
+
+                } else {
+                  event.preventDefault();
+                }
+
+                if($(this).val().indexOf('.') !== -1 && event.keyCode == 190)
+                  event.preventDefault(); 
+
+            });
+
+
+            //Limpìamos la lista de productos seleccionados al hacer cambio de moneda
+
+            $('body').on('focusin', '#appbundle_detalleventa_cliente_moneda', function(){
+
+                $(this).data('val', $(this).val());
+
+            }).on('change','#appbundle_detalleventa_cliente_moneda',function(e){
+
+                var prev = $(this).data('val');
+
+
+                bootbox.confirm({
+                    title: null,
+                    message: "La lista de productos será limpiada. Desea continuar?",
+                    buttons: {
+                        cancel: {
+                            label: '<i class="fa fa-times"></i> Cancelar'
+                        },
+                        confirm: {
+                            label: '<i class="fa fa-check"></i> Confirmar'
+                        }
+                    },
+                    callback: function (result) {
+
+                        if(result){
+
+
+                            $(".prod").each( function () {
+                                $(this).remove();
+                            });
+
+                            $(".prod-linea").each( function () {
+                                $(this).remove();
+                            });
+
+                            $('#total').html($.number( 0, 2, '.', ',' ));
+                            $('#impuestos').html($.number( 0, 2, '.', ',' ));
+
+
+                            var moneda = $('#appbundle_detalleventa_cliente_moneda').val();
+                            var fecha  = $('#appbundle_detalleventa_cliente_fecha').val();
+
+                            var cliente = obtenerCliente();
+                            var tipo_cliente = cliente.tipo;
+
+                            var modo = 'false';
+                            if ($("#producto-slider").hasClass("d-none")) {
+                               modo = 'true';
+                            }
+
+                            var cargandoTexto = '<i class="fa fa-circle-o-notch fa-spin"></i>';
+
+                            if(modo == 'false'){
+                                $('#producto-slider').html(cargandoTexto);
+                            }else{
+                                $('#producto-lista').html(cargandoTexto);
+                            }
+
+                            var textobuscar = '';
+
+                            $.ajax({
+                              method: "POST",
+                              url: "{{ path('buscar_productos')}}",
+                              data: { textobuscar: textobuscar,modo: modo,moneda:moneda,fecha:fecha,tipo_cliente:tipo_cliente}
+                            })
+                              .done(function( data ) {
+
+                                if(data.error){
+
+                                    bootbox.alert(data.error);
+                                    $('#appbundle_detalleventa_cliente_moneda').val(1);
+                                    $('#buscar').trigger("click");               
+
+                                }
+                                else
+                                {
+
+                                    if(modo == 'false'){
+                                        $('#producto-slider').html(data);
+                                    }else{
+                                        $('#producto-lista').html(data);
+                                    }
+
+                                }
+
+                                if(moneda == 2)
+                                {
+                                    $('.simbolo_moneda').html('$ ');
+                                    $('#total_simbolo_moneda').html(' $');
+                                    $('#igv_simbolo_moneda').html(' $');
+                                }
+                                else
+                                {
+                                    $('.simbolo_moneda').html('S./ ');
+                                    $('#total_simbolo_moneda').html(' S./');
+                                    $('#igv_simbolo_moneda').html(' S./');                    
+                                }               
+
+                                if(tipo_cliente == 'mayorista')
+                                {
+                                    $('.x_mayor').html('P.Un.: ');
+                                }
+                                else
+                                {
+                                    $('.x_mayor').html('X Mayor: ');
+                                }
+
+                            });   
+
+
+                        }
+                        else
+                        {
+                            $('#appbundle_detalleventa_cliente_moneda').val(prev);
+
+                        }
+
+                    }
+                });
+
+
+            });
+
+
+            function deshabilitarBotones()
+            {
+                $('#vender').prop('disabled', true);
+                $('#proforma').prop('disabled', true);
+                $('#buscar').prop('disabled', true);
+                $('#limpiar').prop('disabled', true);
+            }
+
+            selectipodocumento.on("change", function(e) {
+
+                e.preventDefault();
+
+                var valor = this.value;
+
+                if(valor == 1){
+
+                    txtdniruc.prop('maxLength', 8);
+
+
+                }else if(valor == 2){
+
+                    txtdniruc.prop('maxLength', 11);
+
+                }else{
+
+                    txtdniruc.prop('maxLength', 11);
+
+                }
+
+            });
+
+            btnagregarcliente.on('click',function(e){
+
+                e.preventDefault();
+
+                selectipodocumento.val('');
+                txtnombrerazonsocial.val('');
+                txtdniruc.val('');
+                txtdireccion.val('');
+                txtemail.val('');
+                txttelefono.val('');
+                txttipo.val('');                            
+                $('#cliente_id').val('');
+
+                selectipodocumento.prop('disabled', false);
+                txtnombrerazonsocial.prop('disabled', false);
+                txtdniruc.prop('disabled',false);
+                txtdireccion.prop('disabled',false);
+                txtemail.prop('disabled',false);
+                txttelefono.prop('disabled',false);
+                txttipo.prop('disabled',false);
+                btnguardarcliente.prop('disabled',false);
+
+                $('.cliente_factura').modal('show');
+
+            });
+
+            btneditarcliente.on('click',function(e){
+
+                e.preventDefault();
+
+                var cliente = $('#appbundle_detalleventa_cliente_cliente_select').val();
+
+                if(cliente == ''){
+
+                    bootbox.alert("Debe seleccionar un cliente para que pueda editar.");                    
+                    return false;
+
+                }else{
+
+                    var respuesta = obtenerCliente(function(output){});
+
+                    var direccion        = respuesta.direccion;
+                    var email            = respuesta.email;
+                    var razon_social     = respuesta.razon_social;
+                    var numero_documento = respuesta.numero_documento;
+                    var tipo_documento   = respuesta.tipo_documento;
+                    var distrito         = respuesta.distrito;
+                    var cliente_id       = respuesta.id;
+                    var tipo             = respuesta.tipo;
+                    var telefono         = respuesta.telefono;
+
+
+                    selectipodocumento.val(tipo_documento);
+                    txtnombrerazonsocial.val(razon_social);
+                    txtdniruc.val(numero_documento);
+                    txtdireccion.val(direccion);
+                    txtemail.val(email);
+                    txtdistrito.val(distrito);
+                    txtclienteid.val(cliente_id);
+                    txttelefono.val(telefono);
+                    txttipo.val(tipo);
+
+                    if(numero_documento == '---')
+                    {
+                        selectipodocumento.prop('disabled', true);
+                        txtnombrerazonsocial.prop('disabled', true);
+                        txtdniruc.prop('disabled',true);
+                        txtdireccion.prop('disabled',true);
+                        txtemail.prop('disabled',true);
+                        txttipo.prop('disabled',true);
+                        txttelefono.prop('disabled',true);                        
+                        btnguardarcliente.prop('disabled',true);
+                    }
+                    else
+                    {
+                        selectipodocumento.prop('disabled', false);
+                        txtnombrerazonsocial.prop('disabled', false);
+                        txtdniruc.prop('disabled',false);
+                        txtdireccion.prop('disabled',false);
+                        txtemail.prop('disabled',false);
+                        txttipo.prop('disabled',false);
+                        txttelefono.prop('disabled',false);                           
+                        btnguardarcliente.prop('disabled',false);
+                    }
+
+                    $('.cliente_factura').modal('show');
+
+                }
+
+            });
+
+            txtformapago.on("change",function(){
+
+                var formapago = this.value;
+
+
+                if(formapago == 4){
+
+                    txtmontoacuenta.prop('required', false);
+                    txtmontoacuenta.prop('readonly', true);
+                    txtmontoacuenta.val(0);
+                    $( "#monto_acuenta" ).remove();   
+
+                    txtnrovoucher.prop('readonly', false);
+                    txtnrovoucher.prop('required', 'required');
+
+                    $( "<div class='invalid-feedback' id='voucher'>Este valor es requerido.</div>" ).insertAfter( "#appbundle_detalleventa_cliente_numero_voucher" );
+
+                }else if(formapago == 5){
+
+                    txtnrovoucher.prop('required', false);
+                    txtnrovoucher.prop('readonly', true);
+                    $( "#voucher" ).remove();
+
+                    txtmontoacuenta.prop('readonly', false);
+                    txtmontoacuenta.prop('required', 'required');
+
+                    $( "<div class='invalid-feedback' id='monto_acuenta'>Este valor es requerido.</div>" ).insertAfter( "#appbundle_detalleventa_cliente_monto_acuenta" );
+                }else{
+
+                    txtmontoacuenta.prop('required', false);
+                    txtmontoacuenta.prop('readonly', true);
+                    txtmontoacuenta.val(0);
+                    $( "#monto_acuenta" ).remove();                    
+                    txtnrovoucher.prop('required', false);
+                    txtnrovoucher.prop('readonly', true);
+                    $( "#voucher" ).remove();
+                }
+
+            });
+
+            btnguardarcliente.on('click',function (e) {
+
+                e.preventDefault();
+
+                var tipodocumento = selectipodocumento.val();
+                var nrazonsocial  = txtnombrerazonsocial.val();
+                var dniruc        = txtdniruc.val();
+                var direccion     = txtdireccion.val();
+                var email         = txtemail.val();
+                var distrito      = txtdistrito.val();
+                var clienteid     = txtclienteid.val();
+                var telefono      = txttelefono.val();
+                var tipo          = txttipo.val();
+
+                if(tipodocumento == '1'){
+
+                    if( nrazonsocial == '' || dniruc == '' ){
+
+                        bootbox.alert("Se ha seleccionado el tipo DNI. Debe ingresar el nombre y el número de documento.");                    
+                        return false;
+
+                    }
+
+                }else if(tipodocumento == '2'){
+
+                    if( nrazonsocial == '' || dniruc == '' || direccion == '' ){
+
+                        bootbox.alert("Se ha seleccionado el tipo RUC. Debe ingresar el nombre , el número de documento y la dirección.");                    
+                        return false;
+
+                    }
+
+                }else{
+
+                    bootbox.alert("Debe seleccionar el tipo de documento.");                    
+                    return false;
+
+                }
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('registrar_cliente_nuevo')}}",
+                  data: { nrazonsocial: nrazonsocial, dniruc: dniruc, direccion: direccion ,distrito: distrito,tipodocumento: tipodocumento,clienteid: clienteid,email:email,tipo:tipo,telefono:telefono}
+                })
+                  .done(function( data ) {
+
+                    var newOption = new Option(data.text, data.id, false, true);
+                    $('#appbundle_detalleventa_cliente_cliente_select').append(newOption).trigger('change');
+                    $('#buscar').trigger("click");
+                    $('.cliente_factura').modal('hide');
+
+
+                });   
+
+            });
+
+            txtbuscar.on('keyup',function(e){
+
+                if(e.keyCode == 13){
+                    btnbuscar.click();
+                }
+
+            });
+
+
+            btnbuscar.on('click',function () {
+
+                var fecha = $('#appbundle_detalleventa_cliente_fecha').val();
+                var moneda = $('#appbundle_detalleventa_cliente_moneda').val();
+
+                var cliente = obtenerCliente();
+                var tipo_cliente = cliente.tipo;
+
+                var modo = 'false';
+                if ($("#producto-slider").hasClass("d-none")) {
+                   modo = 'true';
+                }
+
+                var $this = $(this);
+                var cargandoTexto = '<i class="fa fa-circle-o-notch fa-spin"></i>';
+                if ($(this).html() !== cargandoTexto) {
+                  $this.data('original-text', $(this).html());
+                  $this.html(cargandoTexto);
+                }
+
+                if(modo == 'false'){
+                    $('#producto-slider').html(cargandoTexto);
+                }else{
+                    $('#producto-lista').html(cargandoTexto);
+                }
+                
+                var textobuscar = txtbuscar.val();
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('buscar_productos')}}",
+                  data: { textobuscar: textobuscar,modo:modo,moneda: moneda,fecha: fecha,tipo_cliente:tipo_cliente}
+                })
+                  .done(function( data ) {
+
+
+                    setTimeout(function() {
+                      $this.html($this.data('original-text'));
+                    }, 100);
+
+                    if(data.error){
+
+                        bootbox.alert(data.error);
+                        $('#appbundle_detalleventa_cliente_moneda').val(1);
+                        $('#buscar').trigger("click");               
+
+                    }
+                    else
+                    {
+
+                        if(modo == 'false'){
+                            $('#producto-slider').html(data);
+                        }else{
+                            $('#producto-lista').html(data);
+                        }
+
+                    }
+
+                    if(moneda == 2){
+                        $('.simbolo_moneda').html('$ ');
+                        $('#total_simbolo_moneda').html(' $');
+                        $('#igv_simbolo_moneda').html(' $');
+                    }else
+                    {
+                        $('.simbolo_moneda').html('S./ ');
+                        $('#total_simbolo_moneda').html(' S./');
+                        $('#igv_simbolo_moneda').html(' S./');                    
+                    }   
+
+                    if(tipo_cliente == 'mayorista')
+                    {
+                        $('.x_mayor').html('P.Un.: ');
+                    }
+                    else
+                    {
+                        $('.x_mayor').html('X Mayor: ');
+                    }
+
+                });   
+
+            });
+
+            $('body').on('change','.precioinput',function(){
+
+                var valor   = this.value;
+                var id      = this.id;
+
+                var precio      = $('input[name=precio_'+id+']').val();
+                var cantidad    = $('input[name=cantidad_'+id+']').val();
+
+                var total_linea = cantidad * precio;
+
+                $('#subtotal_'+id).html(total_linea.toFixed(2));
+
+                var total = 0;
+                var impuestos = 0;
+                $(".subtotal").each( function () {
+                    var subtotal = Number($(this).html());
+                    total += Number($(this).html());
+
+                    if(incluirIgv.is(":checked")){
+                        impuestos += 0.18*(subtotal/1.18);
+                    }
+                    
+
+                });
+
+                if(!$('#appbundle_detalleventa_cliente_incluirIgv').is(":checked")){
+                    impuestos = total * 0.18;
+                    total = total + impuestos;
+                } 
+
+                $('#total').html($.number( total, 2, '.', ',' ));
+                $('#impuestos').html($.number( impuestos, 2, '.', ',' ));                                   
+
+            });
+
+            $('body').on('focusin', '.cantidadinput', function(){
+
+                $(this).data('val', $(this).val());
+
+            }).on('change','.cantidadinput',function(e){
+
+                e.preventDefault();
+
+                var valor   = this.value;
+                var id      = this.id;
+                
+                var precio  = 0;
+
+                var precio_x_rango = obtenerPrecioXRango(id,valor);
+
+                if(precio_x_rango)
+                {
+                    //precio = $.number( precio_x_rango, 2, '.', ',' );
+                    $('input[name=precio_'+id+']').val(precio_x_rango);
+
+                }
+
+                precio          = $('input[name=precio_'+id+']').val();
+                var cantidad    = $('input[name=cantidad_'+id+']').val();
+                var stock       = $('input[name=stock_'+id+']').val();
+
+                var total_linea = cantidad * precio;
+
+                var prev = $(this).data('val');
+
+                // if(!ventaNegativo){
+                //      var dif = stock - cantidad;
+                //     if( dif < 0){
+                //         $('input[name=cantidad_'+id+']').val(prev);
+                //         bootbox.alert("Ya no hay stock suficiente. Stock disponible : "+stock);
+                //         return false;
+
+                //     }
+
+                // }
+
+                $('#subtotal_'+id).html(total_linea.toFixed(2));
+
+                var total = 0;
+                var impuestos = 0;
+                $(".subtotal").each( function () {
+                    var subtotal = Number($(this).html());
+                    total += Number($(this).html());
+
+                    if(incluirIgv.is(":checked")){
+                        impuestos += 0.18*(subtotal/1.18);
+                    }                    
+                });
+
+                if(!$('#appbundle_detalleventa_cliente_incluirIgv').is(":checked")){
+                    impuestos = total * 0.18;
+                    total = total + impuestos;
+                } 
+
+                $('#total').html($.number( total, 2, '.', ',' ));
+                $('#impuestos').html($.number( impuestos, 2, '.', ',' ));     
+
+            });
+
+
+            var timer = 0;
+            var delay = 200;
+            var prevent = false;
+
+            $('body')
+                .on('click','.producto a',function() {
+
+                    var self = this;
+
+                    timer = setTimeout(function() {
+
+                        if (!prevent) {
+                            
+                            var precio = $('span', self ).text();
+                            var nombre = $('.nombre', self ).html();
+                            var producto_id = $('.atributos', self ).attr('id');
+                            var unidad = $('.unidades', self ).attr('id');
+                            var stock  = Number($('.stock', self ).attr('id'));
+
+                            if($('#row_'+producto_id).length == 0 )
+                            {
+                                var cantidad = 1;
+
+                                var total_linea = Number(cantidad) * Number(precio);
+
+                                // if($('#appbundle_detalleventa_cliente_incluirIgv').is(":checked")){
+                                //     var total_linea = Number(cantidad) * Number(precio);
+                                // }
+                                // else
+                                // {
+                                //     precio  = precio/1.18;
+                                //     var total_linea = Number(cantidad) * Number(precio);
+                                // }
+
+                                        
+
+                                // if(!ventaNegativo){
+                                //      var dif = stock - cantidad;
+                                //     if( dif < 0){
+
+                                //         bootbox.alert("Ya no hay stock suficiente. Stock disponible : "+stock);
+                                //         return false;
+
+                                //     }
+
+                                // }
+
+                                $('.venta-impuestos').before('<div class="row prod" id="row_'+producto_id+'"><input type="hidden" class="productoid" id="productoid_'+producto_id+'" name="productoid_'+producto_id+'" value="'+producto_id+'"/><input type="hidden" class="stockid" id="stock_'+producto_id+'" name="stock_'+producto_id+'" value="'+stock+'"/><div class="col-md-1"><a href="javascript:eliminar('+producto_id+')" ><i class="fa fa-remove fa-lg"></i></a></div><div class="col-md-4" >'+ nombre +'<span class="ml-2"><a href="javascript:agregarDescripcion('+producto_id+')" ><i class="fa fa-file-text-o fa-sm"></a></i></span><input type="text" class="descripcion d-none" id="productodescripcion_'+producto_id+'" name="productodescripcion_'+producto_id+'" value=""/></div><div class="col-md-2"><input type="text" class="form-control precioinput solonumeros" name="precio_'+producto_id+'" id="'+producto_id+'" value="'+Number(precio).toFixed(2)+'"></div><div class="col-md-2"><input type="text" class="form-control cantidadinput solonumeros" id="'+producto_id+'" name="cantidad_'+producto_id+'"  value="'+cantidad+'"></div><div class="col-md-1">'+unidad+'</div><div class="col-md-2 subtotal" id="subtotal_'+producto_id+'" >'+ total_linea.toFixed(2) +'</div></div><hr class="linea-separadora prod-linea" id="linea_'+producto_id+'" >');
+
+                                item = item + 1;
+
+                            }
+                            else
+                            {
+                                var cantidad_nueva  = Number($('input[name=cantidad_'+producto_id+']').val()) + 1;
+
+                                // if(!ventaNegativo){
+                                //      var dif = stock - cantidad_nueva;
+                                //     if( dif < 0){
+
+                                //         bootbox.alert("Ya no hay stock suficiente. Stock disponible : "+stock);
+                                //         return false;
+
+                                //     }
+
+                                // }
+
+                                $('input[name=cantidad_'+producto_id+']').val(cantidad_nueva);
+
+                                var precio_x_rango = obtenerPrecioXRango(producto_id,cantidad_nueva);
+
+                                if(precio_x_rango)
+                                {
+                                    $('input[name=precio_'+producto_id+']').val(precio_x_rango);
+                                }  
+                                                                
+                                var cantidad    = $('input[name=cantidad_'+producto_id+']').val();
+
+                                if($('#appbundle_detalleventa_cliente_incluirIgv').is(":checked")){
+                                    var precio  = Number($('input[name=precio_'+producto_id+']').val());
+                                }else{
+                                    var precio  = Number($('input[name=precio_'+producto_id+']').val());
+                                }
+
+                                var total_linea = cantidad * precio;
+
+                                $('#subtotal_'+producto_id).html(total_linea.toFixed(2));
+
+                            }
+
+                            var total = 0;
+                            var impuestos = 0;
+                            $(".subtotal").each( function () {
+                                var subtotal = Number($(this).html());
+                                total += Number($(this).html());
+
+                                if($('#appbundle_detalleventa_cliente_incluirIgv').is(":checked")){
+                                    impuestos += 0.18*(subtotal/1.18);
+                                }                                
+                                
+                            });
+
+                            if(!$('#appbundle_detalleventa_cliente_incluirIgv').is(":checked")){
+                                impuestos = total * 0.18;
+                                total = total + impuestos;
+                            } 
+
+                            $('#total').html($.number( total, 2, '.', ',' ));
+                            $('#impuestos').html($.number( impuestos, 2, '.', ',' ));     
+                        }
+                        prevent = false;
+                    },delay);
+                });
+                // .on('dblclick','.producto a',function() {
+
+                //     var nomproducto = $('.imagen', this ).attr('imgnombre');
+                //     var ruta        = $('.imagen', this ).attr('imglink');
+                    
+                //     var img500x500 = '<img class="img-fluid imagen" src="'+ruta+'"  />';
+
+                //     clearTimeout(timer);
+                //     prevent = true;
+
+                //     $('#modalImagen').find('.modal-title').text(nomproducto);
+                //     $('#modalImagen').find('.modal-body .row').html(img500x500);
+
+                //     $('#modalImagen').modal('toggle');
+                // });
+
+
+            $(".select2").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenerempresas')}}",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },
+                placeholder: 'Buscar RUC',
+                minimumInputLength: 11,
+                maximumSelectionSize: 1,
+            });
+
+
+            btn_buscar.on("click", function(){
+
+                var data = {
+                  ruc   : txtdniruc.val(),
+                  token  : '5JFQh5toA0sWhj-YV3NXmt4dzE4JvJjwgYzzPJtYHgA',
+                }
+
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('obtenerdatosempresa')}}",
+                    data: data,
+                    success: function(data){
+
+                        txtnombrerazonsocial.val(data.nombre_o_razon_social);
+                        txtdireccion.val(data.direccion_completa);
+                        txtdistrito.val(data.distrito_id);
+                    }
+
+                });
+            });
+
+            btnlimpiar.on('click',function(){
+
+                location.reload();
+
+            });
+
+            btnproforma.on("click",function(){
+
+                var prd = $(".venta-cuenta").find(".row.prod");
+          
+
+                if(prd.length == 0 ){
+
+                    bootbox.alert("No existen productos agregados.");                    
+                    return false;
+
+                }
+
+                if(txtcliente.val() == ''){
+
+                    bootbox.alert("Debe ingresar el nombre del cliente.");                    
+                    return false;
+
+                }
+
+
+                var dataproforma = [];
+
+                $(".prod").each( function () {
+
+                    var producto   = $(this).find(".col-md-4").text();
+                    var cantidad   = $(this).find(".cantidadinput").val();
+                    var punitario  = $(this).find(".precioinput").val();
+                    var subtotal   = $(this).find(".subtotal").text();
+                    var productoid = $(this).find(".productoid").val();
+                    var descripcion = $(this).find(".descripcion").val();
+                    
+
+                    dataproforma.push({
+                        'producto':producto,
+                        'cantidad':cantidad,
+                        'punitario':punitario,
+                        'subtotal':subtotal,
+                        'productoid':productoid,
+                        'descripcion':descripcion,
+                    });
+
+                    
+                });
+
+                var empleado   = $('#appbundle_detalleventa_cliente_vendedor');
+                var fecha_proforma = $('#appbundle_detalleventa_cliente_fecha');
+
+                dataproforma = JSON.stringify(dataproforma);
+
+                if($('#appbundle_detalleventa_cliente_incluirIgv').is(":checked")){
+                    var incluirIgv  = 'SI';
+                }else{
+                    var incluirIgv  = 'NO';
+                }
+
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('registrar_datos_proforma')}}",
+                  data: { data: dataproforma,cliente:txtcliente.val(),empleado:empleado.val(),plazoEntrega:txtplazoentrega.val(),validezOferta:txtvalidezoferta.val(),empleadoCotiza:txtempleadocotiza.val(),correoEmpleadoCotiza:txtcorreoempleadocotiza.val(),telefonoCliente:txttelefonocliente.val(),incluirIgv:incluirIgv,formaPago:txtformapago.val(),fecha:fecha_proforma.val(),documento:txttipodocumento.val(),moneda:txtmoneda.val()}
+                })
+                  .done(function( data ) {
+
+                    if(data.factura_id != ''){
+
+                        window.open('{{ path('detalleventa_show_proforma') }}?factura_id='+data.factura_id,'blank','width=842, height=842');                        
+
+                    }else{
+
+                        bootbox.alert('Ocurrió un error inesperado. La proforma no fue creada. Actualize la página (F5) y vuelva a intentarlo.');
+                    }
+
+                });               
+
+
+                // window.open('{{ path('detalleventa_show_proforma') }}?data='+encodeURIComponent(dataproforma)+'&cliente='+txtcliente.val()+'&empleado='+empleado.val()+'&plazoEntrega='+txtplazoentrega.val()+'&validezOferta='+txtvalidezoferta.val()+'&empleadoCotiza='+txtempleadocotiza.val()+'&correoEmpleadoCotiza='+txtcorreoempleadocotiza.val()+'&telefonoCliente='+txttelefonocliente.val()+'&incluirIgv='+incluirIgv+'&formaPago='+txtformapago.val()+'&fecha='+fecha_proforma.val()+'&documento='+txttipodocumento.val(),'blank','width=842, height=842');
+
+            });
+
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".setcurrentdate").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+            $(".setcurrentdate").datepicker("setDate", startDate);
+
+            // Selecciona el cliente
+            $(".select2").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenerclientes')}}",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },          
+                placeholder: 'Buscar cliente por nombres,apellidos,razon social,DNI o RUC',
+                minimumInputLength: 3,
+            });
+
+            // Fetch the preselected item, and add to the control
+            $.ajax({
+                type: "GET",
+                url: "{{ path('obtener_cliente_default')}}",
+            }).then(function (data) {
+
+                if(data.total_count != 0){
+
+                    // create the option and append to Select2
+                    var option = new Option(data.results.text, data.results.id, false, true);
+                    $('#appbundle_detalleventa_cliente_cliente_select').append(option).trigger('change');
+
+                    // manually trigger the `select2:select` event
+                    $('#appbundle_detalleventa_cliente_cliente_select').trigger({
+                        type: 'select2:select',
+                        params: {
+                            data: data
+                        }
+                    });
+
+                }
+
+
+            });
+
+            $('.select2').on('select2:select', function (e) {
+
+                var data = e.params.data;
+
+                var tipo_cliente = data.tipo;
+                var moneda = $('#appbundle_detalleventa_cliente_moneda').val();
+                var fecha  = $('#appbundle_detalleventa_cliente_fecha').val();
+
+                var modo = 'false';
+                if ($("#producto-slider").hasClass("d-none")) {
+                   modo = 'true';
+                }
+
+                var cargandoTexto = '<i class="fa fa-circle-o-notch fa-spin"></i>';
+
+                if(modo == 'false'){
+                    $('#producto-slider').html(cargandoTexto);
+                }else{
+                    $('#producto-lista').html(cargandoTexto);
+                }
+
+                var textobuscar = '';                
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('buscar_productos')}}",
+                  data: { textobuscar: textobuscar,modo: modo,moneda:moneda,fecha:fecha,tipo_cliente:tipo_cliente}
+                })
+                  .done(function( data ) {
+
+                    if(data.error){
+
+                        bootbox.alert(data.error);
+                        $('#appbundle_detalleventa_cliente_moneda').val(1);
+                        $('#buscar').trigger("click");               
+
+                    }
+                    else
+                    {
+
+                        if(modo == 'false'){
+                            $('#producto-slider').html(data);
+                        }else{
+                            $('#producto-lista').html(data);
+                        }
+
+                    }
+
+                    if(moneda == 2){
+                        $('.simbolo_moneda').html('$ ');
+                        $('#total_simbolo_moneda').html(' $');
+                        $('#igv_simbolo_moneda').html(' $');
+                    }else
+                    {
+                        $('.simbolo_moneda').html('S./ ');
+                        $('#total_simbolo_moneda').html(' S./');
+                        $('#igv_simbolo_moneda').html(' S./');                    
+                    }             
+
+                    if(tipo_cliente == 'mayorista')
+                    {
+                        $('.x_mayor').html('P.Un.: ');
+                    }
+                    else
+                    {
+                        $('.x_mayor').html('X Mayor: ');
+                    }
+                
+                });  
+                
+            });
+
+
+            var pdfImprimir = '{{ rutaPdf }}';
+            var guiaHtml = '{{ guiaHtml }}';
+
+            if(pdfImprimir)
+            {
+                $('#imprimir').trigger('click'); 
+            }
+
+            if(guiaHtml == 'si')
+            {
+                $('#guiaHtml').removeClass('d-none');
+                $('#imprimirGuia').trigger('click');
+            }
+
+
+            incluirIgv.on('change',function(){
+
+                if ($(this).is(":checked"))
+                {
+
+                    var total = 0;
+                    var impuestos = 0;
+                    $(".subtotal").each( function () {
+                        var subtotal = Number($(this).html());
+                        total += Number($(this).html());
+                        impuestos += 0.18*(subtotal/1.18);
+
+                    });
+
+                    $('#total').html($.number( total, 2, '.', ',' ));
+                    $('#impuestos').html($.number( impuestos, 2, '.', ',' ));    
+
+                }
+                else
+                {
+
+                    var total = 0;
+                    var impuestos = 0;
+                    $(".subtotal").each( function () {
+                        var subtotal = Number($(this).html());
+                        total += Number($(this).html());
+
+
+                    });
+
+                    impuestos = total * 0.18;
+                    total = total + impuestos;
+
+                    $('#total').html($.number( total, 2, '.', ',' ));
+                    $('#impuestos').html($.number( impuestos, 2, '.', ',' ));    
+
+                }
+                
+            });
+
+            $('body').on('click','#modo_lista',function (event) {
+                $('#producto-slider').toggleClass('d-none');
+                $('#producto-lista').toggleClass('d-none');
+
+            });
+
+        });
+    </script>
+
+
+{% endblock %}

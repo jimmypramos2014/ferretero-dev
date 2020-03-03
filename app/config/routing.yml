@@ -1,0 +1,55 @@
+app:
+    resource: '@AppBundle/Controller/'
+    type: annotation
+    prefix: /main
+
+fos_user:
+    resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+
+fos_user_security_login:
+    path:  /
+    defaults:  { _controller: FOSUserBundle:Security:login, _method: POST }
+
+fos_user_resetting:
+    resource: "@FOSUserBundle/Resources/config/routing/resetting.xml"
+    prefix: /resetting
+
+fos_user_register:
+    path:  /register
+    defaults: { _controller: FOSUserBundle:Registration:register }
+
+imprimir_ticket:
+    path:  /imprimir/ticket
+    defaults:  { _controller: AppBundle:Default:imprimirTicket, _method: GET }
+
+obtenerdatosempresa:
+    path:  /obtenerdatosempresa
+    defaults:  { _controller: AppBundle:ServicioAjax:obtenerDatosEmpresa, _method: GET }
+
+consultar_estado_boleta:
+    path:  /consultar/estado/boleta
+    defaults:  { _controller: AppBundle:ServicioAjax:consultarEstadoBoleta, _method: GET } 
+
+establecer_tipo_de_cambio:
+    path:  /establecer/tipo/cambio
+    defaults:  { _controller: AppBundle:Default:establecerTipoDeCambio, _method: GET }
+
+consultar_documentos_error:
+    path:  /consultar/documentos/error
+    defaults:  { _controller: AppBundle:Default:consultarDocumentosError, _method: GET }
+
+consultar_documentos_noenviados:
+    path:  /consultar/documentos/noenviados
+    defaults:  { _controller: AppBundle:Default:consultarDocumentosNoEnviados, _method: GET }
+
+actualizar_datos_factura:
+    path:  /actualizar/datos/factura
+    defaults:  { _controller: AppBundle:Default:actualizarDatosFactura, _method: GET }
+
+actualizar_precio_costo_detalle_venta:
+    path:  /actualizar/precio/costo/detalle/venta
+    defaults:  { _controller: AppBundle:Default:actualizarPrecioCostoDetalleVenta, _method: GET }
+
+actualizar_stock_producto:
+    path:  /actualizar/stock/producto
+    defaults:  { _controller: AppBundle:Default:actualizarStock, _method: GET }                  

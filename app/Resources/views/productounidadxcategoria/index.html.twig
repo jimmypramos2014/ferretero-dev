@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Productounidadxcategorias list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Ratio</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for productoUnidadXCategorium in productoUnidadXCategorias %}
+            <tr>
+                <td><a href="{{ path('productounidadxcategoria_show', { 'id': productoUnidadXCategorium.id }) }}">{{ productoUnidadXCategorium.id }}</a></td>
+                <td>{{ productoUnidadXCategorium.tipo }}</td>
+                <td>{% if productoUnidadXCategorium.estado %}Yes{% else %}No{% endif %}</td>
+                <td>{{ productoUnidadXCategorium.ratio }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('productounidadxcategoria_show', { 'id': productoUnidadXCategorium.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('productounidadxcategoria_edit', { 'id': productoUnidadXCategorium.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('productounidadxcategoria_new') }}">Create a new productoUnidadXCategorium</a>
+        </li>
+    </ul>
+{% endblock %}

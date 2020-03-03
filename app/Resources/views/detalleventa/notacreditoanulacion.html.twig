@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <meta charset="utf-8">
+    <head>
+        <title>Ticket</title>
+        <style type="text/css">
+     
+            table {
+                display: table;
+                border-collapse: separate;
+                border-spacing: 2px;
+                border-color: grey;                
+            }
+
+            .col-4 {
+                -webkit-box-flex: 0;
+                -ms-flex: 0 0 33.333333%;
+                flex: 0 0 33.333333%;
+                max-width: 33.333333%;
+            }
+
+            .table {
+                width: 100%;
+                max-width: 100%;
+                margin-bottom: 1rem;
+                background-color: transparent;
+            }
+
+            .h3, h3 {
+                font-size: 1.75rem;
+                font-family: inherit;
+                font-weight: 500;
+                line-height: 1.2;
+                color: inherit;                
+            }
+
+            .h6, h6 {
+                font-size: 1rem;
+                font-family: inherit;
+                font-weight: 500;
+                line-height: 1.2;
+                color: inherit;                    
+            }            
+
+            .text-center {
+                text-align: center !important;
+            }            
+        </style>
+    </head>
+
+    <body>
+
+        <div class="col-12 ">
+            <table class="table">
+
+                <tr class="h3 text-center"><td colspan="4">NOTA DE CRÉDITO</td></tr>
+                <tr class="h4 text-center"><td colspan="4">{{ localObj.nombre }}</td></tr>
+                <tr class="text-center"><td colspan="4">{{ localObj.direccion }}</td></tr>
+                <tr class="text-center"><td colspan="4"><center>Tel: {{ localObj.telefono }}</center></td></tr>
+                <tr><td colspan="4"><center>RUC : {{ localObj.empresa.ruc }}</center></td></tr>
+
+                <tr><th>TICKET:</th><td>{{facturaVenta.ticket }}</td><th>  FECHA:</th><td>{{ facturaVenta.fecha | date('d/m/Y  H:i') }}</td></tr>
+                <tr><td>CLIENTE:</td><td colspan="3">{{ facturaVenta.cliente }}</td></tr>
+                <tr><td>CAJERO:</td><td colspan="3">{{ facturaVenta.venta.empleado }}</td></tr>
+                <tr>
+                    <td colspan="4" >
+                        <hr>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr class="text-center">
+                                    <th>Producto</th>
+                                    <th>Descripción</th>
+                                    <th>Cantidad</th>
+                                    <th>Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set total = 0 %}
+                                {% set impuesto = 0 %}
+                                {% for detalle in facturaVenta.venta.detalleVenta %}
+
+                                    <tr class="text-center">
+                                        <td>{{ detalle.productoXLocal.producto.nombre }}</td>
+                                        {% set descripcion = '' %}
+                                        {% if detalle.descripcion %}
+                                            {% set descripcion = detalle.descripcion  %}
+                                        {% endif %}
+                                        <td>{{ descripcion }}</td>
+                                        <td>{{ detalle.cantidad }}</td>
+                                        <td>{{ detalle.subtotal | number_format(2, '.', ',') }}</td>
+                                    </tr>   
+                                    {% set total = total + detalle.subtotal %}
+                                    {% set impuesto = impuesto +  0.18*detalle.subtotal/1.18 %}
+                                {% endfor  %}
+                            </tbody>
+                            <tfoot>
+
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Sub Total</th>
+                                    <th>{{ total | number_format(2, '.', ',') }}</th>                            
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th>IGV</th>
+                                    <th>{{ impuesto | number_format(2, '.', ',') }}</th>                            
+                                </tr> 
+                                <tr>
+                                    <th></th>
+                                    <th ></th>
+                                    <th>TOTAL</th>
+                                    <th>{{ total | number_format(2, '.', ',') }}</th>                            
+                                </tr>
+                            </tfoot>
+                         
+                        </table>
+                        <hr>
+                    </td>
+                </tr>
+
+            </table>
+
+
+        </div>    
+
+        <div class="col-12 ">
+            
+            <p class="text-center ">
+                **GRACIAS**
+                <br>
+                Este es un comprobante interno que valida la anulación de la venta
+            </p>
+
+        </div>
+
+    </body>
+</html>

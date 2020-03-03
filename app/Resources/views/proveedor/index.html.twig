@@ -1,0 +1,205 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+{% endblock %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="container">
+
+
+
+        <div class="card mx-auto mt-5">
+            <div class="card-body">
+
+                <div class="row mt-2 mb-4 pr-3">
+                    <div class="col-lg-12 ">
+                        <a href="{{ path('proveedor_new') }}" class="btn btn-primary pull-right">Registrar proveedor</a>
+                    </div>
+                </div>
+
+                <div class="row mt-2 ">
+                    <div class="col-lg-12">
+                        <table id="dtProducto" class="table table-striped table-bordered" style="width: 100%;">                            
+                            <thead>
+                                <tr>
+                                    <th>Ítem</th>
+                                    <th>Cod. Proveedor</th>
+                                    <th>Proveedor</th>
+                                    <th>RUC</th>
+                                    <th>Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Dirección</th>
+                                    <th>Estado en la SUNAT</th>
+                                    <th>Habilitado en el sistema</th>
+                                    <th class="no-sort">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% set item = 1 %}
+                            {% for proveedor in proveedors %}
+                                <tr>
+                                    <td>{{ item }}</td>
+                                    <td>{{ proveedor.codigo }}</td>
+                                    <td>{{ proveedor.nombre | upper }}</td>
+                                    <td>{{ proveedor.ruc }}</td>
+                                    <td>{{ proveedor.telefono }}</td>
+                                    <td>{{ proveedor.email }}</td>
+                                    <td>{{ proveedor.direccion  }}</td>
+
+                                    {% set clase = '' %}
+                                    {% set claseestado = '' %}
+                                    {% if proveedor.condicion == 'ACTIVO' %} {% set clase = 'bg-success text-white' %} {% endif %}
+                                    {% if proveedor.condicion == 'BAJA DEFINITIVA' %} {% set clase = 'bg-danger text-white' %}{% endif %}
+
+                                    {% if proveedor.estado == false %} {% set claseestado = 'bg-danger text-white' %} {% endif %}
+
+                                    <td><span class="{{ clase }}">{{ proveedor.condicion ? proveedor.condicion : '' }}</span></td>
+
+                                    <td><span class="{{ claseestado }}">{{ proveedor.estado ? 'SI' : 'NO' }}</span></td>
+
+                                    <td class="text-center">
+
+                                        <a href="javascript:eliminar({{proveedor.id}})" class="mr-2" data-toggle="tooltip" data-target="" title="Deshabilitar">
+                                            <i class="fa fa-remove fa-lg"></i>
+                                        </a>
+
+                                        <a href="{{ path('proveedor_edit', { 'id': proveedor.id }) }}"><i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar"></i></a>
+
+                                        {% if proveedor.estado == false %}
+
+                                            <a href="javascript:habilitar({{proveedor.id}})" class="" data-toggle="tooltip" data-target="" title="Habilitar">
+                                                <i class="fa fa-check fa-lg"></i>
+                                            </a>
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+                                {% set item = item + 1 %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+    <script type="text/javascript">
+
+        function eliminar(id) {
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                    },
+                    cancel: {
+                        label: 'Cancelar',
+                    }
+                },                
+                size: 'small',
+                message: "¿Está seguro de eliminar el registro?", 
+                callback: function(res){ 
+                    if(res){
+                        location = id+'/delete';
+                    }
+                }
+            });
+        } 
+
+        function habilitar(id) {
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                    },
+                    cancel: {
+                        label: 'Cancelar',
+                    }
+                },                
+                size: 'small',
+                message: "¿Está seguro de habilitar el registro?", 
+                callback: function(res){ 
+                    if(res){
+                        location = id+'/habilitar';
+                    }
+                }
+            });
+        } 
+
+        $(document).ready(function() {
+            $('#dtProducto').DataTable( {
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },                
+                dom: 'Bfrtip',
+                "columns": [
+                    { "visible": false },
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                ],
+                "order": [[ 1, "desc" ]],
+                responsive: true,                
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'print',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    }
+                ]  
+            });
+        });
+        
+    </script>
+          
+{% endblock %}

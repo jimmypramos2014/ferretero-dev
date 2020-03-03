@@ -1,0 +1,124 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Guiaremision</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ guiaRemision.id }}</td>
+            </tr>
+            <tr>
+                <th>Fechaemision</th>
+                <td>{% if guiaRemision.fechaEmision %}{{ guiaRemision.fechaEmision|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Tipo</th>
+                <td>{{ guiaRemision.tipo }}</td>
+            </tr>
+            <tr>
+                <th>Serie</th>
+                <td>{{ guiaRemision.serie }}</td>
+            </tr>
+            <tr>
+                <th>Numero</th>
+                <td>{{ guiaRemision.numero }}</td>
+            </tr>
+            <tr>
+                <th>Fechainiciotraslado</th>
+                <td>{% if guiaRemision.fechaInicioTraslado %}{{ guiaRemision.fechaInicioTraslado|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Motivotraslado</th>
+                <td>{{ guiaRemision.motivoTraslado }}</td>
+            </tr>
+            <tr>
+                <th>Tipotransporte</th>
+                <td>{{ guiaRemision.tipoTransporte }}</td>
+            </tr>
+            <tr>
+                <th>Peso</th>
+                <td>{{ guiaRemision.peso }}</td>
+            </tr>
+            <tr>
+                <th>Numerobultos</th>
+                <td>{{ guiaRemision.numeroBultos }}</td>
+            </tr>
+            <tr>
+                <th>Transportistadocumento</th>
+                <td>{{ guiaRemision.transportistaDocumento }}</td>
+            </tr>
+            <tr>
+                <th>Transportistadocumentonumero</th>
+                <td>{{ guiaRemision.transportistaDocumentoNumero }}</td>
+            </tr>
+            <tr>
+                <th>Transportistadenominacion</th>
+                <td>{{ guiaRemision.transportistaDenominacion }}</td>
+            </tr>
+            <tr>
+                <th>Transportistaplaca</th>
+                <td>{{ guiaRemision.transportistaPlaca }}</td>
+            </tr>
+            <tr>
+                <th>Conductordocumento</th>
+                <td>{{ guiaRemision.conductorDocumento }}</td>
+            </tr>
+            <tr>
+                <th>Conductordocumentonumero</th>
+                <td>{{ guiaRemision.conductorDocumentoNumero }}</td>
+            </tr>
+            <tr>
+                <th>Conductornombre</th>
+                <td>{{ guiaRemision.conductorNombre }}</td>
+            </tr>
+            <tr>
+                <th>Puntopartida</th>
+                <td>{{ guiaRemision.puntoPartida }}</td>
+            </tr>
+            <tr>
+                <th>Puntollegada</th>
+                <td>{{ guiaRemision.puntoLlegada }}</td>
+            </tr>
+            <tr>
+                <th>Ubigeopartida</th>
+                <td>{{ guiaRemision.ubigeoPartida }}</td>
+            </tr>
+            <tr>
+                <th>Ubigeollegada</th>
+                <td>{{ guiaRemision.ubigeoLlegada }}</td>
+            </tr>
+            <tr>
+                <th>Observacion</th>
+                <td>{{ guiaRemision.observacion }}</td>
+            </tr>
+            <tr>
+                <th>Estado</th>
+                <td>{% if guiaRemision.estado %}Yes{% else %}No{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Fechacreacion</th>
+                <td>{% if guiaRemision.fechaCreacion %}{{ guiaRemision.fechaCreacion|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Fechamodificacion</th>
+                <td>{% if guiaRemision.fechaModificacion %}{{ guiaRemision.fechaModificacion|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('guiaremision_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('guiaremision_edit', { 'id': guiaRemision.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

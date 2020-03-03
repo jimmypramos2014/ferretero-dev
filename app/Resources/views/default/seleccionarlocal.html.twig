@@ -1,0 +1,182 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="modal hide fade" tabindex="-1" role="dialog" id="myModal" data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Seleccionar local</h4>
+      </div>
+
+      <form id="form" action="{{ path('seleccionar_local') }}" class="form-horizontal needs-validation" role="form" method="post" novalidate>
+
+        <div class="modal-body">
+
+          <div class="form-row">
+              <div class="form-group col-md-12">
+                  {{ form_row(form.local) }}
+                  <div class="invalid-feedback">
+                      Este valor es requerido.
+                  </div>                     
+              </div>
+              <div class="form-group col-md-12">
+                  {{ form_row(form.caja) }}
+                  <div class="invalid-feedback">
+                      Este valor es requerido.
+                  </div>                     
+              </div>
+              {{ form_widget(form._token) }}
+
+          </div>
+
+        </div>
+
+        <div class="form-row ml-3 mr-3 d-none" id="caja_condicion">
+
+        </div>
+
+        <div class="modal-footer">
+          {% if 'ROLE_ADMIN' not in app.user.roles  %}
+            <p class="d-flex justify-content-start">            
+              <a class="btn btn-small btn-primary text-white" data-toggle="modal" data-target="#salirModal">
+                <i class="fa fa-fw fa-sign-out"></i>Salir
+              </a>               
+            </p>
+          {% endif  %}
+
+          <p class="d-flex justify-content-end">
+            <button type="button" class="btn btn-secondary mr-2" onclick="$('#myModal').modal('hide');">Cerrar</button>
+            <input type="submit" class="btn btn-small btn-primary" id="btn_guardar"  value="Guardar" />
+          </p>
+          
+        </div>
+
+      </form>
+
+
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- Logout Modal-->
+<div class="modal fade" id="salirModal" tabindex="-1" role="dialog" aria-labelledby="salirModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="">¿Está seguro de salir?</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">Selecciona "Cerrar sesión" si estás seguro.</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+        <a class="btn btn-primary" href="{{ path('fos_user_security_logout')}}">Cerrar sesión</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }} 
+
+    <script type="text/javascript">
+    
+      $(window).on('load',function(){
+        $('#myModal').modal('show');
+      });
+
+      $(document).ready(function() {
+
+          var local_select  = $('#appbundle_seleccionar_local_local');
+          var caja_select   = $('#appbundle_seleccionar_local_caja');
+          var btn_guardar   = $('#btn_guardar');
+
+
+          local_select.on("change", function(){
+
+              var data = {
+                local      : this.value,
+                autorizado  : 'si',
+              }
+
+              caja_select.val('').attr("disabled", "disabled");
+              btn_guardar.attr("disabled", "disabled");
+
+              $.ajax({
+                method: "POST",
+                url: "{{ path('obtener_caja_desde_local')}}",
+                data: data,
+                success: function(data){
+                  caja_select.html(data).removeAttr("disabled");
+                  caja_select.css('pointer-events','auto');
+                  btn_guardar.removeAttr("disabled");
+                }
+
+              });
+
+          });
+
+          caja_select.on("change", function(){
+
+              var data = {
+                caja      : this.value,
+                autorizado  : 'si',
+              }
+
+              btn_guardar.attr("disabled", "disabled");
+              
+              $.ajax({
+                method: "POST",
+                url: "{{ path('obtener_condicion_caja')}}",
+                data: data,
+                success: function(data){
+
+                  $('#caja_condicion').removeClass("d-none");
+
+                  if(data['condicion'] == 'cerrado'){
+
+                      btn_guardar.attr("disabled", "disabled");
+
+                  }else if(data['condicion'] == 'abierto'){
+
+                      btn_guardar.removeAttr("disabled");
+                      
+
+                  }else{
+                    
+                      btn_guardar.removeAttr("disabled");
+                  }
+
+                  $('#caja_condicion').html(data['rpta']);                  
+                }
+
+              });
+
+              //console.log(this.value);
+          });
+
+          $('#form').submit(function(){
+
+            $("input[type='submit']", this)
+              .val("Espere por favor...")
+              .attr('disabled', 'disabled');
+
+            return true;
+
+          });
+
+
+      });      
+
+    </script>
+
+          
+{% endblock %}

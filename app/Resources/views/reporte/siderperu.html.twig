@@ -1,0 +1,270 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+    <style>
+        .datepicker{
+            z-index:100000 !important;
+        }
+    </style>
+{% endblock %}
+
+
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+{# <div class="container-fluid">
+    <div class="card mx-auto mt-5">
+        <div class="card-header">Filtros</div>
+        <div class="card-body">#}
+
+            <div class="row mb-2 ml-1">
+                <div class="col-lg-12">
+                
+                <form id="form" action="{{ path('reporte_siderperu') }}" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+                    <div class="form-row">
+                        <div class="form-group  col-md-2">
+                            {{ form_row(form.fecha_inicio,{'attr':{'value':fecha_inicio}}) }}
+
+                        </div>
+                        <div class="form-group  col-md-2">
+                            {{ form_row(form.fecha_fin,{'attr':{'value':fecha_fin}}) }}
+
+                        </div>
+                        <p class="pull-right mt-4" style="padding-top:5px;"> 
+                            <input type="submit" class="btn btn-small btn-primary" value="Buscar" />           
+                        </p>
+                    </div>
+
+                </form>
+
+                </div>
+
+            </div>
+
+       {#} </div>
+        
+    </div> #}
+
+    {#<div class="card mx-auto mt-5">
+        <div class="card-body">#}
+
+            <div class="row mt-2 ">
+                <div class="col-lg-12">
+                    <table id="dtProducto" class="table table-striped table-bordered "  style="width: 100%;">
+                        <thead>
+{#                             <tr>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead" width="12%">Local</th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>                                
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>                                
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>                                
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>                                
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>                                
+                                <th class="filterhead"></th>                                                                
+                            </tr> #}
+
+                            <tr>
+                                {#<th>Ítem</th>#}
+                                <th>Año</th>
+                                <th>Mes</th>
+                                <th>Tienda</th>
+                                <th>Canal venta</th>
+                                <th>RUC o DNI</th>
+                                <th>Cliente</th>
+                                <th>Direccion</th>
+                                <th>Distrito</th>
+                                <th>Dpto.Cliente</th>
+                                <th>Teléfono</th>
+                                <th>Vendedor</th>
+                                <th>Dirección despacho</th>
+                                <th>Distrito</th>
+                                <th>Dpto.</th>
+                                <th>Producto</th>
+                                <th>Cantidad (Und.)</th>
+                                <th>Venta (Tn.)</th>
+                                <th>Tipo venta</th>
+                                <th>Días de crédito</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% set item = 1 %}
+                        {% for venta in ventas %}
+                            <tr>
+                                {#<td>{{ item }}</td>#}
+                                <td>{{ venta.ano }}</td>
+                                <td>{{ venta.mes }}</td>
+                                <td>{{ venta.almacen }}</td>
+                                <td>{{ venta.tipo_canal_venta }}</td>
+                                <td>{{ venta.ruc_cliente }}</td>
+                                <td>{{ venta.razon_social_cliente }}</td>
+                                <td>{{ venta.direccion_cliente }}</td>
+                                <td>{{ venta.distrito_cliente }}</td>
+                                <td>{{ venta.departamento_cliente }}</td>
+                                <td>{{ venta.telefono }}</td>
+                                <td>{{ venta.vendedor }}</td>
+                                <td>{{ venta.direccion_despacho }}</td>
+                                <td>{{ venta.distrito_despacho }}</td>
+                                <td>{{ venta.departamento_despacho }}</td>
+                                <td>{{ venta.producto }}</td>
+                                <td class="text-right">{{ venta.cantidad | number_format(2, '.', ',') }}</td>
+                                {% set venta_x_tn  = venta.venta / 1000 %}
+                                <td class="text-right" >{{ venta_x_tn | number_format(2, '.', ',') }}</td>
+                                <td>{{ venta.tipo_venta }}</td>
+                                <td>{{ venta.dias_credito }}</td>
+
+
+                            </tr>
+                            {% set item = item + 1 %}
+                        {% endfor %}
+                        </tbody>
+{#                         <tfoot>
+                            <tr>
+                                <th colspan="8" style="text-align:right">Total (S./):</th>
+                                <th style="padding:0px;vertical-align: middle;"></th>
+                            </tr>
+                        </tfoot> #}
+                    </table>
+
+                </div>
+            </div>
+        {#</div>
+    </div>
+
+</div>#}
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            var table = $('#dtProducto').DataTable( {
+
+                // "footerCallback": function ( row, data, start, end, display ) {
+                //     var api = this.api(), data;
+         
+                //     // Remove the formatting to get integer data for summation
+                //     var intVal = function ( i ) {
+                //         return typeof i === 'string' ?
+                //             i.replace(/[\$,]/g, '')*1 :
+                //             typeof i === 'number' ?
+                //                 i : 0;
+                //     };
+         
+                //     // Total over all pages
+                //     total = api
+                //         .column( 8 )
+                //         .data()
+                //         .reduce( function (a, b) {
+                //             return intVal(a) + intVal(b);
+                //         }, 0 );
+         
+                //     // Total over this page
+                //     pageTotal = api
+                //         .column( 8, { page: 'current'} )
+                //         .data()
+                //         .reduce( function (a, b) {
+                //             return intVal(a) + intVal(b);
+                //         }, 0 );
+         
+                //     // Update footer
+                //     $( api.column( 8 ).footer() ).html(
+                //         '<span style="font-size:0.80rem;">'+pageTotal.toFixed(2) +' ( '+ total.toFixed(2) +' total)</span>'
+                //     );
+                // },
+
+
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },
+                //responsive: true,
+                "pageLength": 50,                                 
+                dom: 'Bfrtip',
+                order: [[ 2, "desc" ]],
+                "scrollX": true,
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'print',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    }
+                ]
+
+            });
+
+
+            // $(".filterhead").each( function ( i ) {
+
+            //     if(i == 7){
+            //         var texto = '';
+            //         if(i==7){texto = 'Local';}
+            //         var select = $('<select class="form-control" ><option value="">'+texto+'</option></select>')
+            //             .appendTo( $(this).empty() )
+            //             .on( 'change', function () {
+            //                var term = $(this).val();
+            //                 table.columns( i ).search(term, false, false ).draw();
+            //             });
+            //         table.column( i).data().unique().sort().each( function ( d, j ) {
+            //             select.append( '<option value="'+d+'">'+d+'</option>' )
+            //         });
+            //     }
+
+            // });
+
+        });
+
+    </script>
+          
+{% endblock %}

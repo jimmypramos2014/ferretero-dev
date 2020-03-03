@@ -1,0 +1,43 @@
+# To get started with security, check out the documentation:
+# https://symfony.com/doc/current/security.html
+security:
+    encoders:
+        FOS\UserBundle\Model\UserInterface: bcrypt
+
+    role_hierarchy:
+        ROLE_ADMIN:       [ROLE_ALMACENERO,ROLE_VENDEDOR]
+        ROLE_SUPER_ADMIN: ROLE_ADMIN
+
+    providers:
+        fos_userbundle:
+            id: fos_user.user_provider.username_email
+
+    firewalls:
+        main:
+            pattern: ^/
+            form_login:
+                provider: fos_userbundle
+                #csrf_token_generator: security.csrf.token_manager
+                # if you are using Symfony < 2.8, use the following config instead:
+                # csrf_provider: form.csrf_provider
+                login_path: /
+                #check_path:  fos_user_security_login_check
+                #check_path: /login_check
+                always_use_default_target_path: true
+                #default_target_path:  /main/producto
+                success_handler: app.component.authentication.handler.login_success_handler
+
+            logout:
+                path:  fos_user_security_logout
+                target: /
+                #invalidate_session: true
+                #success_handler: app.component.authentication.handler.logout_success_handler
+            anonymous: true
+
+    access_control:
+        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/main/administrador, roles: ROLE_SUPER_ADMIN }
+        - { path: ^/main/empleado, roles: ROLE_ADMIN }
+        - { path: ^/main/, role: [ROLE_ADMIN,ROLE_ALMACENERO,ROLE_VENDEDOR] }

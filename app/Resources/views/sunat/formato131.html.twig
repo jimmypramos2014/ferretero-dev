@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .no-border {
+            border: 0;
+            box-shadow: none;
+        }
+    </style>
+{% endblock %}
+
+
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+
+    <div class="card mx-auto mt-2">
+        <div class="card-body">
+
+            <div class="row mt-2 ">
+                <div class="col-md-12">
+
+                    <form id="form" action="{{ path('sunat_formato131') }}" class="form-horizontal " role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-3">
+                                {{ form_row(formSunatF121.local) }}
+                            </div>                      
+                       
+                            <div class="form-group col-md-2">
+                                {{ form_row(formSunatF121.ano,{'attr':{'value':ano }}) }}
+                            </div>
+                            <div class="form-group col-md-2">
+                                {{ form_row(formSunatF121.mes,{'attr':{'value':mes }}) }}
+                            </div>
+                            <p class="pull-right " style="margin-top: 1.9rem !important;"> 
+                                <input type="submit" class="btn btn-small btn-primary" value="Generar" name="generar" />    
+
+                            </p>
+
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        {% set visible = 'd-none' %}
+        {% if generado %}
+            {% set visible = '' %}
+        {% endif %}
+        <div class="card-footer {{ visible }}">
+            {% set zipRuta =  '/uploads/sunat/' ~ empresa ~ '/' ~ local ~ '/f131/' ~ mes ~ '-' ~ ano ~ '.zip' %}
+            <a href="{{ zipRuta }}" class="nav-link"><i class="fa fa-save fa-lg" data-toggle="tooltip" title="Descargar"></i> Descargar documentos generados</a>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            
+        });
+
+    </script>
+          
+{% endblock %}

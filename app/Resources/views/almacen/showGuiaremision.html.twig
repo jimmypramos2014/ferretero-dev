@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <meta charset="utf-8">
+    <head>
+        <title>Guia remisión</title>
+        <style type="text/css">
+
+            @font-face {
+                font-family: Cambria;
+                src: url({{ 'http://' ~ host ~ '/fonts/Cambria.ttf' }} ) format('truetype');
+            }
+
+            body { 
+                font-family: 'Cambria';
+                font-size:11pt;
+                font-weight:bold;
+                letter-spacing: 0.1em;  
+            }
+
+
+        </style>
+    </head>
+
+    <body>
+
+        {% set puntoPartida_X = 0 %}
+        {% set puntoPartida_Y = 0 %}
+        {% set puntoLlegada_X = 0 %}
+        {% set puntoLlegada_Y = 0 %}
+        {% set fechaTraslado_X = 0 %}
+        {% set fechaTraslado_Y = 0 %}
+        {% set costoMinimo_X = 0 %}
+        {% set costoMinimo_Y = 0 %}
+        {% set marca_X = 0 %}
+        {% set marca_Y = 0 %}
+        {% set constanciaInscripcion_X = 0 %}
+        {% set constanciaInscripcion_Y = 0 %}
+        {% set licenciaConducir_X = 0 %}
+        {% set licenciaConducir_Y = 0 %}
+        {% set destinatario_X = 0 %}
+        {% set destinatario_Y = 0 %}
+        {% set rucDestinatario_X = 0 %}
+        {% set rucDestinatario_Y = 0 %}
+        {% set transporte_X = 0 %}
+        {% set transporte_Y = 0 %}
+        {% set rucTransporte_X = 0 %}
+        {% set rucTransporte_Y = 0 %}
+        {% set tipoComprobante_X = 0 %}
+        {% set tipoComprobante_Y = 0 %}
+        {% set numComprobante_X = 0 %}
+        {% set numComprobante_Y = 0 %}
+        {% set detalleCodigo_X = 0 %}
+        {% set detalleCodigo_Y = 0 %}
+        {% set detalleDescripcion_X = 0 %}
+        {% set detalleDescripcion_Y = 0 %}
+        {% set detalleCantidad_X = 0 %}
+        {% set detalleCantidad_Y = 0 %}
+        {% set detalleUnidad_X = 0 %}
+        {% set detalleUnidad_Y = 0 %}
+        {% set detallePeso_X = 0 %}
+        {% set detallePeso_Y = 0 %}
+        {% set inicioDetalleVenta_X = 0 %}
+        {% set inicioDetalleVenta_Y = 0 %}
+
+
+        {% for componenteXDocumento in componentesXDocumento %}
+            
+            {% if componenteXDocumento.componente.nombre == 'puntoPartida' %}
+                {% set puntoPartida_X = componenteXDocumento.posicionX %}
+                {% set puntoPartida_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'puntoLlegada' %}
+                {% set puntoLlegada_X = componenteXDocumento.posicionX %}
+                {% set puntoLlegada_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'fechaTraslado' %}
+                {% set fechaTraslado_X = componenteXDocumento.posicionX %}
+                {% set fechaTraslado_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'costoMinimo' %}
+                {% set costoMinimo_X = componenteXDocumento.posicionX %}
+                {% set costoMinimo_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'marca' %}
+                {% set marca_X = componenteXDocumento.posicionX %}
+                {% set marca_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'constanciaInscripcion' %}
+                {% set constanciaInscripcion_X = componenteXDocumento.posicionX %}
+                {% set constanciaInscripcion_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'licenciaConducir' %}
+                {% set licenciaConducir_X = componenteXDocumento.posicionX %}
+                {% set licenciaConducir_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'destinatario' %}
+                {% set destinatario_X = componenteXDocumento.posicionX %}
+                {% set destinatario_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'rucDestinatario' %}
+                {% set rucDestinatario_X = componenteXDocumento.posicionX %}
+                {% set rucDestinatario_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'transporte' %}
+                {% set transporte_X = componenteXDocumento.posicionX %}
+                {% set transporte_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'rucTransporte' %}
+                {% set rucTransporte_X = componenteXDocumento.posicionX %}
+                {% set rucTransporte_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'tipoComprobante' %}
+                {% set tipoComprobante_X = componenteXDocumento.posicionX %}
+                {% set tipoComprobante_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'numComprobante' %}
+                {% set numComprobante_X = componenteXDocumento.posicionX %}
+                {% set numComprobante_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'detalleCodigo' %}
+                {% set detalleCodigo_X = componenteXDocumento.posicionX %}
+                {% set detalleCodigo_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'detalleDescripcion' %}
+                {% set detalleDescripcion_X = componenteXDocumento.posicionX %}
+                {% set detalleDescripcion_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'detalleCantidad' %}
+                {% set detalleCantidad_X = componenteXDocumento.posicionX %}
+                {% set detalleCantidad_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'detalleUnidad' %}
+                {% set detalleUnidad_X = componenteXDocumento.posicionX %}
+                {% set detalleUnidad_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'detallePeso' %}
+                {% set detallePeso_X = componenteXDocumento.posicionX %}
+                {% set detallePeso_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'inicioDetalleVenta' %}
+                {% set inicioDetalleVenta_X = componenteXDocumento.posicionX %}
+                {% set inicioDetalleVenta_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+                                                                                                                                                            
+        {% endfor %}
+
+        {% if puntoPartida_X > 0 %}
+
+            <span id="puntoPartida" style="position:absolute; top: {{ puntoPartida_X ~ 'px' }}; left: {{ puntoPartida_Y }}px; width: 450px; color: black;">{{ transferencia.transferenciaXTransporte ? transferencia.transferenciaXTransporte.puntoPartida | upper : ''  }}</span>
+
+        {% endif %}
+
+        {% if puntoLlegada_X > 0 %}
+            <span id="puntoLlegada" style="position:absolute; top: {{ puntoLlegada_X }}px; left: {{ puntoLlegada_Y }}px; width: 450px; color: black;">{{ transferencia.transferenciaXTransporte ? transferencia.transferenciaXTransporte.puntoLlegada | upper : ''  }}</span>    
+        {% endif %}
+
+        {% if fechaTraslado_X > 0 %}
+            <span id="fechaTraslado" style="position:absolute; top: {{ fechaTraslado_X }}px; left: {{ fechaTraslado_Y }}px; width: 400px; color: black;">{{ transferencia.transferenciaXTransporte ? transferencia.transferenciaXTransporte.fechaTraslado | date('d/m/Y'): "now" | date('d/m/Y') }}</span>
+        {% endif %}
+
+        {% if costoMinimo_X > 0 %}
+            <span id="costoMinimo" style="position:absolute; top: {{ costoMinimo_X }}px; left: {{ costoMinimo_Y }}px; width: 400px; color: black;">{{ transferencia.transferenciaXTransporte ? transferencia.transferenciaXTransporte.costoMinimo : '' }}</span>    
+        {% endif %}
+        {% if marca_X > 0 %}
+
+            <span id="marca" style="position:absolute; top: {{ marca_X }}px; left: {{ marca_Y }}px; width: 400px; color: black;">{{ transferencia.transferenciaXTransporte ? transferencia.transferenciaXTransporte.marca : '' }} -  {{ transferencia.transferenciaXTransporte ? transferencia.transferenciaXTransporte.placa : '' }}</span>
+
+        {% endif %}
+        {% if constanciaInscripcion_X > 0 %}
+
+            <span id="constanciaInscripcion" style="position:absolute; top: {{ constanciaInscripcion_X }}px; left: {{ constanciaInscripcion_Y }}px; width: 400px; color: black;">{{ transferencia.transferenciaXTransporte ? transferencia.transferenciaXTransporte.constanciaInscripcion : '' }}</span>
+
+        {% endif %}
+        {% if licenciaConducir_X > 0 %}
+            <span id="licenciaConducir" style="position:absolute; top: {{ licenciaConducir_X }}px; left: {{ licenciaConducir_Y }}px; width: 400px; color: black;">{{  transferencia.transferenciaXTransporte ? transferencia.transferenciaXTransporte.licenciaConducir : '' }}</span>    
+        {% endif %}
+        {% if destinatario_X > 0 %}
+            <span id="destinatario" style="position:absolute; top: {{ destinatario_X }}px; left: {{ destinatario_Y }}px; width: 400px; color: black;">{{  transferencia.transferenciaXTransporte ? transferencia.transferenciaXTransporte.destinatario : '' }}</span>    
+        {% endif %}
+        {% if rucDestinatario_X > 0 %}
+
+            <span id="rucDestinatario" style="position:absolute; top: {{ rucDestinatario_X }}px; left: {{ rucDestinatario_Y }}px; width: 400px; color: black;">{{  transferencia.transferenciaXTransporte ? transferencia.transferenciaXTransporte.rucDestinatario : '' }}</span>
+
+        {% endif %}
+
+        {% if transporte_X > 0 %}
+
+            <span id="transporte" style="position:absolute; top: {{ transporte_X }}px; left: {{ transporte_Y }}px; width: 400px; color: black;">{{  transferencia.transferenciaXTransporte.transporte ? transferencia.transferenciaXTransporte.transporte : '' }}</span>
+
+        {% endif %}
+
+        {% if rucTransporte_X > 0 %}
+
+            <span id="rucTransporte" style="position:absolute; top: {{ rucTransporte_X }}px; left: {{ rucTransporte_Y }}px; width: 400px; color: black;">{{  transferencia.transferenciaXTransporte.transporte ? transferencia.transferenciaXTransporte.transporte.ruc : '' }}</span>
+
+        {% endif %}
+
+
+
+
+{#         <span id="cliente" style="position:absolute; top: 200px; left: 200px; width: 600px; color: blue;">{{ facturaVenta.cliente }}</span>
+        <span id="ruc" style="position:absolute; top: 220px; left: 200px; width: 600px; color: blue;">{{ facturaVenta.cliente.ruc }}</span>
+        <span id="direccion" style="position:absolute; top: 240px; left: 200px; width: 600px; color: blue;">{{ facturaVenta.cliente.direccion }}</span> #}
+        
+            {% set top = inicioDetalleVenta_X %}
+            {% set item = 1 %}
+            {% set impuesto = 0 %}
+            {% set total = 0 %}
+            {% if facturaVenta %}
+                {% for detalle in facturaVenta.venta.detalleVenta %}
+                    {# <span class="item" style="position:absolute; top: {{ top ~ 'px'}}; left: 0px; width: 10px; color: black;">{{ item }}</span> #}
+                    {% if detalleCodigo_Y > 0 %}
+                        <span class="codigo" style="position:absolute; top: {{ top ~ 'px'}}; left: {{ detalleCodigo_Y }}px; width: 100px; color: black;">{{ detalle.productoXLocal.producto.codigo }}</span>                        
+                    {% endif %}
+                    {% if detalleDescripcion_Y > 0 %}
+                        <span class="descripcion" style="position:absolute; top: {{ top ~ 'px'}}; left: {{ detalleDescripcion_Y }}px; width: 700px; color: black;">{{ detalle.productoXLocal.producto.nombre | upper }}</span>                            
+                    {% endif %}
+                    {% if detalleCantidad_Y > 0 %}
+                        <span class="cantidad" style="position:absolute; top: {{ top ~ 'px'}}; left: {{ detalleCantidad_Y }}px; width: 30px; color: black;">{{ detalle.cantidad }}</span>                        
+                    {% endif %}
+                    {% if detalleUnidad_Y > 0 %}
+                        <span class="unidad" style="position:absolute; top: {{ top ~ 'px'}}; left: {{ detalleUnidad_Y }}px; width: 20px; color: black;">{{ detalle.productoXLocal.producto.unidadVenta.abreviatura | upper }}</span>                        
+                    {% endif %}
+
+                    {% if detallePeso_Y > 0 %}
+                        <span class="peso" style="position:absolute; top: {{ top ~ 'px'}}; left: {{ detallePeso_Y }}px; width: 20px; color: black;">0</span>
+                    {% endif %}
+
+
+    {#                 <span class="precioventa" style="position:absolute; top: {{ top ~ 'px'}}; left: 500px; width: 25px; color: black;">0</span>
+                    {% set valorunitario = detalle.subtotal/detalle.cantidad %}
+                    <span class="valorunitario" style="position:absolute; top: {{ top ~ 'px'}}; left: 550px; width: 25px; color: black;">{{ valorunitario | number_format(2, '.', ',') }}</span>
+                    <span class="dscto" style="position:absolute; top: {{ top ~ 'px'}}; left: 600px; width: 25px; color: black;">0</span>
+                    {% set impuesto = impuesto +  0.18*detalle.subtotal/1.18 %}
+                    <span class="igv" style="position:absolute; top: {{ top ~ 'px'}}; left: 650px; width: 25px; color: black;">{{ impuesto | number_format(2, '.', ',') }}</span>
+                    <span class="isc" style="position:absolute; top: {{ top ~ 'px'}}; left: 700px; width: 25px; color: black;">0</span>
+                    <span class="valorventa" style="position:absolute; top: {{ top ~ 'px'}}; left: 750px; width: 25px; color: black;">{{detalle.subtotal | number_format(2, '.', ',') }}</span> #}
+                    
+                    {% set top = top + 20 %}
+                    {% set item = item + 1 %}
+                    {% set total = total + detalle.subtotal %}
+
+                {% endfor %}
+            {% endif %}
+
+{#         <span id="totaligv" style="position:absolute; top: 1100px; left: 750px; width: 20px; color: red;">{{ impuesto | number_format(2, '.', ',')}}</span>
+        <span id="totalmonto" style="position:absolute; top: 1120px; left: 750px; width: 20px; color: red;">{{ total | number_format(2, '.', ',') }}</span> #}
+    
+        <span id="tipoComprobante" style="position:absolute; top: {{ tipoComprobante_X }}px; left: {{ tipoComprobante_Y }}px; width:100px; color: black;">{{ facturaVenta ? facturaVenta.documento | upper  : '' }}</span>
+        <span id="numComprobante" style="position:absolute; top: {{ numComprobante_X }}px; left: {{ numComprobante_Y }}px; width: 200px; color: black;">{{ transferencia.numeroDocumento }}</span>
+
+
+        <span id="foot" style="position:absolute; top: 1300px; left: 0px; width: 20px; color: black;">.</span>
+
+    </body>
+
+</html>

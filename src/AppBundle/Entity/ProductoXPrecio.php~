@@ -1,0 +1,134 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * ProductoXPrecio
+ *
+ * @ORM\Table(name="producto_x_precio")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\ProductoXPrecioRepository")
+ */
+class ProductoXPrecio
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="rango_inicial", type="float", nullable=true)
+     */
+    private $rangoInicial;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="rango_final", type="float", nullable=true)
+     */
+    private $rangoFinal;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="precio", type="float", nullable=true)
+     */
+    private $precio;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Producto", inversedBy="productoXPrecio", cascade={"persist"})
+     * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
+     * 
+     */
+    protected $producto;
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set rangoInicial
+     *
+     * @param float $rangoInicial
+     *
+     * @return ProductoXPrecio
+     */
+    public function setRangoInicial($rangoInicial)
+    {
+        $this->rangoInicial = $rangoInicial;
+
+        return $this;
+    }
+
+    /**
+     * Get rangoInicial
+     *
+     * @return float
+     */
+    public function getRangoInicial()
+    {
+        return $this->rangoInicial;
+    }
+
+    /**
+     * Set rangoFinal
+     *
+     * @param float $rangoFinal
+     *
+     * @return ProductoXPrecio
+     */
+    public function setRangoFinal($rangoFinal)
+    {
+        $this->rangoFinal = $rangoFinal;
+
+        return $this;
+    }
+
+    /**
+     * Get rangoFinal
+     *
+     * @return float
+     */
+    public function getRangoFinal()
+    {
+        return $this->rangoFinal;
+    }
+
+    /**
+     * Set precio
+     *
+     * @param float $precio
+     *
+     * @return ProductoXPrecio
+     */
+    public function setPrecio($precio)
+    {
+        $this->precio = $precio;
+
+        return $this;
+    }
+
+    /**
+     * Get precio
+     *
+     * @return float
+     */
+    public function getPrecio()
+    {
+        return $this->precio;
+    }
+}
+

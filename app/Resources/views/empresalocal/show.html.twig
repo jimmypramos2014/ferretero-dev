@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Empresalocal</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ empresaLocal.id }}</td>
+            </tr>
+            <tr>
+                <th>Nombre</th>
+                <td>{{ empresaLocal.nombre }}</td>
+            </tr>
+            <tr>
+                <th>Direccion</th>
+                <td>{{ empresaLocal.direccion }}</td>
+            </tr>
+            <tr>
+                <th>Codigo</th>
+                <td>{{ empresaLocal.codigo }}</td>
+            </tr>
+            <tr>
+                <th>Telefono</th>
+                <td>{{ empresaLocal.telefono }}</td>
+            </tr>
+            <tr>
+                <th>Limite_venta</th>
+                <td>{{ empresaLocal.limiteventa }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('empresalocal_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('empresalocal_edit', { 'id': empresaLocal.id }) }}">Edit</a>
+        </li>
+
+    </ul>
+{% endblock %}

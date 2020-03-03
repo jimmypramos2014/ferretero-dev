@@ -1,0 +1,438 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }} 
+
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+    <style>
+        @media (min-width: 1200px) {
+            .container{
+                max-width: 1600px;
+            }
+            th { font-size: 12px; }
+            td { font-size: 11px; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="card mt-5">
+        <div class="card-header">
+            <span class="font-weight-bold">Nota :</span><span> Para exportar todos los registros, debe primero mostrar <b>TODO</b> los registros, seleccionelo desde el filtro <b>'Mostrar'</b>. Luego proceda con la exportación a <b>EXCEL o PDF</b> </span>
+        </div>
+        <div class="card-body">
+
+            <div class="row mt-2 ">
+                <div class="col-md-12">
+                    
+                    <table id="dtTable" class="table table-striped table-bordered " role="grid" aria-describedby="dtTable_info" >
+                        <thead>
+                            <tr>
+                                <th class='notexport'>Id</th>
+                                <th>Local</th>
+                                <th>Ticket</th>
+                                <th>Cliente</th>
+                                <th>Documento</th>
+                                <th>Empleado</th>
+                                <th class="all">Fecha</th>
+                                <th class="all">Monto</th>
+                                <th>Moneda</th>
+                                <th>Forma de pago</th>
+                                <th>Estado de pago</th>
+                                <th>Estado de entrega</th>
+                                <th>¿Enviado a la SUNAT?</th>
+                                <th class='notexport'>Id1</th>
+                                <th class='notexport'>Id2</th>
+                                <th class='notexport'>Id3</th>
+                                <th class='notexport'>Id4</th>
+                                <th class='notexport'>Id5</th>
+                                <th class='notexport'>Id6</th>
+                                <th class='notexport'>Id7</th>
+                                <th class='notexport'>Id8</th>
+                                <th class='notexport'>Id9</th>
+                                <th>¿Anulado?</th>
+                                <th class='notexport'>Id11</th>
+                                <th class='notexport'>Id12</th>
+                                <th class='notexport'>Acciones</th>
+
+                            </tr>
+                        </thead>
+
+
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <div class="modal detalleventa" id="detalleventa" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Detalle</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade pagoACuenta" id="pagoACuenta" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pagar</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="form" action="{{ path('detalleventa_procesarpagoacuenta') }}" class="form-horizontal " role="form" method="post"  enctype="multipart/form-data" novalidate>
+                    <div class="modal-body">
+
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-success" id="btn_pagar">Terminar pago</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade text-center" id="documentoAnulacion" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Documento de anulación</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% if enlacePdf != '' %}
+                        <object width="650" height="650" data="{{ enlacePdf }}"></object>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        function anular(id) {
+
+
+            bootbox.prompt({
+                title: "<p>Seleccione una opción.</p>",
+                inputType: 'checkbox',
+                closeButton: false,
+                inputOptions: [
+                    {
+                        text: 'Anular',
+                        value: '1',
+                    },
+                    // {
+                    //     text: 'Anular y generar nota de crédito',
+                    //     value: '2',
+                    // },
+
+                ],
+                callback: function (result) {
+                    
+
+                    if (result != null) {
+
+                        if (result.length > 1) {
+
+                            bootbox.alert("Debe seleccionar solo una opción");
+                            return false;
+
+                        } else {
+
+                            bootbox.prompt({
+                                title: "Ingrese el motivo de anulación.",
+                                inputType: 'textarea',
+                                closeButton: false,
+                                buttons: {
+                                    confirm: {
+                                        label: 'Anular',
+                                    },
+                                    cancel: {
+                                        label: 'Cancelar',
+                                    }
+                                },                
+                                callback: function (res) {
+                                    if(res){
+
+                                        //window.open(id+'/'+res+'/anular/'+result, '_blank');
+
+                                        location = id+'/'+res+'/anular/'+result;
+
+                                        // setTimeout(function(){                            
+                                        //     location.reload();
+                                        // }, 1000);
+                                    }                    
+                                }
+
+                            });
+                        }
+
+                    }
+
+                }
+
+            });
+
+        } 
+
+
+        function enviarFactura(id,correo) {
+
+            bootbox.prompt({
+                title: "¿Está seguro de enviar la factura por correo electrónico al cliente?",
+                size: "large",
+                value: correo,
+                closeButton: false,
+                buttons: {
+                    confirm: {
+                        label: 'Enviar',
+                    },
+                    cancel: {
+                        label: 'Cancelar',
+                    }
+                },                
+                callback: function (res) {
+                    if(res){
+                        location = id+'/'+res+'/enviar/factura';
+                    }                  
+                }
+
+            });
+
+        } 
+
+
+        $(document).ready(function() {
+
+            //Valores anulación venta
+            var txtticket               = $('#appbundle_detalleventa_cliente_ticket');
+            var txtmotivo               = $('#appbundle_detalleventa_cliente_motivo_anulacion');
+            var btnanular               = $('#anular');
+            var btnpagar                = $('#btn_pagar');
+            
+
+            $('#dtTable').DataTable( {
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },
+                "scrollX": true,
+                //"responsive": true,              
+                "dom": 'Blfrtip',
+                "lengthMenu": [[25, 100, -1],[25, 100, "Todo"]],
+                "processing": true,
+                "serverSide": true,
+                "ajax":{
+                    url: "{{ path('listaventa_datatable')}}",
+                    type:"GET",
+                    data:function(dtp){
+                        var searchValue = dtp.search.value;
+                        return dtp;
+                    }
+                },                                
+                "columns": [
+                    { "visible": false },
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    { "visible": false },
+                    { "visible": false },
+                    { "visible": false },
+                    { "visible": false },
+                    { "visible": false },
+                    { "visible": false },
+                    { "visible": false },
+                    { "visible": false },
+                    { "visible": false },
+                    { "visible": true },
+                    { "visible": false },
+                    { "visible": false },
+                    { "visible": true },
+                ],
+                "deferRender": true,             
+                // "aoColumnDefs": [
+                //   {
+                //     "mData": null,
+                //     "sClass":  "text-center",
+                //     "sDefaultContent": elim +'   <a href="#" data-toggle="tooltip" data-target="" title="Editar" class="editar ml-2"><i class="fa fa-edit fa-lg"></i></a>',
+                //     "aTargets": [ -1 ]
+                //   }
+                // ],
+                "pageLength": '{{ empresaObj.paginado ? empresaObj.paginado : 25 }}',
+                "order": [[ 0, "desc" ],[ 6, "desc" ]],
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        exportOptions: {
+                            columns: ':not(.notexport)'
+                        },                        
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        exportOptions: {
+                            columns: ':not(.notexport)'
+                        },
+                        orientation: 'landscape',
+                        pageSize: 'LEGAL',                       
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'print',
+                        exportOptions: {
+                            columns: ':not(.notexport)'
+                        },
+                        orientation: 'landscape',
+                        pageSize: 'LEGAL',                        
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    }
+                ]  
+            });
+
+            $('#detalleventa').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget) // Button that triggered the modal
+                var recipient = button.data('factura') // Extract info from data-* attributes
+                // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+                // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+                var modal = $(this);
+
+                var cargandoTexto = '<div class="text-center"><i class="fa fa-circle-o-notch fa-spin"></i>Cargando.....</div>';
+            
+                modal.find('.modal-body').html(cargandoTexto);
+
+                var data = {
+                    factura     : recipient,
+                    autorizado  : 'si',
+                }
+
+
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('obtener_detalle_venta')}}",
+                    data: data,
+                    success: function(data){
+                        modal.find('.modal-body').html(data)
+                    }
+
+                });
+
+
+            });
+
+            $('#pagoACuenta').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var recipient = button.data('factura');
+
+                var modal = $(this);
+
+                var cargandoTexto = '<div class="text-center"><i class="fa fa-circle-o-notch fa-spin"></i>Cargando.....</div>';
+            
+                modal.find('.modal-body').html(cargandoTexto);
+
+                var data = {
+                    factura     : recipient,
+                    autorizado  : 'si',
+                }
+
+
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('procesar_pago_acuenta')}}",
+                    data: data,
+                    success: function(data){
+                        modal.find('.modal-body').html(data);
+                        //location.reload();
+
+                    }
+
+                });
+
+            });
+
+            $('body').on('click','.confirmation',function (event) {
+                return confirm('¿Está seguro de confirmar el pago?');
+            })
+
+            var enlacePdf = '{{ enlacePdf }}';
+
+            if(enlacePdf != '')
+            {
+                $('#documentoAnulacion').modal('show');
+            }
+
+        });
+
+    </script>
+          
+{% endblock %}

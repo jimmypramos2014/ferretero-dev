@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FACTURA</title>
+    <style type="text/css">
+
+        @font-face {
+            font-family: 'Open Sans';
+            src: url({{ 'http://' ~ host ~ '/fonts/OpenSans-Regular.ttf' }} ) format('truetype');
+        }
+
+        body { 
+            font-family: 'Open Sans', sans-serif;
+            font-size:9pt;
+            background-size: 100%;
+        }
+
+
+    </style>    
+</head>
+<body>
+
+    <section class="" style="">
+
+        <table border="0">
+            <tr>
+                <td align="center" style="">
+                    
+                    {% if facturaVenta.local.razonComercial %}          
+                        <span style="font-size: 12pt;"><b>{{ facturaVenta.local.razonComercial ?  facturaVenta.local.razonComercial : facturaVenta.local.empresa.nombre }}</b></span></br>
+                    {% endif %}
+
+                    <span style="font-size: 11pt;"><b>{{ facturaVenta.local.empresa.nombre }}</b></span></br>
+
+                    {% if facturaVenta.local.direccion %}
+                        {{ facturaVenta.local.direccion }}</br>
+                    {% endif %}
+                    
+                    <b>RUC: {{ facturaVenta.local.rucComercial ? facturaVenta.local.rucComercial : facturaVenta.local.empresa.ruc }}</b></br>
+
+                    {% if facturaVenta.local.telefono %}
+                        {{ facturaVenta.local.telefono ?  'Teléfono:' ~ facturaVenta.local.telefono : '' }}</br>
+                    {% endif %}
+
+                    <b>FACTURA ELECTRÓNICA</b></br>
+                    <b>{{facturaVenta.ticket }}</b>
+
+                </td>
+            </tr>
+
+            <tr>
+                <td align="left" style="">
+                    
+                    <b>CLIENTE</b></br>
+                    {{ 'RUC: '~ facturaVenta.cliente.ruc  }}</br>
+                    {{ facturaVenta.cliente.razonSocial  }}</br>
+                    {{ facturaVenta.cliente.direccion }}<br>                    
+                    <b>CAJA:</b> {{ facturaVenta.caja.nombre | upper }}</br>
+
+                    <b>FECHA EMISIÓN:</b> {{ facturaVenta.fecha | date('d/m/Y  H:i') }}</br>
+                    <b>MONEDA:</b> {{ facturaVenta.venta.ventaFormaPago[0].moneda ? facturaVenta.venta.ventaFormaPago[0].moneda.nombre | upper : 'SOLES' }} </br>
+                    <b>IGV:</b> 18%
+
+                </td>
+            </tr>
+
+        </table>
+
+        <hr style="border:1px dotted #b8b3b3;" />
+
+
+        <table cellspacing="3" cellpadding="1">
+            <tr>
+                <th style="text-align:left;font-size: 9pt;">[CANT]</th>
+                <th style="text-align:left;font-size: 9pt;">DESCRIPCIÓN</th>
+                <th style="text-align:left;font-size: 9pt;">P/U</th>
+                <th style="text-align:right;font-size: 9pt;">TOTAL</th>
+            </tr>
+
+            {% set total = 0 %}
+            {% set impuesto = 0 %}
+            {% for detalle in facturaVenta.venta.detalleVenta %}
+
+                <tr>
+                    {% set descripcion = '' %}
+                    {% if detalle.descripcion  %}
+                        {% set descripcion = detalle.descripcion  %}
+                    {% endif %}
+
+                    <td style="text-align:left;font-size: 9pt;">{{ '[' ~ detalle.cantidad ~ '] ' }}</td>
+                    <td style="text-align:left;font-size: 9pt;">{{ detalle.productoXLocal.producto.nombre | slice(0,25) | upper  ~ ' ' ~ descripcion }}</td>
+
+                    {% set precioUnitario = detalle.subtotal/detalle.cantidad %}
+                    <td style="text-align:right;font-size: 9pt;">{{ precioUnitario | number_format(2, '.', ',') }}</td>
+                    <td style="text-align:right;font-size: 9pt;">{{ detalle.subtotal | number_format(2, '.', ',') }}</td>
+                </tr>   
+                {% set total = total + detalle.subtotal %}
+                {% set impuesto = impuesto +  0.18 * detalle.subtotal/1.18 %}
+            {% endfor  %}
+
+            {% set total_gravada = total / 1.18 %}
+            {% set igvtotal = total_gravada * 0.18 %}
+
+            <tr class="total">
+              <td colspan="3" style="text-align:left;font-size: 9pt;border-top:1px dotted #b8b3b3;"><b>GRAVADA {{ ' ' ~ facturaVenta.venta.ventaFormaPago[0].moneda.simbolo | upper }}</b></td>
+              <td style="text-align:right;font-size: 9pt;border-top:1px dotted #b8b3b3;">{{ total_gravada | number_format(2, '.', ',') }}</td>
+            </tr>
+            <tr class="total">
+              <td colspan="3" style="text-align:left;font-size: 9pt;"><b>IGV 18.00% {{ ' ' ~ facturaVenta.venta.ventaFormaPago[0].moneda.simbolo | upper }} </b></td>
+              <td style="text-align:right;font-size: 9pt;">{{ igvtotal | number_format(2, '.', ',') }}</td>
+            </tr>            
+
+            <tr class="total">
+              <td colspan="3" style="text-align:left;font-size: 9pt;"><b>TOTAL {{ ' ' ~ facturaVenta.venta.ventaFormaPago[0].moneda.simbolo | upper }} </b></td>
+              <td style="text-align:right;font-size: 9pt;">{{ total | number_format(2, '.', ',') }}</td>
+            </tr>
+
+            {% if facturaVenta.venta.ventaFormaPago[0].montoEntregado and facturaVenta.local.ventanaVuelto %}                    
+
+                <tr class="total">
+                  <td colspan="4" style="text-align:left;font-size: 9pt;"><b>FORMA DE PAGO</b></td>
+                </tr>  
+
+                <tr class="total">
+                  <td colspan="3" style="text-align:left;font-size: 9pt;"><b>EFECTIVO : </b></td>
+                  {% set monto_entregado = facturaVenta.venta.ventaFormaPago[0].montoEntregado ? facturaVenta.venta.ventaFormaPago[0].montoEntregado : 0 %}
+                  {% set monto_a_pagar = total %}
+                  {% set vuelto = monto_entregado - monto_a_pagar  %}  
+                  <td style="text-align:right;font-size: 9pt;">{{ monto_entregado | number_format(2, '.', ',') }}</td>
+                </tr>  
+
+                <tr class="total">
+                  <td colspan="3" style="text-align:left;font-size: 9pt;"><b>VUELTO : </b></td>
+                  <td style="text-align:right;font-size: 9pt;">{{ vuelto | number_format(2, '.', ',') }}</td>
+                </tr>  
+
+            {% endif %}
+
+
+
+        </table>
+
+        <hr style="border:1px dotted #b8b3b3;" />
+
+
+        {% set totalEntero = total|parteEntera  %}
+        {% set totalDecimal = total|parteDecimal %}
+
+
+        <table border="0">
+            <tr>
+                <td align="left" style="font-size:9pt;">
+                    
+                    <b>IMPORTE EN LETRAS:</b><br>{{ numeroALetras(totalEntero) ~ ' con ' ~ totalDecimal ~ '/100 ' }} {{ facturaVenta.venta.ventaFormaPago[0].moneda ? facturaVenta.venta.ventaFormaPago[0].moneda.nombre | upper : 'SOLES' }}
+
+                </td>
+            </tr>
+
+            <tr>
+                <td align="left" style="">
+                    
+                    <span style="font-weight:bold;font-size:9pt;">CONDICIONES DE PAGO : </span>{{ facturaVenta.venta.ventaFormaPago[0].formaPago  | upper }} {{ facturaVenta.venta.ventaFormaPago[0].numeroDias != 0 and facturaVenta.venta.ventaFormaPago[0].numeroDias != null ? ' a ' ~ facturaVenta.venta.ventaFormaPago[0].numeroDias ~ ' dias' : '' }}
+
+                </td>
+            </tr>
+
+            {% if facturaVenta.numeroGuiaremision %}
+
+                <tr>
+                    <td style=""><span style="font-weight:bold;font-size:9pt;">GUIA DE REMISIÓN: </span>{{ facturaVenta.numeroGuiaremision ? facturaVenta.numeroGuiaremision : '' }}</td>
+                </tr>
+
+            {% endif %}
+
+            {% if facturaVenta.detraccion != 0 %}
+
+                <tr>
+                    <td style=""><span style="font-weight:bold;font-size:9pt;">Número CTA.: </span></td>
+                </tr>
+
+            {% endif %}
+
+            
+
+        </table>     
+        
+        <hr style="border:1px dotted #b8b3b3;" />       
+
+        <table width="100%" border="0">
+
+            <tr>
+                <td align="center" style="font-size:9pt;">
+                    
+                    GRACIAS POR SU PREFERENCIA
+
+                </td>
+            </tr>
+
+        </table>
+
+
+        <table  width="" border="0" style="">
+            <tr>
+                <td width="" align="center" style="">
+
+                    <span style="font-size:8pt;">
+                            Representación impresa de la FACTURA ELECTRÓNICA <br>
+                            Emitido mediante un PROVEEDOR Autorizado por la SUNAT mediante Resolución de Intendencia No.034-005-0005315   
+                    </span>
+                    <br>
+
+                    {% set cadena_para_codigo_qr = facturaVenta.local.empresa.ruc ~ '|' ~ '01' ~ '|' ~ facturaVenta.ticket|slice(0, 4)  ~ '|' ~ facturaVenta.ticket[5:] ~ '|' ~ igvtotal | number_format(2, '.', ',') ~ '|' ~ total | number_format(2, '.', ',') ~ '|' ~ facturaVenta.fecha|date('d/m/Y') ~ '|' ~ '6' ~ '|' ~ facturaVenta.cliente.ruc ~ '|' ~ facturaVenta.ticket|obtenerHash ~ '|' %}
+
+                    {{ generarCodigoQR(cadena_para_codigo_qr) | raw }}
+
+                </td>
+
+            </tr>
+
+        </table>
+
+    </section>
+   
+
+
+
+</body>
+</html>

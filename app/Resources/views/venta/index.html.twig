@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Ventas list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for ventum in ventas %}
+            <tr>
+                <td><a href="{{ path('venta_show', { 'id': ventum.id }) }}">{{ ventum.id }}</a></td>
+                <td>{% if ventum.fecha %}{{ ventum.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{{ ventum.total }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('venta_show', { 'id': ventum.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('venta_edit', { 'id': ventum.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('venta_new') }}">Create a new ventum</a>
+        </li>
+    </ul>
+{% endblock %}

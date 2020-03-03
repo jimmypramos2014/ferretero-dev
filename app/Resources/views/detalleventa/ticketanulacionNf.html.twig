@@ -1,0 +1,37 @@
+{% extends 'basePv.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="https://printjs-4de6.kxcdn.com/print.min.css">
+{% endblock %}
+
+{% block body %}
+
+
+    <object width="400" height="400" data="{{ facturaVenta.enlacePdf }}"></object>
+
+{#     <button type="button" onclick="printJS('{{ rutaPdf }}')"  id="imprimir" class="d-none">
+        PDF
+    </button> #}
+        
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }} 
+    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function(){
+
+            // var pdfImprimir = '{{ rutaPdf }}';
+
+            // if(pdfImprimir){
+            //     $('#imprimir').trigger('click'); 
+            // }
+
+        });
+
+    </script>
+{% endblock %}    

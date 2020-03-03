@@ -1,0 +1,172 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+{% endblock %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="container">
+
+
+
+        <div class="card mx-auto mt-5">
+            <div class="card-body">
+
+                <div class="row mt-2 mb-4 pr-3">
+                    <div class="col-lg-12 ">
+                        <a href="{{ path('gasto_new') }}" class="btn btn-primary pull-right ml-2">Registrar gasto</a>
+                        <a href="{{ path('gasto_egreso_new') }}" class="btn btn-primary pull-right ">Registrar egreso</a>
+                    </div>                    
+                </div>
+
+
+                <div class="row mt-2 ">
+                    <div class="col-lg-12">
+                        <table id="dtProducto" class="table table-striped table-bordered" style="width: 100%;">                            
+                            <thead>
+                                <tr>
+                                    <th>Proveedor o beneficiario</th>
+                                    <th>Servicio o Concepto</th>
+                                    <th>Monto</th>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th class="no-sort">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% set item = 1 %}
+                            {% for gasto in gastos %}
+                                <tr>
+                                    <td>{{ gasto.proveedor ? gasto.proveedor | upper : gasto.beneficiario | upper  }}</td>
+                                    <td>{{ gasto.servicio ? gasto.servicio | upper  : gasto.concepto | upper  }}</td>
+                                    <td>{{ gasto.monto | number_format(2, '.', ',') }}</td>
+                                    <td data-sort="<%= {{ gasto.fecha | date('Y-m-d H:i') }} %>" >{{ gasto.fecha | date('d/m/Y') }}</td>
+                                    <td>{{ gasto.tipo | upper  }}</td>
+
+                                    <td class="text-center">
+
+                                        <a href="javascript:eliminar({{gasto.id}})" class="mr-2" data-toggle="tooltip"  title="Eliminar">
+                                            <i class="fa fa-remove fa-lg"></i>
+                                        </a>
+
+                                        {% if gasto.tipo == 'egreso' %}
+
+                                            <a href="{{ path('gasto_egreso_edit', { 'id': gasto.id }) }}">
+                                                <i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar"></i>                                                
+                                            </a>
+
+                                            <a href="javascript:window.open('{{ path('gasto_show_reciboegreso', { 'id': gasto.id }) }}','blank','width=595, height=842')" >
+                                                <i class="fa fa-print fa-lg" data-toggle="tooltip" title="Recibo de egreso"></i>                                                
+                                            </a>
+
+                                        {% endif %}
+
+                                        {% if gasto.tipo == 'gasto' %}
+
+                                            <a href="{{ path('gasto_edit', { 'id': gasto.id }) }}">
+                                                <i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar"></i>                                                
+                                            </a>
+
+
+                                        {% endif %}
+
+
+
+                                    </td>
+
+                                </tr>
+                                {% set item = item + 1 %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+    <script type="text/javascript">
+
+        function eliminar(id) {
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                    },
+                    cancel: {
+                        label: 'Cancelar',
+                    }
+                },                
+                size: 'small',
+                message: "¿Está seguro de eliminar el registro?", 
+                callback: function(res){ 
+                    if(res){
+                        location = id+'/delete';
+                    }
+                }
+            });
+        } 
+
+        $(document).ready(function() {
+            $('#dtProducto').DataTable( {
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },                
+                dom: 'Bfrtip',
+                order: [[ 3, "desc" ]],
+                responsive: true,
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'print',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    }
+                ]  
+            });
+        });
+        
+    </script>
+          
+{% endblock %}

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <meta charset="utf-8">
+    <head>
+        <title>BOLETA</title>
+        <style type="text/css">
+
+
+            @font-face {
+                font-family: 'Open Sans';
+                src: url({{ 'http://' ~ host ~ '/fonts/OpenSans-Regular.ttf' }} ) format('truetype');
+            }
+
+            body { 
+                font-family: 'Open Sans', sans-serif;
+                background-size: 100%;
+            }
+        
+            tr.item:nth-child(odd) {
+                background-color:#FFFFFF;
+            }
+            tr.item:nth-child(even) {
+                background-color:#EEEDEB;
+            }
+ 
+
+            span.cls_004{font-size:23.1px;color:rgb(0,0,0);font-weight:bolder;font-style:normal;text-decoration: none}
+            span.cls_005{font-size:23.1px;color:rgb(0,0,0);font-weight:bolder;font-style:normal;text-decoration: none}
+            span.cls_002{font-size:11.5px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            span.cls_003{font-size:11.5px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            span.cls_006{font-size:23.1px;color:rgb(0,0,0);font-weight:bolder;font-style:normal;text-decoration: none}
+            td.cls_007{font-size:12.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            th.cls_007{font-size:12.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}            
+            td.cls_008{font-size:12.1px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            th.cls_008{font-size:12.1px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            span.cls_008{font-size:12.1px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}                           
+            span.cls_009{font-size:11.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+
+
+            td.cls_004{font-size:19.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            td.cls_005{font-size:20.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            td.cls_002{font-size:12.5px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            td.cls_003{font-size:11.5px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            td.cls_006{font-size:18.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+
+            th.cls_004{font-size:19.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            th.cls_005{font-size:20.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            th.cls_002{font-size:11.5px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            th.cls_003{font-size:11.5px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            th.cls_006{font-size:18.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+
+        </style>
+    </head>
+
+    <body>
+
+
+        <div style="">
+
+            <table  width="880" border="0" style="border-spacing: .5em;">
+                <tr>
+                    <td width="70%" style="">
+
+                        {% if localObj.empresa.logo %}
+                            <img src="{{ app.request.getSchemeAndHttpHost() ~ '/uploads/imagenes/' ~ localObj.empresa.logo }}" alt="" width="320px" height="80px">
+                            <br>
+                        {% endif %}
+                        <table  width="100%" border="0" style="border-spacing: 0em;">
+                            <tr>
+                                <td class="cls_002">
+                                    {{ localObj.empresa.nombreCorto ? localObj.empresa.nombreCorto | upper : localObj.empresa.nombre | upper }} 
+                                    
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cls_003">
+                                    {{ localObj.empresa.direccion ? localObj.empresa.direccion : '' }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cls_003">                        
+                                    
+                                    {{ localObj.telefono ? 'Tlf.: ' ~ localObj.telefono ~ ' | ' : '' }}
+                                    {{ localObj.email ? 'Email: ' ~ localObj.email ~ ' | ' : '' }} 
+                                    {{ localObj.empresa.direccionWeb ? 'Web: ' ~ localObj.empresa.direccionWeb : '' }}
+                                    
+                                </td>
+                            </tr>                                                           
+                        </table>
+                                                
+
+                    </td>
+
+                    <td width="30%" align="center" style="background-color:{{ localObj.boletaColor ? localObj.boletaColor : 'white' }};border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;">
+                        <span class="cls_004" style="">{{ localObj.empresa.ruc ? 'RUC: ' ~ localObj.empresa.ruc : '' }}</span><br>
+                        <span style="height:100px;"></span>
+                        <span class="cls_005" style="">BOLETA DE VENTA <br>ELECTRÓNICA</span> <br>
+                        <span style="height:100px;"></span>
+                        <span class="cls_006" style="">{{ facturaVenta.ticket }}</span>
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+            <table  width="880" border="0" style="border-spacing: .5em;">
+                <tr>
+                    <td width="70%" style="border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;">
+
+                        <table  width="100%" border="0" style="border-spacing: 0em;">
+                            <tr>
+                                <th align="left" width="10%" class="cls_002">CLIENTE</th>
+                                <th width="1%" class="cls_003">:</th>
+                                <td class="cls_003">{{ facturaVenta.cliente.razonSocial }}</td>                 
+                            </tr>
+                            <tr>
+                                <th align="left" width="10%" class="cls_002">DNI</th>
+                                <th width="1%" class="cls_003">:</th>
+                                <td class="cls_003">{{ facturaVenta.cliente.ruc }}</td>
+                   
+                            </tr>
+                            <tr>
+                                <th align="left" width="10%" class="cls_002">DIRECCIÓN</th>
+                                <th width="1%" class="cls_003">:</th>
+                                <td align="left" class="cls_003">{{ facturaVenta.cliente.direccion }}</td>
+                            </tr>                                
+                        </table>
+
+                    </td>
+
+                    <td width="30%" align="" style="border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;">
+
+                        <table  width="100%" border="0" style="border-spacing: 0em;">
+                            <tr>
+                                <th width="60%" align="left" class="cls_002">FECHA EMISIÓN</th>
+                                <th width="1%" class="cls_003">:</th>
+                                <td class="cls_003">{{ facturaVenta.fecha | date('d/m/Y') }}</td>                    
+                            </tr>
+                            <tr>
+                                <th width="60%" align="left" class="cls_002">FECHA DE VENC.</th>
+                                <th width="1%" class="cls_003">:</th>
+                                <td class="cls_003">{{ facturaVenta.fecha | date('d/m/Y') }}</td>                    
+                            </tr>                            
+                            <tr>
+                                <th width="60%" align="left" class="cls_002">MONEDA</th>
+                                <th width="1%" class="cls_003">:</th>
+                                <td class="cls_003">{{ facturaVenta.venta.ventaFormaPago[0].moneda | upper }}</td>                      
+                            </tr>
+                              
+                        </table>
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+            <table  width="880" border="0" style="border-spacing: .5em;">
+                <tr>
+                    <td width="100%" style="border-spacing: 0em;border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;">
+
+                        <table width="100%" border="0" style="background-color:{{ localObj.facturaColor ? localObj.boletaColor : 'white' }};">
+                            <tr style="height:25px;">
+                                <th width="5%" class="cls_007">CANT.</th>
+                                <th width="2%" class="cls_007">UM</th>                    
+                                <th width="8%" class="cls_007">CÓD.</th>
+                                <th width="61%" class="cls_007" align="left">DESCRIPCIÓN</th>
+                                <th width="8%" class="cls_007" align="right">V/U</th>
+                                <th width="8%" class="cls_007" align="right">P/U</th>
+                                <th width="8%" class="cls_007" align="right">IMPORTE</th>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+
+                        <table width="100%" border="0" style="border-spacing: 0em;">
+                            {% set item = 1 %}
+                            {% set impuesto = 0 %}
+                            {% set total = 0 %}    
+    
+                            {% for detalle in facturaVenta.venta.detalleVenta %}
+                                <tr class="item" style="">
+                                    <td width="5%" align="center" class="cls_008">{{ detalle.cantidad }}</td>
+                                    <td width="2%" align="center" class="cls_008">NIU</td>                        
+                                    <td width="8%" align="center" class="cls_008">{{ detalle.productoXLocal.producto.codigo }}</td>
+                                    <td width="61%" align="left" class="cls_008">{{ detalle.productoXLocal.producto.nombre | upper  }} {{ detalle.descripcion ? ' - ' ~  detalle.descripcion | upper  : ''  }}</td>
+                                    
+                                    {% set precio = detalle.subtotal / detalle.cantidad %}
+                                    {% set precio_vu = precio / 1.18 %}
+                                    <td width="8%" align="right" class="cls_008">{{ precio_vu | number_format(3, '.', ',') }}</td>                       
+                                    <td width="8%" align="right" class="cls_008">{{ precio | number_format(3, '.', ',') }}</td>
+                                    <td width="8%" align="right" class="cls_008">{{ detalle.subtotal | number_format(2, '.', ',') }}</td>                    
+                                </tr>
+                                {% set item = item + 1 %}
+                                {% set total = total + detalle.subtotal %}
+                                {% set impuesto = impuesto +  0.18 * detalle.subtotal/1.18 %}
+
+                            {% endfor %}                            
+
+                            {% if facturaVenta.incluirIgv %}
+                    
+                                {% set subtotal = total/1.18 %}
+                                {% set igvtotal = subtotal * 0.18 %}
+
+                            {% else %}
+
+                                {% set subtotal = total %}
+                                {% set igvtotal = 0.18 * subtotal %}
+                                {% set total = igvtotal +  subtotal %}
+
+                            {% endif %}
+
+                            <tr style="height:5px;">
+                                <td colspan="7"></td>             
+                            </tr>
+
+                            <tr>
+                                <td colspan="4"></td>
+                                <th colspan="2" align="right" class="cls_007">GRAVADA {{ ' ' ~ facturaVenta.venta.ventaFormaPago[0].moneda.simbolo | upper }}</th>
+                                <th align="right" class="cls_007">{{ subtotal | number_format(2, '.', ',')  }}</th>                    
+                            </tr>
+
+                            <tr>
+                                <td colspan="4"></td>
+                                <th colspan="2" align="right" class="cls_007">IGV 18.00% {{ ' ' ~ facturaVenta.venta.ventaFormaPago[0].moneda.simbolo | upper }}</th>
+                                <th align="right" class="cls_007">{{ igvtotal | number_format(2, '.', ',')  }}</th>                    
+                            </tr>
+
+                            <tr>
+                                <td colspan="4"></td>
+                                <th colspan="2" align="right" class="cls_007">TOTAL {{ ' ' ~ facturaVenta.venta.ventaFormaPago[0].moneda.simbolo | upper }}</th>
+                                <th align="right" class="cls_007">{{ total | number_format(2, '.', ',')  }}</th>                    
+                            </tr>
+
+                        </table>
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+
+
+
+            {% set totalEntero = total|parteEntera  %}
+            {% set totalDecimal = total|parteDecimal %}
+
+            <table  width="880" border="0" style="border-spacing: .5em;">
+
+                <tr style="height:20px;">
+                    <th valign="center" align="left" class="cls_002" style="border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;padding-left:2px;">
+                        IMPORTE EN LETRAS :
+                        <em style="font-size:11.5px;color:rgb(0,0,0);font-weight:normal;font-style:normal;">{{ numeroALetras(totalEntero) ~ ' con ' ~ totalDecimal ~ '/100 ' ~ facturaVenta.venta.ventaFormaPago[0].moneda | upper }}</em>
+                    </th>
+
+                </tr>
+
+                <tr style="height:20px;">
+                    <th valign="center" align="left" class="cls_002" style="border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;padding-left:2px;">
+                        CONDICIONES DE PAGO :
+                        <em style="font-size:11.5px;color:rgb(0,0,0);font-weight:normal;font-style:normal;">{{ facturaVenta.venta.ventaFormaPago[0].formaPago  | upper }} {{ facturaVenta.venta.ventaFormaPago[0].numeroDias != 0 and facturaVenta.venta.ventaFormaPago[0].numeroDias != null ? ' a ' ~ facturaVenta.venta.ventaFormaPago[0].numeroDias ~ ' dias' : '' }}</em>
+                    </th>
+                </tr>
+
+                {% if facturaVenta.numeroGuiaremision %}
+
+                    <tr style="height:20px;">
+                        <th valign="center" align="left" class="cls_002" style="border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;padding-left:2px;">
+                            GUIA DE REMISIÓN:
+                            <em style="font-size:11.5px;color:rgb(0,0,0);font-weight:normal;font-style:normal;">{{ facturaVenta.numeroGuiaremision ? facturaVenta.numeroGuiaremision : '' }}</em>
+                        </th>
+                    </tr>
+
+                {% endif %}
+
+                {% if facturaVenta.detraccion != 0 %}
+
+                    <tr style="height:20px;">
+                        <th valign="center" align="left" class="cls_002" style="border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;padding-left:2px;">
+                            Número CTA.:
+                        </th>
+                    </tr>
+
+                {% endif %}
+
+            </table>
+
+            <table  width="880" border="0" style="border-spacing: .5em;">
+                <tr>
+                    <td width="96%" valign="top" style="border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;padding: 5px;">
+
+                        <span class="cls_008">
+                            Representación impresa de la BOLETA DE VENTA ELECTRÓNICA <br>
+                            Emitido mediante un PROVEEDOR Autorizado por la SUNAT mediante Resolución de Intendencia No.034-005-0005315
+
+                        </span>
+
+
+                    </td>
+
+                    <td width="4%" valign="top" align="center" style="border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;padding: 0px;">
+
+                        {% set cadena_para_codigo_qr = facturaVenta.local.empresa.ruc ~ '|' ~ '03' ~ '|' ~ facturaVenta.ticket|slice(0, 4)  ~ '|' ~ facturaVenta.ticket[5:] ~ '|' ~ igvtotal | number_format(2, '.', ',') ~ '|' ~ total | number_format(2, '.', ',') ~ '|' ~ facturaVenta.fecha|date('d/m/Y') ~ '|' ~ '1' ~ '|' ~ facturaVenta.cliente.ruc ~ '|' ~ facturaVenta.ticket|obtenerHash ~ '|' %}
+
+                        {{ generarCodigoQR(cadena_para_codigo_qr) | raw }}
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+        </div>
+
+
+
+    </body>
+</html>

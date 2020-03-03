@@ -1,0 +1,259 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+    <style>
+        .datepicker{
+            z-index:100000 !important;
+        }
+        th { font-size: 12px; }
+        td { font-size: 11px; }
+    </style>
+{% endblock %}
+
+
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+
+    <div class="row mb-2 ml-1">
+        <div class="col-lg-12">
+        
+        <form id="form" action="{{ path('reporte_ganancias') }}" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+            <div class="form-row">
+                <div class="form-group  col-md-2">
+                    {{ form_row(form.fecha_inicio,{'attr':{'value':fecha_inicio}}) }}
+
+                </div>
+                <div class="form-group  col-md-2">
+                    {{ form_row(form.fecha_fin,{'attr':{'value':fecha_fin}}) }}
+
+                </div>
+                <p class="pull-right mt-4" style="padding-top:5px;"> 
+                    <input type="submit" class="btn btn-small btn-primary" value="Buscar" />           
+                </p>
+            </div>
+
+        </form>
+
+        </div>
+
+    </div>
+
+
+    <div class="row mt-2 ">
+        <div class="col-lg-12">
+            <table id="dtProducto" class="table table-striped table-bordered "  style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Código</th>
+                        <th>Documento</th>
+                        <th>Fecha</th>
+                        <th>Precio Unitario</th>
+                        <th>Precio Costo</th>
+                        <th>Ganancia/Unidad</th>
+                        <th>Cantidad</th>
+                        <th>Venta Total</th>
+                        <th>Compra Total</th>
+                        <th>Ganancia Total</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                {% set item = 1 %}
+                {% for venta in ventas %}
+                    <tr>
+                        <td>{{ venta.producto }}</td>
+                        <td>{{ venta.codigo }}</td>
+                        <td>{{ venta.documento }}</td>                        
+                        <td data-sort="<%= {{ venta.fecha | date('Y-m-d H:i') }} %>">{{ venta.fecha | date('d/m/Y H:i') }} </td>
+                        <td>{{ venta.precio_venta | number_format(5,'.',',') }}</td>
+                        <td>{{ venta.precio_costo | number_format(5,'.',',') }}</td>
+                        <td>{{ venta.ganancia_x_unidad | number_format(5,'.',',') }}</td>
+                        <td>{{ venta.cantidad | number_format(5,'.',',') }}</td>
+                        <td>{{ venta.venta_total | number_format(5,'.',',') }}</td>
+                        <td>{{ venta.compra_total | number_format(5,'.',',') }}</td>
+                        <td>{{ venta.ganancia_total | number_format(5,'.',',') }}</td>
+
+                    </tr>
+                    {% set item = item + 1 %}
+                {% endfor %}
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <th colspan="8" style="text-align:right">Total (S./):</th>
+                        <th style="vertical-align: middle;text-align:right;"></th>
+                        <th></th>
+                        <th></th>
+
+                    </tr>
+                </tfoot>    
+
+            </table>
+
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            var table = $('#dtProducto').DataTable( {
+
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
+         
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+         
+                    // Total over all pages
+                    total = api
+                        .column(8 )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+         
+                    // Total over this page
+                    pageTotal = api
+                        .column( 8, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+         
+                    // Update footer
+                    $( api.column( 8 ).footer() ).html(
+                        '<span style="font-size:0.80rem;">'+pageTotal.toFixed(5) +' ( '+ total.toFixed(5) +' total)</span>'
+                    );
+
+
+                    // Total over all pages
+                    total = api
+                        .column( 9 )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+         
+                    // Total over this page
+                    pageTotal = api
+                        .column( 9, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+         
+                    // Update footer //' ( '+ total.toFixed(2) +
+                    $( api.column( 9 ).footer() ).html(
+                        '<span style="font-size:0.80rem;">'+pageTotal.toFixed(5) +' ( '+ total.toFixed(5) +' total)</span>'
+                    );   
+
+
+                    // Total over all pages
+                    total = api
+                        .column( 10 )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+         
+                    // Total over this page
+                    pageTotal = api
+                        .column( 10, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+         
+                    // Update footer //' ( '+ total.toFixed(2) +
+                    $( api.column( 10 ).footer() ).html(
+                        '<span style="font-size:0.80rem;">'+pageTotal.toFixed(5) +' ( '+ total.toFixed(5) +' total)</span>'
+                    );    
+
+
+                },
+
+
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },
+                "pageLength": 25,                                 
+                dom: 'Bfrtip',
+                order: [[ 3, "desc" ],[1,"asc"]],
+                //"scrollX": true,
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        title: 'ganancias',
+                        exportOptions: {
+                            columns: ':not(.notexport)'
+                        },                              
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        title: 'ganancias',
+                        exportOptions: {
+                            columns: ':not(.notexport)'
+                        },                              
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'print',
+                        exportOptions: {
+                            columns: ':not(.notexport)'
+                        },                              
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    }
+                ]
+
+            });
+
+        });
+
+    </script>
+          
+{% endblock %}

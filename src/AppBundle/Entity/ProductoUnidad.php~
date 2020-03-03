@@ -1,0 +1,325 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * ProductoUnidad
+ *
+ * @ORM\Table(name="producto_unidad")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\ProductoUnidadRepository")
+ */
+class ProductoUnidad
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="codigo", type="string", length=32, nullable=true)
+     */
+    private $codigo;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="abreviatura", type="string", length=4, nullable=true)
+     * @Assert\NotBlank(message="Este valor es requerido")
+     */
+    private $abreviatura;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="nombre", type="string", length=100, nullable=true)
+     * @Assert\NotBlank(message="Este valor es requerido")
+     */
+    private $nombre;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="descripcion", type="string", length=255, nullable=true)
+     */
+    private $descripcion;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="tipo", type="string", length=32, nullable=true)
+     * @Assert\NotBlank(message="Este valor es requerido")
+     */
+    private $tipo;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="estado", type="boolean", nullable=true)
+     */
+    private $estado;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="ratio", type="float", nullable=true)
+     * @Assert\NotBlank(message="Este valor es requerido")
+     */
+    private $ratio;
+    
+    /**
+     * @ORM\ManyToOne(targetEntity="ProductoUnidadCategoria", inversedBy="unidad", cascade={"persist"})
+     * @ORM\JoinColumn(name="categoria_id", referencedColumnName="id")
+     * @Assert\NotBlank(message="Este valor es requerido")
+     * 
+     */
+    protected $categoria;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Empresa", inversedBy="unidad", cascade={"persist"})
+     * @ORM\JoinColumn(name="empresa_id", referencedColumnName="id")
+     * 
+     */
+    protected $empresa;
+
+    public function __toString()
+    {
+        return $this->getNombre();
+    }
+    
+
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set codigo
+     *
+     * @param string $codigo
+     *
+     * @return ProductoUnidad
+     */
+    public function setCodigo($codigo)
+    {
+        $this->codigo = $codigo;
+
+        return $this;
+    }
+
+    /**
+     * Get codigo
+     *
+     * @return string
+     */
+    public function getCodigo()
+    {
+        return $this->codigo;
+    }
+
+    /**
+     * Set abreviatura
+     *
+     * @param string $abreviatura
+     *
+     * @return ProductoUnidad
+     */
+    public function setAbreviatura($abreviatura)
+    {
+        $this->abreviatura = $abreviatura;
+
+        return $this;
+    }
+
+    /**
+     * Get abreviatura
+     *
+     * @return string
+     */
+    public function getAbreviatura()
+    {
+        return $this->abreviatura;
+    }
+
+    /**
+     * Set nombre
+     *
+     * @param string $nombre
+     *
+     * @return ProductoUnidad
+     */
+    public function setNombre($nombre)
+    {
+        $this->nombre = $nombre;
+
+        return $this;
+    }
+
+    /**
+     * Get nombre
+     *
+     * @return string
+     */
+    public function getNombre()
+    {
+        return $this->nombre;
+    }
+
+    /**
+     * Set descripcion
+     *
+     * @param string $descripcion
+     *
+     * @return ProductoUnidad
+     */
+    public function setDescripcion($descripcion)
+    {
+        $this->descripcion = $descripcion;
+
+        return $this;
+    }
+
+    /**
+     * Get descripcion
+     *
+     * @return string
+     */
+    public function getDescripcion()
+    {
+        return $this->descripcion;
+    }
+
+    /**
+     * Set categoria
+     *
+     * @param \AppBundle\Entity\ProductoUnidadCategoria $categoria
+     *
+     * @return ProductoUnidad
+     */
+    public function setCategoria(\AppBundle\Entity\ProductoUnidadCategoria $categoria = null)
+    {
+        $this->categoria = $categoria;
+
+        return $this;
+    }
+
+    /**
+     * Get categoria
+     *
+     * @return \AppBundle\Entity\ProductoUnidadCategoria
+     */
+    public function getCategoria()
+    {
+        return $this->categoria;
+    }
+
+    /**
+     * Set empresa
+     *
+     * @param \AppBundle\Entity\Empresa $empresa
+     *
+     * @return ProductoUnidad
+     */
+    public function setEmpresa(\AppBundle\Entity\Empresa $empresa = null)
+    {
+        $this->empresa = $empresa;
+
+        return $this;
+    }
+
+    /**
+     * Get empresa
+     *
+     * @return \AppBundle\Entity\Empresa
+     */
+    public function getEmpresa()
+    {
+        return $this->empresa;
+    }
+
+    /**
+     * Set tipo
+     *
+     * @param string $tipo
+     *
+     * @return ProductoUnidad
+     */
+    public function setTipo($tipo)
+    {
+        $this->tipo = $tipo;
+
+        return $this;
+    }
+
+    /**
+     * Get tipo
+     *
+     * @return string
+     */
+    public function getTipo()
+    {
+        return $this->tipo;
+    }
+
+    /**
+     * Set estado
+     *
+     * @param boolean $estado
+     *
+     * @return ProductoUnidad
+     */
+    public function setEstado($estado)
+    {
+        $this->estado = $estado;
+
+        return $this;
+    }
+
+    /**
+     * Get estado
+     *
+     * @return boolean
+     */
+    public function getEstado()
+    {
+        return $this->estado;
+    }
+
+    /**
+     * Set ratio
+     *
+     * @param float $ratio
+     *
+     * @return ProductoUnidad
+     */
+    public function setRatio($ratio)
+    {
+        $this->ratio = $ratio;
+
+        return $this;
+    }
+
+    /**
+     * Get ratio
+     *
+     * @return float
+     */
+    public function getRatio()
+    {
+        return $this->ratio;
+    }
+}

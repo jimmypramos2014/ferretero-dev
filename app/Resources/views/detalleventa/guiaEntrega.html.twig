@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <meta charset="utf-8">
+    <head>
+        <title>Guía de entrega</title>
+        <style type="text/css">
+
+
+            @font-face {
+                font-family: 'Open Sans';
+                src: url({{ 'http://' ~ host ~ '/fonts/OpenSans-Regular.ttf' }} ) format('truetype');
+            }
+
+            body { 
+                font-family: 'Open Sans', sans-serif;
+                background-size: 100%;
+            }
+        
+            tr.item:nth-child(odd) {
+                background-color:#FFFFFF;
+            }
+            tr.item:nth-child(even) {
+                background-color:#EEEDEB;
+            }
+ 
+
+            span.cls_004{font-size:15.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            span.cls_005{font-size:16.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            span.cls_002{font-size:7.5px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            span.cls_003{font-size:7.5px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            span.cls_006{font-size:14.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            td.cls_007{font-size:8.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            th.cls_007{font-size:8.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}            
+            td.cls_008{font-size:8.1px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            th.cls_008{font-size:8.1px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            span.cls_008{font-size:8.1px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}                           
+            span.cls_009{font-size:7.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+
+
+            td.cls_004{font-size:15.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            td.cls_005{font-size:16.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            td.cls_002{font-size:7.5px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            td.cls_003{font-size:7.5px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            td.cls_006{font-size:14.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+
+            th.cls_004{font-size:15.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            th.cls_005{font-size:16.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            th.cls_002{font-size:7.5px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            th.cls_003{font-size:7.5px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            th.cls_006{font-size:14.1px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+
+        </style>
+    </head>
+
+    <body>
+
+
+        <div style="">
+
+            <table  width="880" border="0" style="border-spacing: .5em;">
+                <tr>
+                    <td width="75%" style="">
+
+                        {% if localObj.empresa.logo %}
+                            <img src="{{ app.request.getSchemeAndHttpHost() ~ '/uploads/imagenes/' ~ localObj.empresa.logo }}" alt="" width="320px" height="80px">
+                            <br>
+                        {% endif %}
+                        <table  width="100%" border="0" style="border-spacing: 0em;">
+                            <tr>
+                                <td class="cls_002">
+                                    {{ localObj.empresa.nombreCorto ? localObj.empresa.nombreCorto | upper : localObj.empresa.nombre | upper }} 
+                                    
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cls_003">
+                                    {{ localObj.empresa.direccion ? localObj.empresa.direccion : '' }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cls_003">                        
+                                    
+                                    {{ localObj.telefono ? 'Tlf.: ' ~ localObj.telefono ~ ' | ' : '' }}
+                                    {{ localObj.email ? 'Email: ' ~ localObj.email ~ ' | ' : '' }} 
+                                    {{ localObj.empresa.direccionWeb ? 'Web: ' ~ localObj.empresa.direccionWeb : '' }}
+                                    
+                                </td>
+                            </tr>                                                           
+                        </table>
+                                                
+
+                    </td>
+
+                    <td width="25%" align="center" style="background-color:{{ localObj.boletaColor ? localObj.boletaColor : 'white' }};border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;">
+                        <span class="cls_004" style="">{{ localObj.empresa.ruc ? 'RUC: ' ~ localObj.empresa.ruc : '' }}</span><br>
+                        <span style="height:100px;"></span>
+                        <span class="cls_005" style="">GUIA DE <br>ENTREGA</span> <br>
+                        <span style="height:100px;"></span>
+                        <span class="cls_006" style="">{{ random() }}</span>
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+            <table  width="880" border="0" style="border-spacing: .5em;">
+                <tr>
+                    <td width="75%" style="border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;">
+
+                        <table  width="100%" border="0" style="border-spacing: 0em;">
+                            <tr>
+                                <th align="left" width="10%" class="cls_002">CLIENTE</th>
+                                <th width="1%" class="cls_003">:</th>
+                                <td class="cls_003">{{ facturaVenta.cliente.razonSocial }}</td>                 
+                            </tr>
+                            <tr>
+                                <th align="left" width="10%" class="cls_002">RUC</th>
+                                <th width="1%" class="cls_003">:</th>
+                                <td class="cls_003">{{ facturaVenta.cliente.ruc }}</td>
+                   
+                            </tr>
+                            <tr>
+                                <th align="left" width="10%" class="cls_002">DIRECCIÓN</th>
+                                <th width="1%" class="cls_003">:</th>
+                                <td align="left" class="cls_003">{{ facturaVenta.cliente.direccion }}</td>
+                            </tr>                                
+                        </table>
+
+                    </td>
+
+                    <td width="25%" align="" style="border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;">
+
+                        <table  width="100%" border="0" style="border-spacing: 0em;">
+                            <tr>
+                                <th width="40%" align="left" class="cls_002">FECHA ENTREGA</th>
+                                <th width="1%" class="cls_003">:</th>
+                                <td class="cls_003">{{ facturaVenta.fecha | date('d/m/Y') }}</td>                    
+                            </tr>
+                            <tr>
+                                <td colspan="3" align="left" class="cls_002"></td>                  
+                            </tr>                            
+                            <tr>
+                                <td colspan="3" align="left" class="cls_002"></td>                      
+                            </tr>
+                              
+                        </table>
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+            <table  width="880" border="0" style="border-spacing: .5em;">
+                <tr>
+                    <td width="100%" style="border-spacing: 0em;border-radius: 5px;border-bottom:1px solid;border-top:1px solid;border-left:1px solid;border-right:1px solid;">
+
+                        <table width="100%" border="0" style="background-color:{{ localObj.facturaColor ? localObj.boletaColor : 'white' }};">
+                            <tr style="height:25px;">
+                                <th width="10%" class="cls_007">BOLETA NRO.</th>
+                                <th width="10%" class="cls_007">CANTIDAD</th>                    
+                                <th width="80%" class="cls_007">MERCADERÍA</th>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+
+                        <table width="100%" border="0" style="border-spacing: 0em;">
+
+   
+                            {% for detalle in facturaVenta.venta.detalleVenta %}
+
+                                {% for dvi in detalleVentaEntrega %}
+
+                                    {% if detalle.id == dvi.detalleVenta.id %}
+
+                                        <tr class="item" style="">
+                                            <td width="10%" align="center" class="cls_008">{{ facturaVenta.ticket }}</td>
+                                            <td width="10%" align="center" class="cls_008">{{ dvi.cantidad }}</td>                        
+                                            <td width="80%" align="left" class="cls_008">{{ detalle.productoXLocal.producto.nombre }}</td>
+                
+                                        </tr>
+
+
+                                    {% endif %}
+
+                                {% endfor %}
+
+
+
+                            {% endfor %}                            
+
+{#                             <tr style="height:5px;">
+                                <td colspan="3"></td>             
+                            </tr>
+
+
+                            <tr>
+                                <th colspan="2" align="right" class="cls_007">TOTAL {{ ' ' ~ facturaVenta.venta.ventaFormaPago[0].moneda.simbolo | upper }}</th>
+                                <th align="right" class="cls_007"></th>                    
+                            </tr> #}
+
+                        </table>
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+
+        </div>
+
+
+
+    </body>
+</html>

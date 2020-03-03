@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <meta charset="utf-8">
+    <head>
+        <title>Recibo de egreso</title>
+        <style type="text/css">
+
+            body {
+                font-family:Arial;
+                font-size:14pt;
+            }
+
+        </style>
+    </head>
+
+    <body>
+
+        {% set numRecibo_X = 0 %}
+        {% set numRecibo_Y = 0 %}
+
+        {% set beneficiario_X = 0 %}
+        {% set beneficiario_Y = 0 %}
+
+        {% set montoEgreso_X = 0 %}
+        {% set montoEgreso_Y = 0 %}
+        {% set concepto_X = 0 %}
+        {% set concepto_Y = 0 %}
+        {% set fechaEgreso_X = 0 %}
+        {% set fechaEgreso_Y = 0 %}
+
+        {% set direccionEmpresa_X = 0 %}
+        {% set direccionEmpresa_Y = 0 %}
+        {% set contactoEmpresa_X = 0 %}
+        {% set contactoEmpresa_Y = 0 %}
+
+
+        {% for componenteXDocumento in componentesXDocumento %}
+            
+            {% if componenteXDocumento.componente.nombre == 'numRecibo' %}
+                {% set numRecibo_X = componenteXDocumento.posicionX %}
+                {% set numRecibo_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'beneficiario' %}
+                {% set beneficiario_X = componenteXDocumento.posicionX %}
+                {% set beneficiario_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'montoEgreso' %}
+                {% set montoEgreso_X = componenteXDocumento.posicionX %}
+                {% set montoEgreso_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'concepto' %}
+                {% set concepto_X = componenteXDocumento.posicionX %}
+                {% set concepto_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'fechaEgreso' %}
+                {% set fechaEgreso_X = componenteXDocumento.posicionX %}
+                {% set fechaEgreso_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'direccionEmpresa' %}
+                {% set direccionEmpresa_X = componenteXDocumento.posicionX %}
+                {% set direccionEmpresa_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'contactoEmpresa' %}
+                {% set contactoEmpresa_X = componenteXDocumento.posicionX %}
+                {% set contactoEmpresa_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+                                                                                                                             
+        {% endfor %}
+
+
+
+
+        <div style="background-image: url({{ 'http://' ~ host ~ '/formatos/' ~ app.session.get('empresa') ~ '/recibo_egreso.jpg' }});background-size: 100%;background-repeat: no-repeat;position:relative;top:0px;left:0px;width: 990px;height: 691px; color: black;">
+
+            {% if localObj.empresa.direccion %}
+
+            <span id="direccionEmpresa" style="position:absolute; top: {{direccionEmpresa_X}}px; left:{{direccionEmpresa_Y}}px; width: 500px; color: #253F8A;font-size:15pt;font-weight:bold;">{{ localObj.empresa.direccion }}</span>
+            {% endif %}
+
+            {% if localObj.telefono %}
+
+                <span id="contactoEmpresa" style="position:absolute; top: {{contactoEmpresa_X}}px; left:{{contactoEmpresa_Y}}px; width: 500px; color: #253F8A;font-size:12pt;font-weight:bold;">{{ 'Tel.:' ~ localObj.telefono ~ ' ' }} {{ localObj.email ? ' Email: ' ~ localObj.email:'' }}</span>
+
+            {% endif %}
+
+            <span id="numRecibo" style="position:absolute; top: {{ numRecibo_X ~ 'px' }}; left: {{ numRecibo_Y }}px; width: 40px; color: #253F8A;font-size:20pt;">{{ gasto.numeroDocumento ? gasto.numeroDocumento | upper : ''  }}</span>
+            <span id="beneficiario" style="position:absolute; top: {{ beneficiario_X }}px; left: {{ beneficiario_Y }}px; width: 600px; color: black;">{{ gasto.beneficiario ? gasto.beneficiario | upper : ''  }}</span>
+
+            <span id="montoEgreso" style="position:absolute; top: {{ montoEgreso_X }}px; left: {{ montoEgreso_Y }}px; width: 400px; color: black;">{{ gasto.monto ? gasto.monto : ''}}</span>
+
+            <span id="concepto" style="position:absolute; top: {{ concepto_X }}px; left: {{ concepto_Y }}px; width: 400px; color: black;">{{ gasto.concepto ? gasto.concepto | upper : '' }}</span>
+            <span id="fechaEgreso" style="position:absolute; top: {{ fechaEgreso_X }}px; left: {{ fechaEgreso_Y }}px; width: 400px; color: black;">{{ gasto.fecha | date('d/m/Y') }}</span>
+
+        <div>
+
+
+
+        
+        <span id="foot" style="position:absolute; top: 691px; left: 990px;color: black;"></span>
+
+
+
+        <div style="background-image: url({{ 'http://' ~ host ~ '/formatos/' ~ app.session.get('empresa') ~ '/recibo_egreso.jpg' }});background-size: 100%;background-repeat: no-repeat;position:relative;top:692px;left:0px;width: 990px;height: 691px;color: black;">
+
+            {% if localObj.empresa.direccion %}
+
+            <span id="direccionEmpresa" style="position:absolute; top: {{direccionEmpresa_X}}px; left:{{direccionEmpresa_Y}}px; width: 500px; color: #253F8A;font-size:15pt;font-weight:bold;">{{ localObj.empresa.direccion }}</span>
+            {% endif %}
+
+            {% if localObj.telefono %}
+
+                <span id="contactoEmpresa" style="position:absolute; top: {{contactoEmpresa_X}}px; left:{{contactoEmpresa_Y}}px; width: 500px; color: #253F8A;font-size:12pt;font-weight:bold;">{{ 'Tel.:' ~ localObj.telefono ~ ' ' }} {{ localObj.email ? ' Email: ' ~ localObj.email:'' }}</span>
+
+            {% endif %}
+
+            <span id="numRecibo2" style="position:absolute; top: {{ numRecibo_X ~ 'px' }}; left: {{ numRecibo_Y }}px; width: 40px; color: #253F8A;font-size:20pt;">{{ gasto.numeroDocumento ? gasto.numeroDocumento | upper : ''  }}</span>
+            <span id="beneficiario2" style="position:absolute; top: {{ beneficiario_X }}px; left: {{ beneficiario_Y }}px; width: 600px; color: black;">{{ gasto.beneficiario ? gasto.beneficiario | upper : ''  }}</span>
+
+            <span id="montoEgreso2" style="position:absolute; top: {{ montoEgreso_X }}px; left: {{ montoEgreso_Y }}px; width: 400px; color: black;">{{ gasto.monto ? gasto.monto : ''}}</span>
+
+            <span id="concepto2" style="position:absolute; top: {{ concepto_X }}px; left: {{ concepto_Y }}px; width: 400px; color: black;">{{ gasto.concepto ? gasto.concepto | upper : '' }}</span>
+            <span id="fechaEgreso2" style="position:absolute; top: {{ fechaEgreso_X }}px; left: {{ fechaEgreso_Y }}px; width: 400px; color: black;">{{ gasto.fecha | date('d/m/Y') }}</span> 
+
+       <div>
+
+
+
+
+        
+
+    </body>
+
+</html>

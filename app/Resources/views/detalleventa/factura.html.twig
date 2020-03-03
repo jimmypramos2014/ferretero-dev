@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <meta charset="utf-8">
+    <head>
+        <title>FACTURA</title>
+        <style type="text/css">
+
+            @font-face {
+                font-family: Cambria;
+                src: url({{ 'http://' ~ host ~ '/fonts/Cambria.ttf' }} ) format('truetype');
+            }
+
+            body { 
+                font-family: 'Cambria';
+                font-size:11pt;
+                background-size: 100%;
+            }
+        
+        </style>
+    </head>
+
+    <body>
+        {% set ticket_X = 0 %}
+        {% set ticket_Y = 0 %}
+        {% set cliente_X = 0 %}
+        {% set cliente_Y = 0 %}
+        {% set direccion_X = 0 %}
+        {% set direccion_Y = 0 %}
+        {% set rucCliente_X = 0 %}
+        {% set rucCliente_Y = 0 %}
+        {% set fecha_X = 0 %}
+        {% set fecha_Y = 0 %}
+        {% set detalleValorUnitario_X = 0 %}
+        {% set detalleValorUnitario_Y = 0 %}
+        {% set detalleValorVenta_X = 0 %}
+        {% set detalleValorVenta_Y = 0 %}
+        {% set detalleDescripcion_X = 0 %}
+        {% set detalleDescripcion_Y = 0 %}
+        {% set detalleCantidad_X = 0 %}
+        {% set detalleCantidad_Y = 0 %}
+
+        {% set montoTotal_X = 0 %}
+        {% set montoTotal_Y = 0 %}
+        {% set inicioDetalleVenta_X = 0 %}
+        {% set inicioDetalleVenta_Y = 0 %}
+
+        {% set direccionEmpresa_X = 0 %}
+        {% set direccionEmpresa_Y = 0 %}
+        {% set contactoEmpresa_X = 0 %}
+        {% set contactoEmpresa_Y = 0 %}
+
+        {% set finDetalleVenta_X = 0 %}
+        {% set finDetalleVenta_Y = 0 %}
+
+        {% set rucEmpresa_X = 0 %}
+        {% set rucEmpresa_Y = 0 %}
+
+        {% for componenteXDocumento in componentesXDocumento %}
+            
+            {% if componenteXDocumento.componente.nombre == 'ticket' %}
+                {% set ticket_X = componenteXDocumento.posicionX %}
+                {% set ticket_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'cliente' %}
+                {% set cliente_X = componenteXDocumento.posicionX %}
+                {% set cliente_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'direccion' %}
+                {% set direccion_X = componenteXDocumento.posicionX %}
+                {% set direccion_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'rucCliente' %}
+                {% set rucCliente_X = componenteXDocumento.posicionX %}
+                {% set rucCliente_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'fecha' %}
+                {% set fecha_X = componenteXDocumento.posicionX %}
+                {% set fecha_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'detalleCantidad' %}
+                {% set detalleCantidad_X = componenteXDocumento.posicionX %}
+                {% set detalleCantidad_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'detalleDescripcion' %}
+                {% set detalleDescripcion_X = componenteXDocumento.posicionX %}
+                {% set detalleDescripcion_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'detalleValorUnitario' %}
+                {% set detalleValorUnitario_X = componenteXDocumento.posicionX %}
+                {% set detalleValorUnitario_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'detalleValorVenta' %}
+                {% set detalleValorVenta_X = componenteXDocumento.posicionX %}
+                {% set detalleValorVenta_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'montoTotal' %}
+                {% set montoTotal_X = componenteXDocumento.posicionX %}
+                {% set montoTotal_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'inicioDetalleVenta' %}
+                {% set inicioDetalleVenta_X = componenteXDocumento.posicionX %}
+                {% set inicioDetalleVenta_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+            
+            {% if componenteXDocumento.componente.nombre == 'direccionEmpresa' %}
+                {% set direccionEmpresa_X = componenteXDocumento.posicionX %}
+                {% set direccionEmpresa_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'contactoEmpresa' %}
+                {% set contactoEmpresa_X = componenteXDocumento.posicionX %}
+                {% set contactoEmpresa_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'finDetalleVenta' %}
+                {% set finDetalleVenta_X = componenteXDocumento.posicionX %}
+                {% set finDetalleVenta_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'rucEmpresa' %}
+                {% set rucEmpresa_X = componenteXDocumento.posicionX %}
+                {% set rucEmpresa_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+        {% endfor %}
+
+        {% set top = inicioDetalleVenta_X %}
+
+        <div style="position:absolute; top: 15px; left: 60px; color: black;">
+
+            <table  width="858" border="0" style="border-spacing: .5em;">
+                <tr>
+                    <td width="28%" style="">
+                        {% if localObj.empresa.logo %}
+                            <img src="{{ app.request.getSchemeAndHttpHost() ~ '/uploads/imagenes/' ~ localObj.empresa.logo }}" alt="" width="320px" height="80px">
+                        {% endif %}
+
+                    </td>
+
+                    <td width="32%" align="center" style="border-right: 2px solid #EEEDEB;border-left: 2px solid #EEEDEB;padding:5px;font-weight:bold;">
+                        {{ localObj.empresa.direccion }}<br>
+                        {{ 'Tlf. ' ~ localObj.telefono ~ '' }} <br>
+                        {{ localObj.email ? localObj.email : '' }}  <br>
+                        {{ localObj.empresa.direccionWeb ? localObj.empresa.direccionWeb : '' }}
+                    </td>
+
+                    <td width="40%" align="center" style="background-color:#EEEDEB;border-radius: 5px;">
+                        <span style="font-weight:bold;font-size:14pt;">{{ localObj.empresa.ruc ? 'RUC: ' ~ localObj.empresa.ruc : '' }}</span><br><br>
+                        <span style="font-weight:bold;font-size:20pt;">FACTURA</span> <br><br>
+                        <span style="font-weight:bold;font-size:14pt;">{{ facturaVenta.ticket }}</span>
+                    </td>
+
+                </tr>
+                {#<tr>
+                    <td align="left">
+                        {{ localObj.empresa.direccion }}<br>
+                        {{ 'Tel.:' ~ localObj.telefono ~ ' ' }} {{ localObj.email ? ' Email: ' ~ localObj.email:'' }}  {{ localObj.empresa.direccionWeb ? ' Web: ' ~ localObj.empresa.direccionWeb : '' }}
+                    </td>
+                </tr>#}
+            </table>
+
+            {#<table  width="250" border="0" style="border-top: 1px solid;border-bottom: 1px solid;border-left: 1px solid;border-right: 1px solid;background-color:#EEEDEB;">
+                <tr>
+                    <td align="center" valign="middle" style="font-weight:bold;font-size:16pt;">{{ localObj.empresa.ruc ? 'RUC: ' ~ localObj.empresa.ruc : '' }}</td>              
+                </tr>            
+                <tr>
+                    <th height="90px" valign="middle" style="font-weight:bold;font-size:20pt;">BOLETA</th>              
+                </tr>
+                <tr>
+                    <td align="center" style="font-weight:bold;font-size:14pt;">{{ facturaVenta.ticket }}</td>              
+                </tr>
+
+            </table>#}
+
+            <br>
+
+            <table  width="858" border="0" >
+                <tr>
+                    <th align="left" width="12%">CLIENTE</th>
+                    <th width="1%">:</th>
+                    <td width="51%">{{ facturaVenta.cliente.razonSocial }}</td>
+                    <th width="20%" align="left">FECHA EMISIÓN</th>
+                    <th width="1%">:</th>
+                    <td width="15%">{{ facturaVenta.fecha | date('d/m/Y') }}</td>                    
+                </tr>
+                <tr>
+                    <th align="left" width="12%">R.U.C.</th>
+                    <th width="1%">:</th>
+                    <td width="51%">{{ facturaVenta.cliente.ruc }}</td>
+                    <th width="20%" align="left">MONEDA</th>
+                    <th width="1%">:</th>
+                    <td width="15%">{{ facturaVenta.venta.ventaFormaPago[0].moneda | upper }}</td>                      
+                </tr>
+                <tr>
+                    <th align="left" width="12%">DIRECCIÓN</th>
+                    <th width="1%">:</th>
+                    <td colspan="4">{{ facturaVenta.cliente.direccion }}</td>
+                </tr>                                
+            </table>
+            <br>
+
+            {% set item = 1 %}
+            {% set impuesto = 0 %}
+            {% set total = 0 %}    
+
+
+            <table  width="858" border="0" style="">
+
+                <tr style="background-color:#FD2016;">
+                    <th style="border-bottom: 1px solid;color:#FFFFFF;font-size:11pt;">ITEM</th>
+                    <th style="border-bottom: 1px solid;color:#FFFFFF;font-size:11pt;">CANT.</th>
+                    <th style="border-bottom: 1px solid;color:#FFFFFF;font-size:11pt;">CÓDIGO</th>
+                    <th style="border-bottom: 1px solid;color:#FFFFFF;font-size:11pt;" align="left">DESCRIPCION</th>
+                    <th style="border-bottom: 1px solid;color:#FFFFFF;font-size:11pt;">P/U</th>
+                    <th style="border-bottom: 1px solid;color:#FFFFFF;font-size:11pt;">IMP.</th>
+                </tr>
+                {% for detalle in facturaVenta.venta.detalleVenta %}
+                    <tr style="background-color:#EEEDEB;">
+                        <td width="2%" align="center" style="font-size:10pt;">{{ item }}</td>
+                        <td width="5%" align="center" style="font-size:10pt;">{{ detalle.cantidad }}</td>
+                        <td width="12%" align="left" style="font-size:10pt;">{{ detalle.productoXLocal.producto.codigo }}</td>
+                        <td width="64%" align="left" style="font-size:10pt;">{{ detalle.productoXLocal.producto.nombre | upper  }} {{ detalle.descripcion ? ' - ' ~  detalle.descripcion | upper  : ''  }}</td>
+                        {% set precio = detalle.subtotal / detalle.cantidad %}
+                        <td width="8%" align="right" style="font-size:10pt;">{{ precio | number_format(2, '.', ',') }}</td>
+                        <td width="9%" align="right" style="font-size:10pt;">{{ detalle.subtotal | number_format(2, '.', ',') }}</td>                    
+                    </tr>
+                    {% set item = item + 1 %}
+                    {% set total = total + detalle.subtotal %}
+                    {% set impuesto = impuesto +  0.18 * detalle.subtotal/1.18 %}
+
+                {% endfor %}
+                
+                
+            </table>
+
+            <table  width="858" border="0" >
+
+                {% if facturaVenta.incluirIgv %}
+        
+                    {% set subtotal = total/1.18 %}
+                    {% set igvtotal = subtotal * 0.18 %}
+
+                {% else %}
+
+                    {% set subtotal = total %}
+                    {% set igvtotal = 0.18 * subtotal %}
+                    {% set total = igvtotal +  subtotal %}
+
+                {% endif %}
+                <tr>
+                    <td width="71%" ></td>
+                    <th width="15%" align="right" style="font-size:16px;border-color:#5e5c5c;background-color:#5e5c5c;color:white;">Subtotal S./</th>
+                    <th align="right" style="font-size:16px;background-color:#EEEDEB;">{{ subtotal | number_format(2, '.', ',')  }}</th>                    
+                </tr>
+
+                <tr>
+                    <td ></td>
+                    <th align="right" style="font-size:16px;border-color:#5e5c5c;background-color:#5e5c5c;color:white;">I.G.V. 18%</th>
+                    <th align="right" style="font-size:16px;background-color:#EEEDEB;">{{ igvtotal | number_format(2, '.', ',')  }}</th>                    
+                </tr>
+
+                <tr>
+                    <td ></td>
+                    <th align="right" style="font-size:16px;border-color:#5e5c5c;background-color:#5e5c5c;color:white;">Total S./</th>
+                    <th align="right" style="font-size:16px;background-color:#EEEDEB;">{{ total | number_format(2, '.', ',')  }}</th>                    
+                </tr>
+
+            </table>
+
+
+            {% set totalEntero = total|parteEntera  %}
+            {% set totalDecimal = total|parteDecimal %}
+
+            <table  width="858" border="0" style="background-color:#EEEDEB;">
+
+                <tr>
+                    <td ><span style="font-weight:bold;font-size:12pt;">IMPORTE EN LETRAS : </span>{{ numeroALetras(totalEntero) ~ ' con ' ~ totalDecimal ~ '/100 ' ~ facturaVenta.venta.ventaFormaPago[0].moneda | upper }}</td>
+                </tr>
+                {% if facturaVenta.numeroGuiaremision %}
+
+                    <tr>
+                        <td ><span style="font-weight:bold;font-size:12pt;">GUIA DE REMISIÓN: </span>{{ facturaVenta.numeroGuiaremision ? facturaVenta.numeroGuiaremision : '' }}</td>
+                    </tr>
+
+                {% endif %}
+
+            </table>
+
+
+
+        </div>
+
+
+
+    </body>
+</html>

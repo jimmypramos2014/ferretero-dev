@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent()}}
+
+    <style type="text/css">
+
+    </style>
+{% endblock %}
+{% block body %}
+
+    <div class="container">
+
+        <form id="form" action="{{ path('tipocambio_new') }}" class="form-horizontal " role="form" method="post"  enctype="multipart/form-data" novalidate>
+                <div class="card mx-auto mt-5">
+                    <div class="card-header">Información general</div>
+                    <div class="card-body">                
+
+                        <div class="form-row">
+                            <div class="form-group col-md-3">
+                                {{ form_row(form.fecha) }}
+                     
+                            </div>
+                            <div class="form-group col-md-2">
+                                {{ form_row(form.compra) }}
+ 
+                            </div>
+                            <div class="form-group col-md-2">
+                                {{ form_row(form.venta) }}
+ 
+                            </div>                         
+
+                        </div>
+
+                    </div>
+                </div>
+                
+                {{ form_widget(form.empresa) }}
+
+                {{ form_widget(form._token) }}
+
+                <div class="mt-4">
+                    <p class="pull-right">
+                        <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('tipocambio_index')}}'" />            
+                        <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+                    </p>
+                </div>
+
+        </form>
+
+    </div>
+
+
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}  
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".tipocambio").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+            $(".tipocambio").datepicker("setDate", startDate);
+
+
+
+        });
+
+    </script>
+
+{% endblock %}  

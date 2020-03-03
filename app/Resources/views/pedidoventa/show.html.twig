@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Pedidoventum</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ pedidoVentum.id }}</td>
+            </tr>
+            <tr>
+                <th>Numeropedido</th>
+                <td>{{ pedidoVentum.numeroPedido }}</td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{% if pedidoVentum.fecha %}{{ pedidoVentum.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Estado</th>
+                <td>{% if pedidoVentum.estado %}Yes{% else %}No{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Terminospago</th>
+                <td>{{ pedidoVentum.terminosPago }}</td>
+            </tr>
+            <tr>
+                <th>Descuento</th>
+                <td>{{ pedidoVentum.descuento }}</td>
+            </tr>
+            <tr>
+                <th>Monto</th>
+                <td>{{ pedidoVentum.monto }}</td>
+            </tr>
+            <tr>
+                <th>Impuesto</th>
+                <td>{{ pedidoVentum.impuesto }}</td>
+            </tr>
+            <tr>
+                <th>Fechacreacion</th>
+                <td>{% if pedidoVentum.fechaCreacion %}{{ pedidoVentum.fechaCreacion|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Fechamodificacion</th>
+                <td>{% if pedidoVentum.fechaModificacion %}{{ pedidoVentum.fechaModificacion|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('pedidoventa_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('pedidoventa_edit', { 'id': pedidoVentum.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

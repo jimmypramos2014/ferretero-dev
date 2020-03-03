@@ -1,0 +1,817 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }} 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .no-border {
+            border: 0;
+            box-shadow: none;
+        }
+        .cabecera{
+            font-weight: bold;
+        }
+
+        .compra-total{
+            font-size: 2.5rem;
+            font-weight: bold;
+        }        
+    </style>
+{% endblock %}
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+    
+    {% set tipo_de_cambio_compra = '' %}
+    {% set tipo_de_cambio_venta = '' %}
+    {% set alerta = 'warning' %}
+    {% if tipoCambio %}
+        {% set tipo_de_cambio_compra = tipoCambio.compra %}
+        {% set tipo_de_cambio_venta = tipoCambio.venta %}
+        {% set alerta = 'info' %}
+    {% endif %}
+
+    <div class="alert alert-{{ alerta }}" role="alert">
+        Dólar : {{ tipo_de_cambio_compra != '' and tipo_de_cambio_venta != ''  ? 'Compra = S/. ' ~ tipo_de_cambio_compra ~ ';' ~ ' Venta = S/. ' ~ tipo_de_cambio_venta  : 'Definir el valor del dólar para el día de HOY. Ir a Contabilidad >> Tipo de cambio'}}
+
+        <input type="hidden" value="{{ tipo_de_cambio_compra }}" id="tipo_de_cambio" name="tipo_de_cambio" />
+    </div>
+
+
+    <form id="form" action="{{ path('facturacompra_edit',{'id':facturaCompra.id}) }}" class="form-horizontal  needs-validation" role="form" method="post" enctype="multipart/form-data" novalidate>    
+
+
+
+        <div class="row mt-2 mb-2">
+
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xl-6">
+
+
+                <div class="card" >
+                    <div class="card-body">
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+
+
+                                {{ form_label(edit_form.proveedor) }}
+                                <div class="input-group">
+                                    {{ form_widget(edit_form.proveedor) }}
+                                  
+{#                                     <div class="input-group-append">
+                                        <span class="input-group-text" id="agregar_proveedor" ><i class="fa fa-plus fa-lg" data-toggle="tooltip" title="Agregar proveedor"></i></span>
+                                        <span class="input-group-text" id="editar_proveedor"><i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar proveedor"></i></span>
+                                    </div> #}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div>
+
+
+                            </div>
+
+                            <div class="form-group col-4">
+                                {{ form_row(edit_form.local) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>  
+
+                            </div>
+
+                            {% for compraFormaPago in edit_form.compra.compraFormaPago  %}
+
+                                <div class="form-group col-2 ">
+
+                                    {{ form_row(compraFormaPago.moneda) }}                             
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>   
+                                </div>
+
+
+                            {% endfor %}       
+
+
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-3">
+                                {{ form_row(edit_form.fecha) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                  
+                            </div>                            
+                            <div class="form-group col-3">
+                                {{ form_row(edit_form.documento) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                  
+                            </div>
+                            <div class="form-group col-3">
+                                {{ form_row(edit_form.numero_documento) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                     
+                            </div>
+
+
+
+                            <div class="form-group col-3">
+                                {{ form_row(edit_form.archivo) }}                            
+                            </div>
+
+                            {% if originalArchivo %}
+                                <div class="form-group col-md-1 mt-5">
+                                    <a href="{{ asset('uploads/files/' ~ app.session.get('empresa') ~ '/' ~ originalArchivo) }}" download><i class="fa fa-download fa-lg"></i></a>
+                                </div>                           
+                            {% endif %}   
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-3">
+                                {{ form_row(edit_form.voucher) }}                            
+                            </div>
+
+                            {% if originalVoucher %}
+                                <div class="form-group col-md-1 mt-5">
+                                    <a href="{{ asset('uploads/files/' ~ app.session.get('empresa') ~ '/' ~ originalVoucher) }}" download><i class="fa fa-download fa-lg"></i></a>
+                                </div>                            
+                            {% endif %}   
+
+                            <div class="form-group col-6">
+                                {{ form_row(edit_form.observacion) }}
+                               
+                            </div>                            
+
+                        </div>
+
+                        <div class="form-row">
+
+                            {% for compraFormaPago in edit_form.compra.compraFormaPago  %}
+
+                                <div class="form-group col-2 ">
+
+                                    {{ form_row(compraFormaPago.formaPago) }}                             
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>   
+                                </div>
+
+                                <div class="form-group col-2 ">
+                                    {{ form_row(compraFormaPago.numeroDias) }}                             
+                                </div>
+
+                                <div class="form-group col-2 ">
+                                    {{ form_row(compraFormaPago.condicion) }}                             
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        {% set visible = 'd-none' %}
+                        {% if edit_form.vars.value.compra.compraFormaPago[0].formaPago.id == 4 %}
+                            {% set visible = '' %}
+                        {% endif %}    
+
+                        <div class="form-row  {{ visible }}"  id="nota_credito">
+
+                            <div class="card w-100" >
+                                <div class="card-header">
+                                    Datos de nota de crédito 
+                                </div>
+                                <div class="card-body">
+
+                                    <div class="form-row">
+
+                                        <div class="form-group col-4">
+                                            {{ form_row(edit_form.numero_notacredito) }}                            
+                                        </div>
+
+                                        <div class="form-group col-4">
+                                            {{ form_row(edit_form.documento_relacionado_notacredito) }}
+                                        </div>
+
+                                        <div class="form-group col-4">
+                                            {{ form_row(edit_form.monto_notacredito) }}
+                                        </div>                                                                                 
+                                    </div>
+                        
+
+                                </div>
+                            </div>
+
+                        </div>   
+
+
+                    </div>
+                </div>
+
+                {{ form_widget(edit_form.compra.empleado) }}
+                {{ form_widget(edit_form._token) }}
+
+
+                <div class="card">
+
+                    <div class="card-body">
+
+                        <div class="form-row">
+
+                            <div class="form-group col-12">
+                                {{ form_row(formProducto.productoXLocal) }} 
+
+                                <input type="hidden" value="" name="codigo_producto" id="codigo_producto" />
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                              
+                            </div>                    
+
+                        </div>
+
+                        <div class="form-row">
+
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.unidad) }}
+                               
+                            </div>  
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.precio) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>  
+                            </div>
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.cantidad) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                  
+                            </div>
+
+
+
+                        </div>
+
+                        <p class="text-right">
+                            <input type="button" class="btn btn-small btn-primary" id="agregar" value="Agregar >>">
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xl-6  compra-cuenta">
+
+                <div class="row cabecera">
+                    <div class="col-md-1 ">
+                        
+                    </div>
+                    <div class="col-md-5  p-0">
+                        Producto
+                    </div>
+                    <div class="col-md-2  p-0">
+                        Precio
+                    </div>
+                    <div class="col-md-2  p-0">
+                        Cantidad
+                    </div>                    
+                 
+                    <div class="col-md-2 ">
+                        Importe
+                    </div>
+                </div>
+
+                <hr class="linea-separadora2">
+
+
+
+                {% set total = 0 %}
+                {% set impuesto = 0 %}
+                {% set jj = 0 %}
+                {% for detalle in edit_form.compra.detalleCompra if  detalle.vars.value.productoXLocal %}
+
+                    <div class="row prod" id="row_{{ detalle.vars.value.productoXLocal.id }}">
+                        <input type="hidden" class="productoid" id="productoid_{{ detalle.vars.value.productoXLocal.id }}" name="productoid_{{ detalle.vars.value.productoXLocal.id }}" value="productoid_{{ detalle.vars.value.productoXLocal.id }}" />
+                        <div class="col-md-1 ">
+
+                            <a href="javascript:eliminar({{ detalle.vars.value.productoXLocal.id }})" ><i class="fa fa-remove fa-lg"></i></a>
+
+                        </div>
+                        <div class="col-md-5 p-0" >
+                            {{ detalle.vars.value.productoXLocal.producto.nombre }}
+
+                            <select id="appbundle_facturacompra_compra_detalleCompra_{{ jj }}_productoXLocal" name="appbundle_facturacompra[compra][detalleCompra][{{ jj }}][productoXLocal]" class="form-control d-none"><option value="{{ detalle.vars.value.productoXLocal.id }}" selected>{{ detalle.vars.value.productoXLocal.producto.nombre }}</option></select>
+
+                                {#{{ form_widget(detalle.productoXLocal ) }}#}
+                            
+                        </div>
+                        <div class="col-md-2 p-0">
+                            {{ form_widget(detalle.precio) }}
+
+                        </div>
+
+                        <div class="col-md-2 p-0">
+
+                            {{ form_widget(detalle.cantidad) }}
+
+                        </div>
+
+                        <div class="col-md-2 subtotal " id="subtotal_{{ detalle.vars.value.productoXLocal.id }}" >
+
+                            {{ form_widget(detalle.subtotal )  }}
+
+                        </div>
+
+                        
+                        {{ form_widget(detalle.compra) }}
+
+                    </div>
+
+                    <hr class="linea-separadora" id="linea_{{ detalle.vars.value.productoXLocal.id }}" >
+
+
+                    {% set total = total + detalle.vars.value.subtotal  %}
+                    {% set jj = jj + 1 %}
+
+
+                {% endfor %}
+
+
+
+
+                <div class="row compra-total">
+                    <div class="col-md-4 col-lg-4 col-xs-12">
+                        TOTAL
+                    </div>
+                    <div class="col-md-4 col-lg-4 col-xs-12">
+                        <span id="valor_total">{{ total | number_format(5,'.',',') }}</span>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-sm-12 col-lg-12 col-xs-12">
+                        <input type="submit" name="btn_guardar" id="comprar" class="btn btn-primary btn-lg btn-block" value="Comprar" />
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+        </div>
+
+    </form>
+
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }} 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="{{asset('js/es.js')}}" ></script>
+    <script src="{{asset('js/jquery.number.min.js')}}" ></script>
+
+    <script type="text/javascript">
+
+        var item = '{{ edit_form.compra.detalleCompra | length }}';
+        var i = Number(item);
+        var total = 0;
+
+        function get_detail()
+        {
+            var size=$('#appbundle_detallecompra_producto_archivo')[0].files[0].size;
+            var extension=$('#appbundle_detallecompra_producto_archivo').val().replace(/^.*\./, '');
+            
+            $("#file_detail").html("File Size : "+size+" <br>Extension : "+extension+"");
+        }
+
+
+        function eliminar(id) {
+
+            var total           = $('#valor_total').text().replace(/,/g, '');
+            var subtotalinput   = $( ".subtotalinput" );
+            var subtotal        = $('#row_'+id).find(subtotalinput).val();
+
+            
+
+            $("#row_"+id).remove();
+            $("#linea_"+id).remove();
+
+            var total_act = Number(total) - Number(subtotal);
+
+            $(".subtotalinput").each( function () {
+                var subt = Number($(this).val());
+
+            });
+
+            $('#valor_total').html(total_act.toFixed(5));
+
+
+            //i = i - 1;    
+        } 
+
+        function obtenerValorTipoCambio(fecha) {
+
+            var fecha = $('#appbundle_facturacompra_fecha').val();
+            var respuesta = '';
+
+            $.ajax({
+                method: "POST",
+                async : false ,
+                url: "{{ path('obtenervalortipocambio')}}",
+                data: { fecha: fecha}
+            })
+            .done(function( data ) {
+
+                respuesta = data;
+
+            });
+
+            return respuesta;
+        }
+
+
+        $(document).ready(function() {
+
+            var txtproductoId           = $('#appbundle_detallecompra_producto_productoXLocal');
+            var txtproductoCodigo       = $('#codigo_producto');
+            var txtprecio               = $('#appbundle_detallecompra_producto_precio');
+            var txtcantidad             = $('#appbundle_detallecompra_producto_cantidad');
+            var txtmoneda               = $('#appbundle_facturacompra_compra_compraFormaPago_0_moneda');
+
+            var btnagregar              = $('#agregar');
+
+            var txtproductonuevo        = $('#appbundle_detallecompra_producto_producto_nuevo');
+            var txtcodigoproductonuevo  = $('#appbundle_detallecompra_producto_codigo_producto_nuevo');
+
+            var txtunidad               = $('#appbundle_detallecompra_producto_unidad');
+            var comprar                 = $('#comprar');
+
+            var txtvalortotal           = $('#valor_total');
+
+            var fileArchivo             = $('#appbundle_detallecompra_producto_archivo');
+
+            var tipo_de_cambio          = $('#tipo_de_cambio');
+
+            var formapago               = $('#appbundle_facturacompra_compra_compraFormaPago_0_formaPago');
+            var local                   = $('#appbundle_facturacompra_local');
+
+            var condicionpago           = $('#appbundle_facturacompra_compra_compraFormaPago_0_condicion');
+
+            formapago.on("change",function(e){
+
+                if($(this).val() == 4){
+                    condicionpago.val('pendiente');
+                    $('#nota_credito').removeClass('d-none');
+                }else{
+                    $('#nota_credito').addClass('d-none');
+                }
+
+                if($(this).val() == 2){
+                    condicionpago.val('pendiente');
+                }
+
+                if($(this).val() == 1){
+                    condicionpago.val('pagado');
+                }
+
+            });
+
+            //Limpìamos la lista de productos seleccionados al hacer cambio de moneda
+            $('body').on('focusin', '#appbundle_facturacompra_compra_compraFormaPago_0_moneda', function(){
+
+                $(this).data('val', $(this).val());
+
+            }).on('change','#appbundle_facturacompra_compra_compraFormaPago_0_moneda',function(e){
+
+                var prev = $(this).data('val');
+
+
+                bootbox.confirm({
+                    title: null,
+                    message: "La lista de productos agregados será limpiada. ¿Desea continuar?",
+                    buttons: {
+                        cancel: {
+                            label: '<i class="fa fa-times"></i> Cancelar'
+                        },
+                        confirm: {
+                            label: '<i class="fa fa-check"></i> Confirmar'
+                        }
+                    },
+                    callback: function (result) {
+
+                        if(result){
+
+
+                            $(".prod").each( function () {
+                                $(this).remove();
+                            });
+
+                            $(".linea-separadora").each( function () {
+                                $(this).remove();
+                            });
+
+                            $('#valor_total').html($.number( 0, 2, '.', ',' ));
+
+                        }
+                        else
+                        {
+                            $('#appbundle_facturacompra_compra_compraFormaPago_0_moneda').val(prev);
+
+                        }
+
+                    }
+                });
+
+
+            });
+
+
+            $(".select2").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenerproductos')}}",//"https://api.github.com/search/repositories",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        local: local.val(),
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },
+                placeholder: 'Buscar productos',
+                //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+                minimumInputLength: 3,
+                //templateResult: formatRepo,
+                //templateSelection: formatRepoSelection
+            });
+
+            function formatRepo (repo) {
+
+                if (repo.loading) {
+                    return repo.text;
+                }
+
+                var markup = "<div class='select2-result-repository clearfix'>" +
+                                "<div class='select2-result-repository__meta'>" +
+                                    "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+
+                 markup += "</div></div>";
+
+                return markup;
+            }
+
+            function formatRepoSelection (repo) {
+
+                return repo.text;
+            }
+
+            $('.select2').on('select2:select', function (e) {
+
+                var data = e.params.data;
+                var txtproductovalue  = data.id;
+
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('obtenercodigoproducto')}}",
+                    data: { producto: txtproductovalue }
+                    })
+                    .done(function( data ) {
+                      //console.log(data);
+                      if( data ){
+                        txtunidad.val(data.unidad);
+                      }
+
+                });   
+
+            });
+
+
+
+            btnagregar.on('click',function () {
+
+                if(txtproductoId.val() == '' || txtprecio.val() == '' || txtcantidad.val() == ''){
+
+                    bootbox.alert("Debe seleccionar producto y agregar un precio y cantidad.");
+
+                }else{
+
+
+                    if(txtmoneda.val() == 2){
+
+                        var resp = obtenerValorTipoCambio();
+                        var tipocambio = resp.valor;
+
+                        if(tipocambio == ''){
+
+                            bootbox.alert("Debe definir el tipo de cambio para la fecha seleccionada. Ir a Contabilidad >> Tipo de cambio");
+
+                            return false;
+
+                        }
+
+                        var txtproductonombre = txtproductoId.find("option:selected").text();
+
+                        var subtotal = Number(txtprecio.val()) * Number(txtcantidad.val()) * Number(tipocambio);
+                        var precio_linea = Number(txtprecio.val()) * Number(tipocambio);
+                        var producto_id = Number(txtproductoId.val());
+                        var cantidad = Number(txtcantidad.val());
+                        var compra = '{{ facturaCompra.compra.id }}';
+
+
+                        $('.compra-total').before('<div class="row prod" id="row_'+producto_id+'"><input type="hidden" class="productoid" id="productoid_'+producto_id+'" name="productoid_'+producto_id+'" value="'+producto_id+'"/><div class="col-md-1 "><a href="javascript:eliminar('+producto_id+')" ><i class="fa fa-remove fa-lg"></i></a></div><div class="col-md-5 p-0" >'+ txtproductonombre +' <select id="appbundle_facturacompra_compra_detalleCompra_'+i+'_productoXLocal" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][productoXLocal]" class="form-control d-none"><option value="'+producto_id+'" selected="selected"></option></select></div><div class="col-md-2 p-0"><input type="text" class="form-control precioinput solonumeros" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][precio]" id="appbundle_facturacompra_compra_detalleCompra_'+i+'_precio" value="'+Number(precio_linea).toFixed(5)+'" ></div><div class="col-md-2 p-0"><input type="text" class="form-control cantidadinput solonumeros" id="appbundle_facturacompra_compra_detalleCompra_'+i+'_cantidad" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][cantidad]"  value="'+cantidad+'"></div><div class="col-md-2 subtotal" id="subtotal_'+producto_id+'" ><input type="text" id="appbundle_facturacompra_compra_detalleCompra_'+i+'_subtotal" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][subtotal]" class="form-control subtotalinput solonumeros" readonly="readonly" value="'+Number(subtotal).toFixed(5)+'" ></div></div><hr class="linea-separadora" id="linea_'+producto_id+'" ><select id="appbundle_facturacompra_compra_detalleCompra_'+i+'_compra" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][compra]" class="form-control d-none"><option value="'+compra+'" selected></option></select>');
+
+                        //<select id="appbundle_facturacompra_compra_detalleCompra_'+i+'_compra" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][compra]" class="form-control d-none"><option value="'+compra+'" selected></option></select>
+
+
+                        i = i + 1;
+
+
+
+                        // $('#tblProductosSelect tr:last').after('<tr id="tr_'+txtproductoId.val()+'" class="prd"><td><input type="hidden" name="productoid_'+txtproductoId.val()+'" value="'+txtproductoId.val()+'"/><a href="javascript:eliminar('+txtproductoId.val()+')" ><i class="fa fa-remove fa-lg"></a></i></td><td><input type="text" name="producto_'+txtproductoId.val()+'" class="form-control no-border" value="'+txtproductonombre+'" /></td><td><input type="text" name="precio_'+txtproductoId.val()+'" class="form-control no-border" value="'+precio_linea.toFixed(2)+'" /></td><td><input type="text" name="cantidad_'+txtproductoId.val()+'" class="form-control no-border" value="'+txtcantidad.val()+'" /> </td><td><input type="text" name="" class="form-control no-border subtotal" value="'+subtotal.toFixed(5)+'" /></td></tr>');
+
+
+
+                        var total = 0;
+                        $(".subtotalinput").each( function () {
+                            var subtotal = Number($(this).val());
+                            total += Number($(this).val());
+                        });
+
+                        $('#valor_total').html(total.toFixed(5));
+
+
+                    }else{
+
+
+                        var txtproductonombre = txtproductoId.find("option:selected").text();
+
+                        var subtotal = Number(txtprecio.val()) * Number(txtcantidad.val());
+                        var precio_linea = Number(txtprecio.val()) ;
+                        var producto_id = Number(txtproductoId.val());
+                        var cantidad = Number(txtcantidad.val());
+                        var compra = '{{ facturaCompra.compra.id }}';
+
+
+                        $('.compra-total').before('<div class="row prod" id="row_'+producto_id+'"><input type="hidden" class="productoid" id="productoid_'+producto_id+'" name="productoid_'+producto_id+'" value="'+producto_id+'"/><div class="col-md-1 "><a href="javascript:eliminar('+producto_id+')" ><i class="fa fa-remove fa-lg"></i></a></div><div class="col-md-5 p-0" >'+ txtproductonombre +' <select id="appbundle_facturacompra_compra_detalleCompra_'+i+'_productoXLocal" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][productoXLocal]" class="form-control d-none"><option value="'+producto_id+'" selected="selected"></option></select></div><div class="col-md-2 p-0"><input type="text" class="form-control precioinput solonumeros" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][precio]" id="appbundle_facturacompra_compra_detalleCompra_'+i+'_precio" value="'+Number(precio_linea).toFixed(5)+'" ></div><div class="col-md-2 p-0"><input type="text" class="form-control cantidadinput solonumeros" id="appbundle_facturacompra_compra_detalleCompra_'+i+'_cantidad" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][cantidad]"  value="'+cantidad+'"></div><div class="col-md-2 subtotal" id="subtotal_'+producto_id+'" ><input type="text" id="appbundle_facturacompra_compra_detalleCompra_'+i+'_subtotal" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][subtotal]" class="form-control subtotalinput solonumeros" readonly="readonly" value="'+Number(subtotal).toFixed(5)+'" ></div></div><hr class="linea-separadora" id="linea_'+producto_id+'" ><select id="appbundle_facturacompra_compra_detalleCompra_'+i+'_compra" name="appbundle_facturacompra[compra][detalleCompra]['+i+'][compra]" class="form-control d-none"><option value="'+compra+'" selected></option></select>');
+
+
+                        var total = 0;
+                        $(".subtotalinput").each( function () {
+                            var subtotal = Number($(this).val());
+                            total += Number($(this).val());
+                        });
+
+                        $('#valor_total').html(total.toFixed(5));
+
+
+                    }
+
+
+
+                }
+
+            });
+
+
+            $('body').on('change','.precioinput',function(){
+
+                var valor   = this.value;
+                var id      = this.id.replace(/[^0-9]/g, '');
+
+                var precio      = $('#appbundle_facturacompra_compra_detalleCompra_'+id+'_precio').val();
+                var cantidad    = $('#appbundle_facturacompra_compra_detalleCompra_'+id+'_cantidad').val();
+
+                var total_linea = cantidad * precio;
+
+                $('#appbundle_facturacompra_compra_detalleCompra_'+id+'_subtotal').val(total_linea.toFixed(5));
+
+                var total = 0;
+                $(".subtotalinput").each( function () {
+                    var subtotal = Number($(this).val());
+                    total += Number($(this).val());
+
+                });
+
+                $('#valor_total').html(total.toFixed(5));
+
+            });
+
+            $('body').on('focusin','.cantidadinput',function(){
+
+                $(this).data('val', $(this).val());
+
+            });
+
+
+            $('body').on('change','.cantidadinput',function(){
+
+                var valor   = this.value;
+                var id      = this.id.replace(/[^0-9]/g, '');
+
+
+                var precio      = $('#appbundle_facturacompra_compra_detalleCompra_'+id+'_precio').val();
+                var cantidad    = $('#appbundle_facturacompra_compra_detalleCompra_'+id+'_cantidad').val();
+
+                var total_linea = cantidad * precio;
+                
+                $('#appbundle_facturacompra_compra_detalleCompra_'+id+'_subtotal').val(total_linea.toFixed(5));
+
+                var total = 0;
+                $(".subtotalinput").each( function () {
+                    var subtotal = Number($(this).val());
+                    total += Number($(this).val());
+                });
+
+                $('#valor_total').html(total.toFixed(5));
+
+            });
+
+
+
+            $("form").submit(function(){
+
+                var prd = $(".compra-cuenta").find(".row.prod");
+
+                console.log(prd.length);
+
+                if(prd.length == 0){
+
+                    bootbox.alert("No existen productos agregados!");                    
+                    return false;
+
+                }else{
+
+                    // var extension = fileArchivo.val().replace(/^.*\./, '');
+
+                    // if(extension == 'jpg' || extension == 'png' || extension == 'gif' || extension == 'svg'  || extension == 'jpeg'  || extension == 'pdf' || extension == ''){
+                    //     return true;
+                    // }else{
+                    //     bootbox.alert("El archivo adjunto no tiene el formato permitido (jpg,png,jpeg,gif,pdf)");
+                    //     return false;
+                    // }
+                   
+                }
+
+            });
+
+
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".setcurrentdate").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+            //$(".setcurrentdate").datepicker("setDate", startDate);
+
+
+
+        });
+
+
+    </script>
+          
+{% endblock %}
+
+

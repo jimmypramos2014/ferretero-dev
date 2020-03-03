@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+
+{% endblock %}
+
+
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="container">
+
+        <div class="card mx-auto mt-5">
+            <div class="card-body">
+
+                <div class="row pr-3">
+                    <div class="col-lg-12 ">
+                        <a href="{{ path('productoxlocal_new') }}" class="btn btn-primary pull-right">Registrar producto</a>
+                    </div>
+                </div>
+                <div class="row mt-2 ">
+                    <div class="col-lg-12">
+                        <table id="dtProducto" class="table table-striped table-bordered " style="width: 100%;">
+
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Código</th>
+                                    <th>Producto</th>
+                                    <th>Precio unitario</th>
+                                    <th>Precio por mayor</th>
+                                    <th>Precio compra</th>
+                                    <th class="no-sort tet-center">Acciones</th>
+                                </tr>
+                            </thead>
+
+
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        function eliminar(id) {
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                    },
+                    cancel: {
+                        label: 'Cancelar',
+                    }
+                },                
+                size: 'small',
+                message: "¿Está seguro de eliminar el registro?", 
+                callback: function(res){ 
+                    if(res){
+                        location = id+'/delete';
+                    }
+                }
+            });
+        } 
+
+        $(document).ready(function() {
+
+            var elim = '';
+            {% if 'ROLE_ADMIN' in app.user.roles  %}
+
+                var elim = '<a class="eliminar" href="#" data-toggle="tooltip" data-target="" title="Eliminar"><i class="fa fa-remove fa-lg"></i></a>';
+
+            {% endif %}
+
+            var table = $('#dtProducto').DataTable( {
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },
+                // "search": {
+                //    "smart": false
+                // },                
+                "order": [[ 0, "desc" ]],               
+                "dom": 'Blfrtip',//<"float-left"B><"float-right"f><"float-left col-sm-12 mt-2 ml-0"l>rtip
+                "lengthMenu": [[25, 100, -1],[25, 100, "Todo"]],
+                "pageLength": 25,                
+                "processing": true,
+                "serverSide": true,
+                //"ajax": "{{ path('producto_datatable')}}",
+                "ajax":{
+                    url: "{{ path('producto_datatable')}}",
+                    type:"GET",
+                    data:function(dtp){
+                        // change the return value to what your server is expecting
+                        // here is the path to the search value in the textbox
+                        var searchValue = dtp.search.value;
+                        return dtp;
+                    }
+                },                                                                 
+                "columns": [
+                    { "visible": false },
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                ],             
+                "aoColumnDefs": [
+                  {
+                    "mData": null,
+                    "sClass":  "text-center",
+                    "sDefaultContent": elim +'   <a href="#" data-toggle="tooltip" data-target="" title="Editar" class="editar ml-2"><i class="fa fa-edit fa-lg"></i></a>',
+                    "aTargets": [ -1 ]
+                  }
+                ],
+                responsive: true,
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        //text: '<span class="fa fa-file-excel-o"></span>Excel',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}',
+                        exportOptions: {
+                            modifier: {
+                                search: 'applied',
+                                order: 'applied'
+                            }
+                        }
+                    }
+                ],
+
+                // buttons: [
+                //     {
+                //         extend: 'excelHtml5',
+                //         messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                //     },
+                //     {
+                //         extend: 'pdfHtml5',
+                //         messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                //     },
+                //     {
+                //         extend: 'print',
+                //         messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                //     }
+                // ]  
+
+            });
+
+            $('#dtProducto tbody').on( 'click', '.eliminar', function () {
+                var data = table.row( $(this).parents('tr') ).data();
+                eliminar(data[0]);
+            } );
+
+            $('#dtProducto tbody').on( 'click', '.editar', function () {
+                var data = table.row( $(this).parents('tr') ).data();
+                var url = data[0]+"/edit"
+                $(location).attr('href',url);
+            } );
+
+            // $('#dtProducto').DataTable( {
+            //     "language": {
+            //         "lengthMenu": "Mostrar _MENU_ registros por página",
+            //         "zeroRecords": "No se encontraron registros",
+            //         "info": "Mostrando página _PAGE_ de _PAGES_",
+            //         "infoEmpty": "No existen registros",
+            //         "infoFiltered": "(filtrado de _MAX_ total registros)",
+            //         "search": "Buscar:",
+            //         "paginate": {
+            //             "first":      "Primero",
+            //             "last":       "Último",
+            //             "next":       "Siguiente",
+            //             "previous":   "Anterior"
+            //         },
+            //     },                
+            //     dom: 'Bfrtip',
+            //     "processing": true,
+            //     "serverSide": true,
+            //     "ajax": "{{ path('producto_datatable')}}",
+            //     "deferLoading": 50,              
+            //     buttons: [
+            //         {
+            //             extend: 'excelHtml5',
+            //             messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+            //         },
+            //         {
+            //             extend: 'pdfHtml5',
+            //             messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+            //         },
+            //         {
+            //             extend: 'print',
+            //             messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+            //         }
+            //     ]  
+            // });
+        });
+
+    </script>
+          
+{% endblock %}

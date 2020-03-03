@@ -1,0 +1,371 @@
+{% extends 'base.html.twig' %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+
+{% endblock %}
+{% block body %}
+
+<div class="container">
+
+    <form id="formProducto" action="{{ path('producto_new') }}" class="form-horizontal " role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Información general</div>
+            <div class="card-body">
+
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+
+                        {{ form_row(form.codigo) }}
+
+                    </div> 
+                    <div class="form-group col-md-4 ">
+
+                        <div class="col-md-12 text-center">
+                            {{ generarCodigoBarras(codigo) | raw }}
+                        </div>
+                        <div class="col-md-12 text-center">
+                            <input type="button" value="Imprimir código" class="btn btn-small btn-primary"  onclick="window.open('{{ path('producto_imprimircodigo')}}?codigo={{ codigo }}','_blank');" />
+                        </div>
+                        
+                    </div>
+                </div>
+
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.tipo) }}
+                    </div>                      
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.categoria) }}
+                    </div>                    
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.marca) }}
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form_row(form.nombre) }}
+                    </div>
+   
+
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-6">
+
+                        <label for="codigo_sunat_select" class="required">Código SUNAT *</label>
+
+                        <select class="form-control select2" name="codigo_sunat_select" id="codigo_sunat_select" required="required">
+                          <option value="">Seleccionar código SUNAT</option>
+                        </select>
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                                   
+
+                    </div>      
+                          
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.imagen) }}
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form_row(form.descripcion) }}
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.codigoBarra) }}
+                    </div>
+
+                    <div class="form-group col-md-1">
+                        {{ form_row(form.posicion) }}
+                    </div>
+                    <div class="form-group col-md-1">
+                        {{ form_row(form.peso) }}
+                    </div>                    
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Precios y Unidad</div>
+            <div class="card-body">
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.moneda) }}
+                    </div>                    
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.precioUnitario) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.precioCantidad) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.precioCompra) }}
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        {{ form_label(form.unidadVenta) }}
+                        {{ form_widget(form.unidadVenta,{'attr':{'value':'1'}}) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                         {{ form_label(form.unidadCompra) }}
+                        {{ form_widget(form.unidadCompra,{'attr':{'value':'1'}}) }}
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Stock</div>
+            <div class="card-body">
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+
+                        <table class="table ">
+                            <thead>
+                                <tr>
+                                    <th>Almacen</th>
+                                    <th class="text-left">Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                {% for local in empresa.locales  %}
+
+                                    <tr>
+                                        <td>{{ local | upper }}</td>
+                                        <td class="text-left"><input type="text" class="form-control" id="stock_{{ local.id }}" name="stock_{{ local.id }}" value="0" size="5" /></td>
+                                    </tr>
+                                    
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+    
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Precios por rangos de cantidad</div>
+            <div class="card-body">
+
+
+                <div class="form-row"> 
+
+                    <div class="form-group col-md-6 col-md-offset-2" id="exp_list" data-prototype="{% filter escape %}{{ include('servicioajax/prototypeProductoXPrecio.html.twig', { 'form': form.productoXPrecio.vars.prototype }) }} {% endfilter %} ">
+
+                        <table class="table ">
+
+                            <thead>
+                                <tr>
+                                    <th width="30%">Rango inicial</th>
+                                    <th width="30%">Rango final</th>
+                                    <th width="30%">Precio</th>
+                                    <th width="10%"></th>
+                                </tr>
+                            </thead>
+                            
+                            <tbody class="transaccion">
+                                {% for productoXPrecio in form.productoXPrecio  %}
+
+                                    <tr class="items">
+                                        <td>{{ form_widget(productoXPrecio.rangoInicial) }}</td>
+                                        <td>{{ form_widget(productoXPrecio.rangoFinal) }}</td>
+                                        <td>{{ form_widget(productoXPrecio.precio) }}</td>
+                                        <td><a href="javascript:void(0)" class="btn btn-danger remove-item" ><i class="fa fa-trash"></i></a></td>
+                                    </tr>
+
+                                {% endfor  %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td><a href="javascript:void(0)" class="btn btn-info add-item" ><i class="fa fa-plus "></i></a></td>
+                                    <td class="text-left" colspan="3"></td>
+                                </tr>
+                            </tfoot>
+
+
+
+                        </table>
+                    </div>
+
+                </div>
+
+
+
+            </div>
+        </div>
+
+        {{ form_widget(form._token) }}
+
+        <div class="mt-4">
+            <p class="pull-right">
+                <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('producto_index')}}'" />            
+                <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+            </p>
+        </div>
+        
+
+    </form>
+
+    <div class="modal codigo" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Código de barras</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="guardar_cliente">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+    <script type="text/javascript">
+
+        var $collectionHolder;
+
+
+        $(document).ready(function() {
+
+            var um_venta_select          = $("#appbundle_producto_unidadVenta");
+            var um_compra_select         = $("#appbundle_producto_unidadCompra");    
+            
+            um_venta_select.on("change", function(){
+
+                var data = {
+                  unventa      : this.value,
+                  autorizado  : 'si',
+                }
+
+                um_compra_select.val('').attr("disabled", "disabled");
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('obtener_unidad_compra')}}",
+                  data: data,
+                  success: function(data){
+                    um_compra_select.html(data).removeAttr("disabled");
+                  }
+
+                });
+            });
+
+
+            // Obtenemos el objeto colector
+            $collectionHolder = $('#exp_list');
+
+            $collectionHolder.data('index',$collectionHolder.find('.items').length);
+
+            
+            $('.add-item').on('click',function(){
+
+                addNewForm($collectionHolder);
+
+            })
+
+
+            $('body')
+                .on('click','.remove-item',function(e) {
+
+                    $(e.target).parents('.items').remove();
+                    
+                });
+
+
+            function addNewForm($collectionHolder) {
+
+                $collectionHolder.data('index',$collectionHolder.find('.items').length);
+
+                //Creamos el nuevo formulario y agregamos al colector
+                // obteniendo el prototype
+                var prototype = $collectionHolder.data('prototype');
+                // obtenemos el index 
+                var index  =  $collectionHolder.data('index');
+                // Creamos el form
+                var newForm = prototype.replace(/__name__/g, index);
+
+                $collectionHolder.data('index',index++);
+
+                $('.transaccion').append(newForm);
+
+            }
+
+
+            var newOption = new Option('[27113201] Conjuntos generales de herramientas', 13365, false, true);
+            $('#codigo_sunat_select').append(newOption).trigger('change');                
+
+            // Selecciona el codigo SUNAT
+            $(".select2").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenercodigosunat')}}",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },          
+                placeholder: 'Buscar código',
+                minimumInputLength: 2,
+            });
+            
+        });
+
+    </script>
+
+{% endblock %}

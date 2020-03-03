@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <meta charset="utf-8">
+    <head>
+        <title>Boleta</title>
+        <style type="text/css">
+
+            @font-face {
+                font-family: Cambria;
+                src: url({{ 'http://' ~ host ~ '/fonts/Cambria.ttf' }} ) format('truetype');
+            }
+
+            body { 
+                font-family: 'Cambria';
+                font-size:11pt;
+                background-size: 100%;
+            }
+        
+        </style>
+    </head>
+
+    <body>
+
+
+        <div style="position:absolute; top: 15px; left: 60px; color: black;">
+
+            <table  width="858" border="0" style="border-spacing: .5em;">
+                <tr>
+                    <td width="50%" style="">
+                        {% if localObj.empresa.logo %}
+                            <img src="{{ app.request.getSchemeAndHttpHost() ~ '/uploads/imagenes/' ~ localObj.empresa.logo }}" alt="" width="320px" height="80px">
+                        {% endif %}
+                        <br>
+
+                        <span style="font-weight:bold;" >{{ localObj.empresa.nombre | upper }}</span><br>
+                        <span style="" >{{ localObj.empresa.direccion | upper }}</span><br>
+
+                        <span style="font-weight:bold;">FECHA EMISIÓN: </span>{{ facturaVenta.fecha | date('d/m/Y') }}<br>
+                        <span style="font-weight:bold;">FECHA GENERACIÓN: </span>{{ "now" | date('d/m/Y') }}
+                    </td>
+
+                    <td width="50%" align="center" style="background-color:#EEEDEB;border-radius: 5px;">
+                        <span style="font-weight:bold;font-size:14pt;">{{ localObj.empresa.ruc ? 'RUC: ' ~ localObj.empresa.ruc : '' }}</span><br><br>
+                        <span style="font-weight:bold;font-size:20pt;">COMUNICACIÓN DE BAJA</span> <br><br>
+                        <span style="font-weight:bold;font-size:16;">NÚMERO : {{ facturaVenta.venta.ticketAnulacion ? facturaVenta.venta.ticketAnulacion : '' }}</span> <br><br>
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+            <br>
+
+            <table  width="858" border="0" >
+                <tr style="background-color:#EEEDEB;">
+                    <th align="center">FECHA</th>
+                    <th align="center">TIPO DE DOCUMENTO</th>
+                    <td align="center">SERIE</td>
+                    <th align="center">NÚMERO</th>
+                    <th align="center">MOTIVO</th>
+                </tr>
+                <tr>
+                    <td align="center" >{{ facturaVenta.fecha | date('d/m/Y') }}</td>
+                    <td align="center">{{ facturaVenta.documento | upper }} </td>
+                    <td align="center">{{ facturaVenta.ticket | slice(0, 4) }}</td>
+                    <td align="center">{{ facturaVenta.ticket[5:] }}</td>
+                    <td align="center">{{ facturaVenta.venta.motivoAnulacion ? facturaVenta.venta.motivoAnulacion : '' }}</td>                
+                </tr>
+                              
+            </table>
+
+
+        </div>
+
+    </body>
+</html>

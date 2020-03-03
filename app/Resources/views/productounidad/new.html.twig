@@ -1,0 +1,214 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="alert d-none" role="alert">
+    </div>
+
+    <div class="container">
+
+        <form id="form" action="{{ path('productounidad_new') }}" class="form-horizontal needs-validation" role="form" method="post"  novalidate>
+                <div class="card mx-auto mt-5">
+                    <div class="card-header">Información general</div>
+                    <div class="card-body">                
+
+                        <div class="form-row">
+                            <div class="form-group col-md-2">
+                                {{ form_row(form.codigo) }}
+                   
+                            </div>
+                            <div class="form-group col-md-3">
+                                {{ form_row(form.nombre) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                                
+                            </div>
+                            <div class="form-group col-md-2">
+                                {{ form_row(form.abreviatura) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                 
+                            </div>
+
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-2">
+                                {{ form_row(form.tipo) }}
+                                  
+                            </div>
+                            <div class="form-group col-md-3">
+                                {{ form_label(form.categoria) }}
+
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        
+                                        <span class="input-group-text" id="basic-addon1" data-toggle="modal" data-target="#categoriaModal">
+                                            <a href="#">
+                                                <i class="fa fa-plus-circle fa-lg" data-toggle="tooltip" title="Agregar nueva categoría"></i> 
+                                            </a>                                                    
+                                        </span>
+                                       
+                                    </div>
+                                    {{ form_widget(form.categoria) }}
+                                </div>
+                                                                 
+                            </div>
+                            <div class="form-group col-md-2">
+                                {{ form_row(form.ratio) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                           
+                            </div>                       
+                        </div>
+                        <div class="form-row">
+
+                            <div class="form-group col-md-6">
+                                {{ form_row(form.descripcion) }}
+
+                            </div>
+                                       
+                        </div>
+
+
+                    </div>
+                </div> 
+
+
+                {{ form_row(form.empresa) }}
+                {{ form_row(form.estado) }}
+
+                {{ form_widget(form._token) }}
+
+                <div class="mt-4">
+                    <p class="pull-right">
+                        <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('productounidad_index')}}'" />            
+                        <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+                    </p>
+                </div>
+
+        </form>
+
+    </div>
+
+    <div class="modal hide fade" id="categoriaModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Registrar categoría</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+            <form id="formCategoria"  action="{{ path('productounidadcategoria_new') }}" class="form-horizontal needs-validation" role="form" method="post"  novalidate>
+                <div class="modal-body">
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            {{ form_row(formCategoria.codigo) }}
+               
+                        </div>
+                        <div class="form-group col-md-8">
+                            {{ form_row(formCategoria.nombre) }}
+                            <div class="invalid-feedback">
+                                Este valor es requerido.
+                            </div>                                                 
+                        </div>
+
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            {{ form_row(formCategoria.descripcion) }}
+                        </div>                                       
+                    </div>
+
+
+                    {{ form_row(formCategoria.empresa) }}
+                    {{ form_widget(formCategoria._token) }}
+                    
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-primary" id="guardarCategoria" value="Guardar">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}  
+
+    <script src="http://malsup.github.com/jquery.form.js"></script> 
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var tipo_select              = $("#appbundle_productounidad_tipo");
+            var ratio_select             = $("#appbundle_productounidad_ratio");
+            var categoria_select         = $("#appbundle_productounidad_categoria");
+            var btn_guardar              = $("#guardarCategoria");
+            var formCategoria            = $("#formCategoria");
+            var categoria_nombre         = $("#appbundle_productounidadcategoria_nombre");
+                   
+
+            tipo_select.on("change", function(){
+
+                if(this.value == 'referencial'){
+                    ratio_select.val(1);
+                    ratio_select.prop('readonly',true);
+                }else{
+                    ratio_select.val('');
+                    ratio_select.prop('readonly',false);
+                }
+            });
+     
+            btn_guardar.on("click", function(){
+
+                console.log('hola');
+                if(categoria_nombre.val() == ''){
+                    bootbox.alert("Debe ingresar un nombre de categoría.");
+                }else{
+
+                    formCategoria.ajaxSubmit({
+
+                        type: formCategoria.attr('method'),
+                        url: formCategoria.attr('action'),
+                        data: formCategoria.serialize(),
+                        dataType:'json',
+                        cache:false,
+                        success: function(data) {
+
+                            console.log(data);
+                            categoria_select.append( data['opcion'] );
+                            $('#categoriaModal').modal('hide');
+                            formCategoria.trigger("reset");
+
+                            $('.alert').removeClass('d-none');
+                            $('.alert').addClass('alert-success');
+                            $('.alert').css('display','block');
+                            $('.alert').html(data['mensaje']);
+
+                        },
+                        complete: function(){
+                            console.log('completo!!');
+                        },
+                        error: function(err){
+                            console.log(err);
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
+    </script>
+
+{% endblock %}  

@@ -1,0 +1,227 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+ <div class="container">
+
+    <form id="form" action="{{ path('empresalocal_new') }}" class="form-horizontal " role="form" method="post"  novalidate>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Información general</div>
+            <div class="card-body">    
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.codigo) }}
+  
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        {{ form_row(form.nombre) }}
+            
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form_row(form.empresa) }}
+                
+                    </div>
+                
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.telefono) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.limite_venta) }}
+
+                    </div> 
+                    <div class="form-group col-md-2 mt-5">
+                        {{ form_label(form.ventaNegativo) }}
+                        {{ form_widget(form.ventaNegativo) }}
+
+                    </div>
+                    <div class="form-group col-md-2 mt-5">
+                        {{ form_label(form.mostrarGuiaRemision) }}
+                        {{ form_widget(form.mostrarGuiaRemision) }}
+
+                    </div>                                                            
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.departamento) }}
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.provincia) }}
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.distrito) }}
+                    </div>                       
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.email) }}
+               
+                    </div>
+                    
+                    <div class="form-group col-md-6">
+                        {{ form_row(form.direccion) }}
+               
+                    </div>
+
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-4">
+                        {{ form_row(form.imagenProductoDefault) }}
+               
+                    </div>
+                      
+                    <div class="form-group col-md-4">
+                        {{ form_row(form.imagenCategoriaDefault) }}
+               
+                    </div>                               
+                </div>                
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.prefijoVoucher) }}
+                          
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.serieGuiaremision) }}
+                          
+                    </div>                    
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.serieBoleta) }}
+                          
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.serieFactura) }}
+                         
+                    </div>                       
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.facturacion_electronica) }}
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        {{ form_row(form.url_facturacion) }}
+                    </div>
+                    <div class="form-group col-md-6">
+                        {{ form_row(form.token_facturacion) }}
+                    </div>
+                   
+                </div>
+
+
+
+            </div>
+        </div>
+        {{ form_row(form.estado) }}
+        {{ form_widget(form._token) }}
+
+        <div class="mt-4">
+            <p class="pull-right">
+                <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('empresalocal_index')}}'" />            
+                <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+            </p>
+        </div>
+        
+
+    </form>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}  
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var region_select            = $("#appbundle_empresalocal_departamento");
+            var provincia_select         = $("#appbundle_empresalocal_provincia");    
+            var distrito_select          = $("#appbundle_empresalocal_distrito");
+            var facturacion_electronica  = $("#appbundle_empresalocal_facturacion_electronica");
+            var token                    = $("#appbundle_empresalocal_token_facturacion");
+            var url                      = $("#appbundle_empresalocal_url_facturacion");
+
+
+            region_select.on("change", function(){
+
+                var data = {
+                  region      : this.value,
+                  autorizado  : 'si',
+                }
+
+                provincia_select.val('').attr("disabled", "disabled");
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('obtener_provincia_desde_region')}}",
+                  data: data,
+                  success: function(data){
+                    provincia_select.html(data).removeAttr("disabled");
+                  }
+
+                });
+            });
+
+            provincia_select.on("change", function(){
+
+                var data = {
+                  provincia   : this.value,
+                  autorizado  : 'si',
+                }
+
+                distrito_select.val('').attr("disabled", "disabled");
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('obtener_distrito_desde_provincia')}}",
+                  data: data,
+                  success: function(data){
+                    distrito_select.html(data).removeAttr("disabled");
+                  }
+
+                });
+            });
+
+
+            $("form").submit(function(event){
+
+                if(facturacion_electronica.val() == 1){
+
+
+                    if(token.val() == '' || url.val() == ''){
+                        bootbox.alert('Se ha seleccionado generar Facturación Electrónica por lo tanto debe ingresar un valor para el TOKEN y la ruta URL');
+                        return false;
+                    }
+
+                }else{
+
+                    return true;
+
+                }
+
+                return true;
+                
+            })                 
+        });
+
+    </script>
+
+{% endblock %}  

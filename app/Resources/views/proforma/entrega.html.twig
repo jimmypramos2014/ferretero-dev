@@ -1,0 +1,659 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="container">
+
+        <div class="row pr-3">
+            <div class="col-lg-12 ">
+                <a href="{{ path('proforma_index') }}" class="btn btn-primary pull-left">Regresar</a>
+            </div>
+        </div>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">
+                Seleccione los productos que va a entregar.
+            </div>
+
+            <form id="form" target="blank" onsubmit="window.open('about:blank','blank','width=595, height=842');" action="{{ path('proforma_entrega_procesar') }}" class="form-horizontal " role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+            <div class="card-body">
+
+                <div class="row mt-2 ">
+                    <div class="col-lg-12">
+                        <table id="detalle" class="table table-striped table-bordered">                            
+                            <thead>
+                                <tr>
+                                    <th>Nro.Ticket</th>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Cantidad por entregar</th>
+                                    <th>Cliente</th>
+                                    <th class="text-center"><input type="checkbox" id="select_todo" name="" /></th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% set item = 1 %}
+                            {% for detalle in facturaVenta.venta.detalleVenta %}
+                                <tr>
+                                    <td>{{ facturaVenta.numeroProforma }}</td>
+                                    <td>{{ detalle.productoXLocal.producto.nombre }}</td>
+                                    <td>{{ detalle.cantidad }}</td>
+
+                                    {% set saldo_x_entregar = detalle.cantidad - detalle.cantidadEntregada %}
+                                    {% if  saldo_x_entregar == 0 %} 
+                                        <td>Producto entregado</td>
+                                        {% else %}
+                                        <td><input type="text" class="form-control solonumeros" id="" value="{{saldo_x_entregar}}" name="cantidad_{{ detalle.id }}" size="2"/></td>   
+                                    {% endif %}
+                                    
+                                    <td>{{ facturaVenta.clienteNombre }}</td>
+                                    <td class="text-center">
+                                        {% if  saldo_x_entregar != 0 %}
+                                            <input type="checkbox" id="" class="select" name="select_{{ detalle.id }}" />
+                                        {% endif %}
+                                    </td>
+                                    
+                                </tr>
+                                {% set item = item + 1 %}
+                            {% endfor %}
+                            <input type="hidden" class="form-control" id="proforma_id" value="{{ facturaVenta.id }}" name="proforma_id" size="2"/>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <div class="row mt-2 mb-4 ">
+                    <div class="col-lg-12 ">
+                        <input type="submit" class="btn btn-small btn-primary pull-right ml-2 " id="btn_procesar" value="Procesar entrega e imprimir guía" />
+                    </div>                    
+                </div>
+
+            </div>
+
+
+            </form>
+
+        </div>
+
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">
+                Lista de entregas realizadas
+            </div>
+
+            <div class="card-body">
+
+                <div class="row mt-2 ">
+                    <div class="col-lg-12">
+                        <table id="entregas_realizadas" class="table table-striped table-bordered">                            
+                            <thead>
+                                <tr>
+                                    <th>Fecha de entrega</th>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Usuario que procesó la entrega</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% set item = 1 %}
+                            {% set identificador = '' %}
+                            {% for entrega in entregas %}
+
+                                {% if entrega.identificador != identificador %}
+                                    <tr class="bg-secondary text-white "> 
+                                        <td colspan="4">ENTREGA {{ item }}</td>
+
+                                        <td class="text-center">
+
+                                            <a href="#" data-toggle="modal" data-target="#modalEntrega" data-identificador="{{ entrega.identificador }}" class="mr-2" >
+                                                <i class="fa fa-user fa-lg text-white" data-toggle="tooltip" title="Agregar datos de entrega"></i>                                            
+                                            </a>   
+                                            <a href="javascript:window.open('{{ path('proforma_imprimir_entregaparcial', { 'id': facturaVenta.id ,'identificador':entrega.identificador }) }}','blank','width=595, height=842')" class="mr-2" >
+                                                <i class="fa fa-print fa-lg text-white" data-toggle="tooltip" title="Imprimir guía de entrega"></i>                                                
+                                            </a>
+
+                                            {#{% if facturaVenta.tipo.id == 2 %}#}
+
+                                                {#{% if proforma.facturaVenta.documento == 'factura' %}#}
+
+                                                    <span>||</span>
+
+                                                    <a href="#" data-toggle="modal" data-target="#modalTransporte" data-identificador="{{ entrega.identificador }}" class="mr-2 ml-2">
+                                                        <i class="fa fa-truck fa-lg text-white" data-toggle="tooltip" title="Agregar datos de transporte"></i>                                            
+                                                    </a>
+
+                                                    {% set datosTransporte = obtenerDatosEntregaParcialTransporte(entrega.identificador) %}
+
+                                                    {% if datosTransporte != '' %}
+
+                                                        <a href="javascript:window.open('{{ path('proforma_imprimir_guiaremision_parcial', { 'id': facturaVenta.id ,'identificador':entrega.identificador }) }}','blank','width=595, height=842')" class=" mr-2" >
+                                                            <i class="fa fa-print fa-lg text-white" data-toggle="tooltip" title="Imprimir guía de remision"></i>                                                
+                                                        </a>
+
+                                                    {% endif %}
+
+                                                {#{% endif %}#}
+
+                                            {#{% endif %}#}
+
+                                        </td>
+                                    </tr>
+                                    {% set item = item + 1 %}
+                                {% endif %}
+
+                                <tr>
+                                    <td>{{ entrega.fecha | date('d/m/Y H:i') }}</td>
+                                    <td>{{ entrega.detalleVenta.productoXLocal.producto.nombre }}</td>
+                                    <td>{{ entrega.cantidad }}</td>
+                                    <td>{{ entrega.usuario.username }}</td>
+                                    <td></td>
+                                   
+                                </tr>
+
+                                
+                                {% set identificador = entrega.identificador %}
+
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="modal fade " tabindex="-1" role="dialog" aria-labelledby="entregaModalLabel" id="modalEntrega" aria-hidden="true">
+        <div class="modal-dialog ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Datos de entrega</h5>
+                    <button type="button" class="close" onclick="$('#modalEntrega').modal('hide');" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>                    
+                </div>
+
+                    <div class="modal-body">
+
+                        <div class="form-row">
+                           
+                            <div class="form-group col-md-8">
+                                <label for="cliente">Nombre del Cliente</label>           
+                                <input type="text" class="form-control" name="cliente" id="cliente"  />
+                            </div>
+
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-12">
+                                <label for="direccion">Dirección</label>                  
+                                <input type="text" class="form-control" name="direccion" id="direccion" />
+                            </div>
+
+                        </div>
+
+                        <input type="hidden" class="form-control" name="identificador" id="identificador" />
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="btn_guardar">Guardar</button>
+                        <button type="button" class="btn btn-secondary" onclick="$('#modalEntrega').modal('hide');">Cerrar</button>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade " tabindex="-1" role="dialog" aria-labelledby="transporteModalLabel" id="modalTransporte" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Datos de transporte</h5>
+                    <button type="button" class="close" onclick="$('#modalTransporte').modal('hide');" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>                    
+                </div>
+
+                <form id="form_transporte"  action="{{ path('registrar_datos_entrega_parcial_transporte') }}" class="form" role="form" method="post"  novalidate>
+                    <div class="modal-body">
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-4">
+                    
+                              
+                                {{ form_label(formTransporte.transporte) }}
+                                
+                                <div class="input-group mb-3">
+                                    {{ form_widget(formTransporte.transporte) }}
+
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="agregar_empresa_transporte" data-toggle="modal" data-target="#empresaTransporteModal">
+                                            <i class="fa fa-plus fa-lg " data-toggle="tooltip" title="Agregar empresa de transporte"></i>
+                                                
+                                        </span>
+                                    </div>
+                                                                 
+                                </div>
+         
+
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.puntoPartida) }}              
+                             
+                            </div>
+                           
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.puntoLlegada) }}              
+                             
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-4">
+                             
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.remitente) }}                                       
+                            </div>
+                           
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.destinatario) }}                                       
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-4">
+                             
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.rucRemitente) }}                                       
+                            </div>
+                           
+                            <div class="form-group col-md-4">
+                                {{ form_row(formTransporte.rucDestinatario) }}                                       
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.fechaTraslado) }}
+                            </div>
+                           
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.costoMinimo) }}                                       
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.marca) }}
+                            </div>
+
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.placa) }}                                       
+                            </div>
+                           
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.constanciaInscripcion) }}                                       
+                            </div>
+
+                            <div class="form-group col-md-3">
+                                {{ form_row(formTransporte.licenciaConducir) }}                                       
+                            </div>
+
+                        </div>
+                        
+                        {{ form_widget(formTransporte._token) }}
+
+                        {{ form_widget(formTransporte.identificador) }}
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="guardar_transporte">Guardar</button>
+                        <button type="button" class="btn btn-secondary" onclick="$('#modalTransporte').modal('hide');">Cerrar</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal hide fade" id="empresaTransporteModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Agregar Empresa de transporte</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+            <form id="form_empresatransporte"  action="{{ path('transporte_new') }}" class="form needs-validation" role="form" method="post"  novalidate>
+                <div class="modal-body">
+
+                    <div class="form-row">
+                        <div class="col-md-8">
+                            {{ form_row(formEmpresaTransporte.nombre) }}
+                                                                         
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            {{ form_row(formEmpresaTransporte.ruc) }}
+                            
+                        </div>                                       
+                    </div>
+
+                    {{ form_widget(formEmpresaTransporte.estado) }}
+                    {{ form_widget(formEmpresaTransporte.empresa) }}
+                    {{ form_widget(formEmpresaTransporte._token) }}
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btn_empresatransporte" >Guardar</button>                  
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}
+
+    <script type="text/javascript">
+
+
+
+        $(document).ready(function() {
+
+            var btn_procesar  = $('#btn_procesar');
+            var btn_entrega   = $('#btn_guardar');
+
+
+            function contarCheckbox(){
+
+                var j = 0;
+                $(".select").each( function () {
+
+                    j = j + 1;
+
+                });
+
+                if(j == 0)
+                {
+                    btn_procesar.prop('disabled',true);
+                }else{
+                    btn_procesar.prop('disabled',false);
+                }
+
+            }
+
+            contarCheckbox();
+
+            $("form").submit(function(event){
+
+                setTimeout(function(){                            
+                    location.reload();
+                }, 1500);
+
+            });
+
+            $('#select_todo').change(function() {
+
+                var check = $(this).is(':checked');
+                console.log(check);
+
+                $(".select").each( function () {
+                    $(this).prop('checked', check);
+                });
+                
+            })
+
+
+            $('#modalEntrega').on('shown.bs.modal', function (event) {
+
+                var button = $(event.relatedTarget);
+                var identificador = button.data('identificador');
+                var modal = $(this);
+
+                $('#identificador').val(identificador);
+
+                $.ajax({
+                    method: "POST",
+                    url:"{{ path('obtener_entrega_datos_envio')}}",
+                    data: { 'identificador':identificador,'entidad':'DetalleVentaEntregaDatosEnvio'},
+                    dataType: 'json',
+                    success: function(data){
+
+                        $('#cliente').val(data['cliente']);
+                        $('#direccion').val(data['direccion']);
+
+                    }
+                });
+
+            });        
+
+
+            btn_entrega.on('click', function (event) {
+
+                var cliente   = $('#cliente').val();
+                var direccion = $('#direccion').val();
+                var identificador = $('#identificador').val();
+
+                $.ajax({
+                    method: "POST",
+                    url:"{{ path('registrar_entrega_datos_envio')}}",
+                    data: { 'cliente':cliente,'direccion':direccion,'identificador':identificador,'entidad':'DetalleVentaEntregaDatosEnvio'},
+                    //dataType: 'json',
+                    success: function(data){
+
+                        if(data['exito'] == true){
+                            bootbox.alert("La información fue registrada exitosamente.");
+                        }
+
+                    }
+                });
+
+            });     
+
+
+            //Datos de transrporte
+
+            $('#modalTransporte').on('shown.bs.modal', function (event) {
+
+                var button = $(event.relatedTarget);
+                var identificador = button.data('identificador');
+                var modal = $(this);
+
+                console.log(identificador);
+
+                $('#appbundle_detalleventaentregadatosenvio_identificador').val(identificador);
+
+                $.ajax({
+                    method: "POST",
+                    url:"{{ path('obtener_datos_entrega_parcial_transporte')}}",
+                    data: { 'identificador':identificador},
+                    dataType: 'json',
+                    success: function(data){
+
+                        if(data["fechaTraslado"] != ''){
+
+                            $('#appbundle_detalleventaentregadatosenvio_fechaTraslado').val(data['fechaTraslado']);
+
+                        }else{
+
+                            var d           = new Date();
+                            var currDay     = d.getDate();
+                            var currMonth   = d.getMonth();
+                            var currYear    = d.getFullYear();
+                            var startDate   = new Date(currYear, currMonth, currDay);
+
+                            $("#appbundle_detalleventaentregadatosenvio_fechaTraslado").datepicker("setDate", startDate);
+
+                        }
+
+                        $('#appbundle_detalleventaentregadatosenvio_puntoPartida').val(data['puntoPartida']);
+                        $('#appbundle_detalleventaentregadatosenvio_puntoLlegada').val(data['puntoLlegada']);
+                        $('#appbundle_detalleventaentregadatosenvio_remitente').val(data['remitente']);
+                        $('#appbundle_detalleventaentregadatosenvio_destinatario').val(data['destinatario']);
+                        $('#appbundle_detalleventaentregadatosenvio_rucRemitente').val(data['rucRemitente']);
+                        $('#appbundle_detalleventaentregadatosenvio_rucDestinatario').val(data['rucDestinatario']);
+                        $('#appbundle_detalleventaentregadatosenvio_costoMinimo').val(data['costoMinimo']);
+                        $('#appbundle_detalleventaentregadatosenvio_marca').val(data['marca']);
+                        $('#appbundle_detalleventaentregadatosenvio_placa').val(data['placa']);
+                        $('#appbundle_detalleventaentregadatosenvio_constanciaInscripcion').val(data['constanciaInscripcion']);
+                        $('#appbundle_detalleventaentregadatosenvio_licenciaConducir').val(data['licenciaConducir']);
+                        $('#appbundle_detalleventaentregadatosenvio_transporte').val(data['transporte']);
+                    }
+                });
+
+
+            });
+
+
+            $(".fecha-transporte").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true,
+              
+            });
+
+            //$(".fecha-transporte").datepicker("setDate", startDate);
+
+            var btn_guardar         = $('#guardar_transporte');
+            var form_transporte     = $("#form_transporte");
+            var form_empresatransporte     = $("#form_empresatransporte");
+            var empresatransporte   = $("#appbundle_detalleventaentregadatosenvio_transporte");
+
+            var mostrar_guia        = $('#mostrar_guia');
+
+
+            btn_guardar.on('click',function(){
+
+                //console.log(form_transporte.serialize());
+                $.ajax({
+                    method: form_transporte.attr('method'),
+                    url:form_transporte.attr('action'),
+                    data: form_transporte.serialize(),
+                    dataType: 'json',
+                    success: function(data)
+                    {
+                        //console.log(data);
+                        if(data.hasOwnProperty("response") && data.response === "success")
+                        {
+
+                            if(data.hasOwnProperty("empresatransporte"))
+                            {
+                                //empresatransporte.append(data.empresatransporte);
+                                $('#transporteModal').modal('hide');
+                                bootbox.alert("Los datos de transporte fueron agregados correctamente.");
+                                location.reload();
+
+                                                            
+                            }
+                            else
+                            {
+                                console.log("Transporte no agregado");
+                            }
+                        }
+                    },
+                    error: function(jqXHR, exception)
+                    {
+                        if(jqXHR.status === 405)
+                        {
+                            console.error("Metodo no permitido!");
+                        }
+                    }
+                });
+
+            });
+
+            var btn_empresatransporte    = $("#btn_empresatransporte");
+
+            btn_empresatransporte.on('click',function(e){
+
+                if(form_empresatransporte[0].checkValidity() === false) {
+                    bootbox.alert("Completar todos los campos...");
+                }else{
+
+                    $.ajax({
+                        method: form_empresatransporte.attr('method'),
+                        url:form_empresatransporte.attr('action'),
+                        data: form_empresatransporte.serialize(),
+                        dataType: 'json',
+                        success: function(data)
+                        {
+                            //console.log(data);
+                            if(data.hasOwnProperty("response") && data.response === "success")
+                            {
+
+                                if(data.hasOwnProperty("empresatransporte"))
+                                {
+                                    empresatransporte.append(data.empresatransporte);
+                                    $('#empresaTransporteModal').modal('hide');
+                                    bootbox.alert("La empresa de transporte fue agregada correctamente.");
+                                                                 
+                                }
+                                else
+                                {
+                                    console.log("Categoria no agregada");
+                                }
+                            }
+                        },
+                        error: function(jqXHR, exception)
+                        {
+                            if(jqXHR.status === 405)
+                            {
+                                console.error("Metodo no permitido!");
+                            }
+                        }
+                    });
+
+
+                }
+
+            });
+
+
+                                    
+        });
+
+    </script>
+
+{% endblock %}

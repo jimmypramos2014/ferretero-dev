@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+    <style></style>
+
+{% endblock %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+    
+<div class="container">
+    <form id="form" action="{{ path('notacreditocompra_edit',{'id':notaCreditoCompra.id}) }}" class="form-horizontal needs-validation" role="form" method="post"  novalidate>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Información general</div>
+            <div class="card-body">
+
+                <div class="form-row">
+             
+                    <div class="form-group col-md-4">
+                        {{ form_row(edit_form.fecha) }}
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.numero) }}
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                    </div>
+                
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.valor) }}
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                    </div>
+
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        {{ form_row(edit_form.local) }}
+                    </div>
+                    <div class="form-group col-md-6">
+                        {{ form_row(edit_form.facturaCompra) }}
+                    </div>
+                     
+                </div>
+
+
+            </div>
+        </div>
+
+
+        {{ form_row(edit_form.estado) }}
+        {{ form_widget(edit_form._token) }}
+        <div class="mt-4">
+            <p class="pull-right">
+                <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('notacreditocompra_index')}}'" />            
+                <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+            </p>
+        </div>
+        
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}  
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+
+            var provnombre_text          = $("#appbundle_empresa_nombre");
+            var provdireccion_text       = $("#appbundle_empresa_direccion");
+            var provruc_text             = $("#appbundle_empresa_ruc");
+            var btn_buscar               = $("#buscar_ruc");
+
+            $('.select2-multiple').select2();
+
+
+            $(".setcurrentdate").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+
+            
+
+        });
+
+    </script>
+
+{% endblock %}  

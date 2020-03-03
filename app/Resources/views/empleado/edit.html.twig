@@ -1,0 +1,184 @@
+{% extends 'base.html.twig' %}
+{% block stylesheets %}
+
+    {{ parent() }}
+    <style type="text/css">
+
+        #message {
+            display:none;
+        }
+
+
+    </style>
+{% endblock %}
+{% block body %}
+
+<div class="container">
+
+    <form id="form" action="{{ path('empleado_edit', {'id': empleado.id}) }}" class="form-horizontal " role="form" method="post"  novalidate>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Información general</div>
+            <div class="card-body">
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        {{ form_row(edit_form.nombres) }}
+                       
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form_row(edit_form.apellidoPaterno) }}
+                    
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form_row(edit_form.apellidoMaterno) }}
+                     
+                    </div>            
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.dni) }}
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.email) }}
+                     
+                    </div>  
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.puesto) }}
+
+                    </div>                          
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.local) }}
+
+                    </div>            
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.usuario.username,{'attr':{'class':'form-control'}} ) }}
+                   
+                    </div>
+                    <div class="form-group col-md-2">
+
+                        {{ form_label(edit_form.usuario.plainPassword.first) }}
+                        {{ form_errors(edit_form.usuario.plainPassword.first) }}
+                        {{ form_widget(edit_form.usuario.plainPassword.first, { 'attr': {'class': 'form-control ','value':'abcde1' } }) }}
+                        
+                        <div class="p-0" id="message">
+                          <div class="alert alert-danger font-italic" id="number">Incluir 1 número</div>
+                          <div class="alert alert-danger font-italic" id="length">Mínimo 6 caracteres</div>
+                        </div>    
+                    </div>  
+                    <div class="form-group col-md-2">
+                        {{ form_label(edit_form.usuario.plainPassword.second) }}
+                        {{ form_errors(edit_form.usuario.plainPassword.second) }}
+                        {{ form_widget(edit_form.usuario.plainPassword.second, { 'attr': {'class': 'form-control','value':'abcde1' } }) }}
+                        
+                      
+                    </div>  
+
+                </div>
+
+            </div>
+        </div>
+
+
+
+        {{ form_widget(edit_form.estado) }}
+        {{ form_widget(edit_form._token) }}
+        
+        <div class="mt-4">
+            <p class="pull-right">
+                <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('empleado_index')}}'" />            
+                <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+            </p>
+        </div>
+        
+
+    </form>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }} 
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            $('#appbundle_empleado_usuario_plainPassword_first').prop('required',false);
+            $('#appbundle_empleado_usuario_plainPassword_second').prop('required',false);
+
+        });
+
+
+
+    </script>
+    <script type="text/javascript">
+
+        var myInput = document.getElementById("appbundle_empleado_usuario_plainPassword_first");
+        var letter  = document.getElementById("letter");
+        var capital = document.getElementById("capital");
+        var number  = document.getElementById("number");
+        var length  = document.getElementById("length");
+
+        // When the user clicks on the password field, show the message box
+        myInput.onfocus = function() {
+          document.getElementById("message").style.display = "block";
+        }
+
+        // When the user clicks outside of the password field, hide the message box
+        myInput.onblur = function() {
+          document.getElementById("message").style.display = "none";
+        }
+
+        // When the user starts to type something inside the password field
+        myInput.onkeyup = function() {
+          // Validate lowercase letters
+        //   var lowerCaseLetters = /[a-z]/g;
+        //   if(myInput.value.match(lowerCaseLetters)) { 
+        //     letter.classList.remove("alert-danger");
+        //     letter.classList.add("alert-success");
+        //   } else {
+        //     letter.classList.remove("alert-success");
+        //     letter.classList.add("alert-danger");
+        // }
+
+        //   // Validate capital letters
+        //   var upperCaseLetters = /[A-Z]/g;
+        //   if(myInput.value.match(upperCaseLetters)) { 
+        //     capital.classList.remove("alert-danger");
+        //     capital.classList.add("alert-success");
+        //   } else {
+        //     capital.classList.remove("alert-success");
+        //     capital.classList.add("alert-danger");
+        //   }
+
+          // Validate numbers
+          var numbers = /[0-9]/g;
+          if(myInput.value.match(numbers)) { 
+            number.classList.remove("alert-danger");
+            number.classList.add("alert-success");
+          } else {
+            number.classList.remove("alert-success");
+            number.classList.add("alert-danger");
+          }
+
+          // Validate length
+          if(myInput.value.length >= 6) {
+            length.classList.remove("alert-danger");
+            length.classList.add("alert-success");
+          } else {
+            length.classList.remove("alert-success");
+            length.classList.add("alert-danger");
+          }
+        };
+    </script>
+{% endblock %}

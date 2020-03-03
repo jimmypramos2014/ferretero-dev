@@ -1,0 +1,137 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * DetalleVentaEntregaDatosEnvio
+ *
+ * @ORM\Table(name="detalle_venta_entrega_datos_envio")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\DetalleVentaEntregaDatosEnvioRepository")
+ */
+class DetalleVentaEntregaDatosEnvio
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="identificador", type="string", nullable=true)
+     */
+    private $identificador;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="cliente", type="string", length=100, nullable=true)
+     */
+    private $cliente;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="direccion", type="string", length=255, nullable=true)
+     */
+    private $direccion;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="punto_partida", type="string", length=100, nullable=true)
+     */
+    private $puntoPartida;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="punto_llegada", type="string", length=100, nullable=true)
+     */
+    private $puntoLlegada;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="remitente", type="string", length=100, nullable=true)
+     */
+    private $remitente;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="destinatario", type="string", length=100, nullable=true)
+     */
+    private $destinatario;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="ruc_remitente", type="string", length=11, nullable=true)
+     */
+    private $rucRemitente;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="ruc_destinatario", type="string", length=11, nullable=true)
+     */
+    private $rucDestinatario;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="fecha_traslado", type="date", nullable=true)
+     */
+    private $fechaTraslado;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="costo_minimo", type="float", nullable=true)
+     */
+    private $costoMinimo;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="marca", type="string", length=100, nullable=true)
+     */
+    private $marca;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="placa", type="string", length=32, nullable=true)
+     */
+    private $placa;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="constancia_inscripcion", type="string", length=32, nullable=true)
+     */
+    private $constanciaInscripcion;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="licencia_conducir", type="string", length=32, nullable=true)
+     */
+    private $licenciaConducir;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Transporte", inversedBy="detalleProformaEntregaDatosEnvio", cascade={"persist"})
+     * @ORM\JoinColumn(name="transporte_id", referencedColumnName="id")
+     * 
+     */
+    protected $transporte;
+
+
+}

@@ -1,0 +1,307 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+{% endblock %}
+
+
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+<div class="container">
+    <div class="card mx-auto mt-5">
+        <div class="card-header">Seleccione caja y fecha de apertura <span class=" float-right" data-toggle="tooltip" data-html="true" data-placement="top" title="<b>El filtro</b> <u>fecha de apertura</u> <b>se refiere a las aperturas realizadas ese día en la caja,solo consideran las ventas realizadas hasta la fecha en la que fue cerrada. Si la caja permanece abierta se consideran las ventas hasta el dia actual.</b>" ><i class="fa fa-question fa-lg"></i></span></div>
+        <div class="card-body">
+
+            <div class="row mb-2 ">
+                <div class="col-lg-12">
+                
+                <form id="form" action="{{ path('reporte_caja') }}" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+                    <div class="form-row">
+                        <div class="form-group  col-md-4">
+                            {{ form_row(form.caja,{'value': caja|trim }) }}
+
+                        </div>
+                        <div class="form-group  col-md-2">
+                            <label>Fecha de apertura</label>
+                            {{ form_widget(form.fecha_inicio,{'attr':{'value':fecha }}) }}
+                        </div>
+
+                        <div class="form-group  col-md-3">
+                            {{ form_row(form.forma_pago,{'value': forma_pago|trim }) }}
+                        </div>
+
+                        <p class="pull-right mt-4"> 
+                            <input type="submit" class="btn btn-small btn-primary" value="Buscar" />           
+                        </p>
+
+                    </div>
+
+                </form>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="card mx-auto mt-5">
+        <div class="card-body">
+
+            <div class="row mt-2 ">
+                <div class="col-lg-12">
+
+                        <table id="" class="table table-striped table-bordered ">
+                            <thead>
+                              
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Documento</th>
+                                    <th>Empleado</th>
+                                    <th>Fecha de Emisión</th>
+                                    <th>Fecha de Pago</th>
+                                    <th>Monto</th>
+                                    <th>Forma de pago</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set item = 1 %}
+                                {% set monto_total = 0 %}
+                                {% set monto_apertura = 0 %}
+                                {% set subtotal = 0 %}
+                                {% set apertura_id = '' %}
+                                {% for apertura in aperturas %}
+
+                                    {% for detalle in apertura %}
+
+                                        {% if apertura_id != detalle.apertura_id %}
+                                            <tr class="table-dark group">
+                                                <td colspan="4">{{ 'Apertura : ' ~  detalle.caja }}</td>
+                                                <td>{{ detalle.fecha_apertura | date('d/m/Y H:i') }}</td>
+                                                <td style="text-align:right;">{{ detalle.monto_apertura | number_format(2, '.', ',')  }}</td>
+                                                <td></td>                                            
+                                            </tr>
+
+                                            {% set monto_apertura = monto_apertura + detalle.monto_apertura %}
+
+                                        {% endif %}
+
+                                        <tr>
+                                            <td>{{ detalle.ticket }}</td>
+                                            <td>{{ detalle.documento | upper }}</td>
+                                            <td>{{ detalle.empleado | upper }}</td>
+                                            <td data-sort="<%= {{ detalle.fecha | date('Y-m-d H:i') }} %>">{{ detalle.fecha != '' ? detalle.fecha | date('d/m/Y H:i')  : '' }}</td>
+
+                                            {% if detalle.condicion == 'pendiente' %}
+
+                                                <td>-</td>
+
+                                            {% else  %}
+
+                                                <td>{{ detalle.fecha_pago_credito ? detalle.fecha_pago_credito | date('d/m/Y H:i') :  detalle.fecha | date('d/m/Y H:i') }}</td>
+
+                                            {% endif %}
+                                            
+                                            
+                                            {% set monto = 0 %}
+                                            {% if detalle.monto %}
+
+                                                {% if detalle.condicion != 'pendiente' %}
+
+                                                    {% set monto = detalle.monto %}
+                                                    {% set monto_total = monto_total + detalle.monto %}
+
+                                                {% else %}
+
+                                                    {% if detalle.forma_pago == 'A cuenta' %}
+
+                                                        {% set monto = detalle.monto_a_cuenta %}
+                                                        {% set monto_total = monto_total + monto %}
+
+                                                    {% endif %}
+
+                                                {% endif %}
+
+
+                                            {% endif %}
+                                            
+                                            <td style="text-align:right;">{{ monto | number_format(2, '.', ',')}}</td>
+                                            <td>{{ detalle.forma_pago | upper }}</td>
+                                        </tr>
+
+                                        {% set apertura_id = detalle.apertura_id %}
+                                        
+
+                                    {% endfor %}
+
+
+                                    {% set item = item + 1 %}
+                                {% endfor %}
+                            </tbody>
+
+                            <tfoot>
+                                <tr>
+                                    <th colspan="5" style="text-align:right">Total (S./):</th>
+                                    {% set total = monto_total + monto_apertura %}
+                                    <th style="vertical-align: middle;text-align:right;">{{ total | number_format(2, '.', ',') }}</th>
+                                    <th >-</th>
+
+                                </tr>
+                            </tfoot>                            
+                        </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var groupColumn = 0;
+
+            var table = $('#dtProducto').DataTable( {
+
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
+         
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+         
+                    // Total over all pages
+                    total = api
+                        .column( 6 )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+         
+                    // Total over this page
+                    pageTotal = api
+                        .column( 6, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+         
+                    // Update footer
+                    $( api.column( 6 ).footer() ).html(
+                        '<span style="font-size:0.80rem;">'+pageTotal.toFixed(2) +' ( '+ total.toFixed(2) +' total)</span>'
+                    );
+                },
+
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },
+                sScrollX: '100%',
+                bScrollCollapse: true,                                    
+                dom: 'Bfrtip',
+                order: [[ 5, "desc" ]],                
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'print',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    }
+                ],
+                "columnDefs": [
+                    { "visible": false, "targets": groupColumn }
+                ],
+                "order": [[ groupColumn, 'asc' ]],
+                "displayLength": 100,
+                "drawCallback": function ( settings ) {
+                    var api = this.api();
+                    var rows = api.rows( {page:'current'} ).nodes();
+                    var last=null;
+         
+                    api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
+                        if ( last !== group ) {
+                            $(rows).eq( i ).before(
+                                '<tr class="table-dark group"><td colspan="7"><b> '+group+'</b></td><td></td><td></td</tr>'
+                            );
+         
+                            last = group;
+                        }
+                    });
+                }                
+
+            });
+
+            // Order by the grouping
+            $('#dtProducto tbody').on( 'click', 'tr.group', function () {
+                var currentOrder = table.order()[0];
+                if ( currentOrder[0] === groupColumn && currentOrder[1] === 'asc' ) {
+                    table.order( [ groupColumn, 'desc' ] ).draw();
+                }
+                else {
+                    table.order( [ groupColumn, 'asc' ] ).draw();
+                }
+            } );
+          
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".fecha").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+            {% if fecha == '' %}
+                $(".fecha").datepicker("setDate", startDate);
+            {% endif %}
+
+        });
+
+    </script>
+          
+{% endblock %}

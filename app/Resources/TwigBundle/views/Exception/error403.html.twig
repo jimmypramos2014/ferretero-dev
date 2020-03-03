@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+
+    <p class="alert alert-danger">
+    	<img  src="{{ asset('formatos/ferretero.jpg') }}" width="75" height="75" />
+        Ha ocurrido un error inesperado en el Sistema, por favor comuníquese con el área de soporte al teléfono: 01 4800 403, opción 2.
+    </p>
+
+{% endblock %}

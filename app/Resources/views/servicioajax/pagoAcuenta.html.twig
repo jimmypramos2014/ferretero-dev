@@ -1,0 +1,24 @@
+<div class="row">
+    <div class="col-md-6 ">
+        <span class="bg-white text-dark">Nro VOUCHER : </span>{{ facturaVenta.ticket | upper }}
+    </div>  
+</div>
+<div class="row">
+    <div class="col-md-6 ">
+        <span class="bg-white text-dark">TOTAL : </span>{{ ventaFormaPago.cantidad ? ventaFormaPago.cantidad | number_format(2,'.',',') : '' }}
+    </div>  
+</div>
+<div class="row">
+    <div class="col-md-6 ">
+        <span class="bg-white text-dark">MONTO A CUENTA : </span>{{ ventaFormaPago.montoACuenta ? ventaFormaPago.montoACuenta | number_format(2,'.',',') : '' }}
+    </div>  
+</div>
+<div class="row mt-2">
+    <div class="col-md-6 ">
+        {% set saldo = ventaFormaPago.cantidad - ventaFormaPago.montoACuenta %}
+        <span class="bg-white text-dark">SALDO : </span><span class="bg-success text-white display-4">{{ saldo | number_format(2,'.',',')}}</span>
+        
+    </div>  
+</div>
+<input type="hidden" name="ventaFormaPagoId" value="{{ ventaFormaPago.id }}" />
+<input type="hidden" name="facturaVentaId" value="{{ facturaVenta.id }}" />

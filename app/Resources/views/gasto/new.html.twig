@@ -1,0 +1,380 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }} 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <style>
+
+    </style>
+{% endblock %}
+{% block body %}
+
+    <div class="container">
+
+        <form id="form" action="{{ path('gasto_new') }}" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data" novalidate>
+                <div class="card mx-auto mt-5">
+                    <div class="card-header">Información general</div>
+                    <div class="card-body">                
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-5">
+                                <label for="appbundle_gasto_proveedor">Proveedor</label>
+                                {#{{ form_label(form.proveedor) }}#}
+                                <div class="input-group">
+                                    {#{{ form_widget(form.proveedor) }}#}
+
+                                    <select id="appbundle_gasto_proveedor" class="form-control select2 prov" required="required"  name="proveedor_select"></select>
+                                  
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="agregar_proveedor" ><i class="fa fa-plus fa-lg" data-toggle="tooltip" title="Agregar proveedor"></i></span>
+                                        <span class="input-group-text" id="editar_proveedor"><i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar proveedor"></i></span>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div>
+                            </div>
+
+{#                             <div class="form-group col-md-3">
+                                {{ form_row(form.proveedor) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                      
+                            </div> #}
+                            <div class="form-group col-md-3">
+                                {{ form_row(form.servicio) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>   
+                            </div>
+                         
+                            <div class="form-group col-md-2">
+                                {{ form_row(form.monto) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                   
+                            </div>
+
+                            <div class="form-group col-md-2">
+                                {{ form_row(form.fecha) }}
+                
+                            </div>
+
+
+
+                        </div>
+
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-2">
+                                {{ form_row(form.local) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                   
+                            </div>
+
+                            <div class="form-group col-md-3">
+                                {{ form_row(form.numero_documento) }}             
+                            </div>
+                            <div class="form-group col-md-3">
+                                {{ form_row(form.condicion) }}             
+                            </div>
+                            <div class="form-group col-md-3">
+                                {{ form_row(form.archivo) }}             
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                {{ form_row(form.observacion) }}             
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+                
+                {{ form_row(form.empresa) }}
+                {{ form_row(form.estado) }}
+
+                {{ form_widget(form._token) }}
+
+                <div class="mt-4">
+                    <p class="pull-right">
+                        <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('gasto_index')}}'" />            
+                        <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+                    </p>
+                </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="modal proveedor" tabindex="-1" role="dialog" id="modalProveedor">
+      <div class="modal-dialog " role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Proveedor</h5>
+            <button type="button" class="close" onclick="$('#modalProveedor').modal('hide');" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for"ruc_proveedor">RUC</label>                    
+
+                    <div class="input-group mb-3">
+                        <input type="text" id="ruc_proveedor" name="ruc_proveedor" class="form-control"/>
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="buscar_ruc"><i class="fa fa-search fa-lg " data-toggle="tooltip" title="Buscar"></i></span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group col-md-12">
+                    <label for"nombre_proveedor">Nombre de proveedor</label>
+                    <input type="text" id="nombre_proveedor" name="nombre_proveedor" class="form-control"/>
+                </div>
+
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for"direccion_proveedor">Dirección</label>
+                    <input type="text" id="direccion_proveedor" name="direccion_proveedor" class="form-control"/>
+                </div>
+            </div>     
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for"telefono_proveedor">Teléfono</label>
+                    <input type="text" id="telefono_proveedor" name="telefono_proveedor" class="form-control"/>
+                </div>
+            </div>            
+            
+            <input type="hidden" id="id_proveedor" name="id_proveedor" class="form-control"/>
+            <input type="hidden" id="distrito_proveedor" name="distrito_proveedor" class="form-control"/>
+            <input type="hidden" id="condicion_proveedor" name="condicion_proveedor" class="form-control"/>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="guardar_proveedor">Guardar</button>
+            <button type="button" class="btn btn-secondary" onclick="$('#modalProveedor').modal('hide');">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}  
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="{{asset('js/es.js')}}" ></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var condicion  = $('#appbundle_gasto_condicion');
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".gasto").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+            $(".gasto").datepicker("setDate", startDate);
+
+            $('.gasto').on('change',function(){
+
+                condicion.val(1);
+
+            });
+
+            /*Funcionalidad para agregar y/o editar un proveedor*/
+            function obtenerProveedor() {
+
+                var proveedor = $('#appbundle_gasto_proveedor').val();
+                var respuesta = '';
+
+                $.ajax({
+                    method: "POST",
+                    async : false ,
+                    url: "{{ path('obtenerproveedor')}}",
+                    data: { id: proveedor}
+                })
+                .done(function( data ) {
+
+                    respuesta = data;
+
+                });
+
+                return respuesta;
+            }
+
+            $('#agregar_proveedor').on('click',function(e){
+
+                e.preventDefault();
+
+                $('.proveedor').modal('show');
+
+            });
+
+            $('#editar_proveedor').on('click',function(e){
+
+                e.preventDefault();
+
+                var proveedor = $('#appbundle_gasto_proveedor').val();
+
+                if(proveedor == ''){
+
+                    bootbox.alert("Debe seleccionar un proveedor para que pueda editar.");                    
+                    return false;
+
+                }else{
+
+                    var respuesta = obtenerProveedor(function(output){});
+
+                    var nombre       = respuesta.nombre;
+                    var ruc          = respuesta.ruc;
+                    var telefono     = respuesta.telefono;
+                    var direccion    = respuesta.direccion;
+                    var distrito     = respuesta.distrito;
+                    var condicion    = respuesta.condicion;
+                    var id           = respuesta.id;
+
+                    $('#nombre_proveedor').val(nombre);
+                    $('#ruc_proveedor').val(ruc);
+                    $('#telefono_proveedor').val(telefono);
+                    $('#direccion_proveedor').val(direccion);
+                    $('#id_proveedor').val(id);
+                    $('#distrito_proveedor').val(distrito);
+                    $('#condicion_proveedor').val(condicion);
+
+                    $('.proveedor').modal('show');
+
+                }
+
+            });
+
+            // Selecciona el proveedor
+            $(".prov").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenerproveedores')}}",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        console.log(data.results);
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },
+                placeholder: 'Buscar proveedor por nombre o RUC',
+                minimumInputLength: 3,
+            });
+
+            $('#guardar_proveedor').on('click',function (e) {
+
+                e.preventDefault();
+
+                var nombre_proveedor = $('#nombre_proveedor').val();
+                var ruc_proveedor  = $('#ruc_proveedor').val();
+                var telefono_proveedor     = $('#telefono_proveedor').val();
+                var direccion_proveedor    = $('#direccion_proveedor').val();
+                var distrito_proveedor    = $('#distrito_proveedor').val();
+                var condicion_proveedor    = $('#condicion_proveedor').val();
+                var id_proveedor     = $('#id_proveedor').val();
+
+                if(nombre_proveedor == '' || ruc_proveedor == '' ){
+
+                    bootbox.alert("Debe obligatoriamente ingresar un nombre y el RUC.");                    
+                    return false;
+
+                }
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('registrar_proveedor_nuevo')}}",
+                  data: { nombre: nombre_proveedor, ruc: ruc_proveedor, telefono: telefono_proveedor ,id: id_proveedor,direccion:direccion_proveedor,distrito:distrito_proveedor,condicion:condicion_proveedor,tipo:'servicio'}
+                })
+                  .done(function( data ) {
+
+                    var newOption = new Option(data.text, data.id, false, true);
+                    $('#appbundle_gasto_proveedor').append(newOption).trigger('change');
+                    $('.proveedor').modal('hide');
+
+
+                });   
+
+            });
+
+            /*Fin de funcionalidad para agregar y/o editar un proveedor*/
+
+            $('#buscar_ruc').on("click", function(){
+
+                var data = {
+                  ruc   : $('#ruc_proveedor').val(),
+                  token  : '5JFQh5toA0sWhj-YV3NXmt4dzE4JvJjwgYzzPJtYHgA',
+                }
+                //console.log(provruc_text.val());
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('obtenerdatosempresa')}}",
+                    data: data,
+                    success: function(data){
+
+                        $('#nombre_proveedor').val(data.nombre_o_razon_social);
+                        $('#direccion_proveedor').val(data.direccion_completa);
+                        $('#distrito_proveedor').val(data.distrito_id);
+                        $('#condicion_proveedor').val(data.estado_del_contribuyente);
+
+                        if(data.estado_del_contribuyente != 'ACTIVO'){
+                            bootbox.alert("El proveedor no esta habilitado en la SUNAT");
+                        }                        
+                    }
+
+                });
+            });
+
+
+        });
+
+    </script>
+
+{% endblock %}  

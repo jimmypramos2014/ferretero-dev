@@ -1,0 +1,242 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+    <style></style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <form id="form" action="{{ path('notacreditocompra_new') }}" class="form-horizontal needs-validation" role="form" method="post"  novalidate>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Información general</div>
+            <div class="card-body">
+
+                <div class="form-row">
+             
+                    <div class="form-group col-md-4">
+                        {{ form_row(form.fecha) }}
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.numero) }}
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                    </div>
+                
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.local) }}
+                    </div>
+
+                </div>
+                <div class="form-row">
+
+                    <div class="form-group col-md-6">
+                        {{ form_row(form.facturaCompra) }}
+                    </div>
+                
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.valor) }}
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+
+
+        {{ form_row(form.estado) }}
+        {{ form_widget(form._token) }}
+
+        <div class="card mx-auto mt-2" id="detalle_facturas">
+            <div class="card-header">Detalle de facturas</div>
+            <div class="card-body">
+
+                <div class="row bg-dark text-white">
+                    <div class="col-md-3 ">Número</div>
+                    <div class="col-md-2">Fecha</div>
+                    <div class="col-md-3">Documento</div>
+                    <div class="col-md-2">Monto</div>
+                    <div class="col-md-2">Monto con Dcto.</div>
+                </div>
+                <hr>
+
+                <div class="" id="fin_detalle_facturas">
+                    
+
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="mt-4">
+            <p class="pull-right">
+                <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('notacreditocompra_index')}}'" />            
+                <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+            </p>
+        </div>
+        
+
+    </form>
+
+
+
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}  
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="{{asset('js/jquery.number.min.js')}}" ></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+
+            var valor          = $("#appbundle_notacreditocompra_valor");
+            var facturaCompra  = $("#appbundle_notacreditocompra_facturaCompra");
+
+            function calcularDescuento(){
+
+                var monto = $("#appbundle_notacreditocompra_valor").val();
+
+                if(monto != ''){
+
+                    var total_cantidad = 0;
+                    $(".factura").each( function () {
+
+                        var cantidad  = $(this).find(".cantidad").text().replace(/,/g , '');
+                        total_cantidad = total_cantidad + Number(cantidad);
+
+                    });
+
+                    $(".factura").each( function () {
+
+                        var cantidad  = $(this).find(".cantidad").text().replace(/,/g , '');
+                        var porcentaje = Number(cantidad)/Number(total_cantidad);
+
+                        var descuento = monto * porcentaje;
+                        descuento = Number(cantidad) - descuento;
+
+                        $(this).find(".descuento").addClass('bg-success text-white');
+                        $(this).find(".descuento").html($.number( descuento, 3, '.', ',' ));
+
+
+                    });
+
+                    return true;
+
+                }
+
+                return false;
+
+            };
+
+            facturaCompra.on('change',function(e){
+
+                $('#fin_detalle_facturas').html('');
+
+                var parsedTest = JSON.parse('['+$(this).val()+']');
+
+                parsedTest.forEach(function(factura) {
+
+                    $.ajax({
+                        type: "GET",
+                        url: "{{ path('obtener_factura')}}",
+                        async : false ,
+                        data: { id: factura}
+                    }).then(function (data) {
+
+                        if(data.compra_id != ''){
+
+                            $('#fin_detalle_facturas').append('<div class="row factura" id="factura_'+data.id+'"><div class="col-md-3">'+data.numero_documento+'</div><div class="col-md-2">'+data.fecha+'</div><div class="col-md-3">'+data.documento+'</div><div class="col-md-2  cantidad">'+$.number( data.cantidad, 3, '.', ',' )+'</div><div class="col-md-2  descuento text-center"></div></div><hr>');
+
+                        };
+
+                        calcularDescuento();
+
+                    });
+
+                });
+
+            });
+
+            valor.on('keyup',function(e){
+
+                var monto = $(this).val();
+
+                if(monto != '')
+                {
+                    var total_cantidad = 0;
+                    $(".factura").each( function () {
+
+                        var cantidad  = $(this).find(".cantidad").text().replace(/,/g , '');
+                        total_cantidad = total_cantidad + Number(cantidad);
+
+                    });
+
+                    $(".factura").each( function () {
+
+                        var cantidad  = $(this).find(".cantidad").text().replace(/,/g , '');
+                        var porcentaje = Number(cantidad)/Number(total_cantidad);
+
+                        var descuento = monto * porcentaje;
+                        descuento = Number(cantidad) - descuento;
+
+                        $(this).find(".descuento").addClass('bg-success text-white');
+                        $(this).find(".descuento").html($.number( descuento, 3, '.', ',' ));
+
+
+                    });
+
+                }
+
+                console.log(total_cantidad);
+            });
+
+
+
+            $('.select2-multiple').select2();
+
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".setcurrentdate").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+            $(".setcurrentdate").datepicker("setDate", startDate);
+
+
+
+        });
+
+    </script>
+
+{% endblock %}  

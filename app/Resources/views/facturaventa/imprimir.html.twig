@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <meta charset="utf-8">
+    <head>
+        <title>Documento</title>
+        <link rel="stylesheet" type="text/css" href="https://printjs-4de6.kxcdn.com/print.min.css">
+
+    </head>
+
+    <body>
+
+         <button type="button" onclick="printJS('{{ rutaPdf }}')"  id="imprimir">
+            PDF
+         </button>        
+
+        <script src="{{asset('template/vendor/jquery/jquery.min.js')}}"></script>
+        <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
+
+        <script type="text/javascript">
+
+            $(document).ready(function(){
+                $('#imprimir').trigger('click');
+            });
+
+        </script>
+        
+
+    </body>
+</html>

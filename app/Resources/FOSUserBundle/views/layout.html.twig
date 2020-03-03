@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Ferreteria - Login</title>
+
+    {% block stylesheets %}
+
+        <!-- Bootstrap Core CSS -->
+        <link href="{{asset('template/vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="{{asset('template/css/sb-admin.min.css')}}" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="{{asset('template/vendor/font-awesome/css/font-awesome.min.css')}}" rel="stylesheet" type="text/css">
+
+        <!-- Custom ferretero -->
+        <link href="{{asset('template/css/ferretero_login.css')}}" rel="stylesheet" type="text/css">
+
+
+    {% endblock %}
+
+</head>
+
+<body>
+
+    {% block content %}
+
+        {% block fos_user_content %}{% endblock %}
+        
+    {% endblock %}
+
+    {% block javascripts %}
+        <!-- jQuery -->
+        <script src="{{asset('template/vendor/jquery/jquery.min.js')}}"></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="{{asset('template/vendor/bootstrap/js/bootstrap.min.js')}}"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="{{asset('template/js/sb-admin.min.js')}}"></script>
+
+    {% endblock %}
+    
+</body>
+
+</html>

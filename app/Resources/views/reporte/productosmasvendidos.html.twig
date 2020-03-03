@@ -1,0 +1,170 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+{% endblock %}
+
+
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+<div class="container">
+    <div class="card mx-auto mt-5">
+        <div class="card-header">Filtros</div>
+        <div class="card-body">
+
+            <div class="row mb-2 ">
+                <div class="col-lg-12">
+        
+                    <form id="form" action="{{ path('reporte_productosmasvendidos') }}" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+                        <div class="form-row">
+                            <div class="form-group  col-md-2">
+                                {{ form_row(form.fecha_inicio,{'attr':{'value':fecha_inicio}}) }}
+                            </div>
+
+                            <div class="form-group  col-md-2">
+                                {{ form_row(form.fecha_fin,{'attr':{'value':fecha_fin}}) }}
+                            </div>
+                        </div>
+                        <div class="form-row pull-right">
+                            <input type="submit" id="btn_buscar"class="btn btn-small btn-primary" value="Buscar" />                                       
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        
+    </div>
+
+
+
+    <div class="card mx-auto mt-5">
+        <div class="card-body">
+            <div class="row mt-2 ">
+                <div class="col-lg-12">
+                    <table id="dtProducto" class="table table-striped table-bordered" style="width: 100%;" >
+                        <thead>
+                            <tr>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead" width="12%">Local</th>
+                                <th class="filterhead"></th>
+                            </tr>
+
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre de producto</th>
+                                <th>Local</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% set item = 1 %}
+                        {% for productosmasvendido in productosmasvendidos %}
+                            <tr>
+                                <td>{{ productosmasvendido.codigo }}</td>
+                                <td>{{ productosmasvendido.nombre }}</td>
+                                <td>{{ productosmasvendido.local }}</td>
+                                <td>{{ productosmasvendido.cantidad |number_format(0, '.', ',')  }}</td>
+
+                            </tr>
+                            {% set item = item + 1 %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div> <!-- fin container -->
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            var table = $('#dtProducto').DataTable( {
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },
+                responsive: true,                                   
+                dom: 'Bfrtip',
+                order: [[ 3, "desc" ]],
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'print',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    }
+                ]  
+            });
+
+
+            $(".filterhead").each( function ( i ) {
+
+                if(i == 2){
+                    var texto = '';
+                    if(i==2){texto = 'Local';}
+                    var select = $('<select class="form-control" ><option value="">'+texto+'</option></select>')
+                        .appendTo( $(this).empty() )
+                        .on( 'change', function () {
+                           var term = $(this).val();
+                            table.columns( i ).search(term, false, false ).draw();
+                        });
+                    table.column( i).data().unique().sort().each( function ( d, j ) {
+                        select.append( '<option value="'+d+'">'+d+'</option>' )
+                    });
+                }
+
+            });
+
+
+        });
+
+    </script>
+          
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+
+  {{ parent() }}
+    
+  <link rel="stylesheet" type="text/css" href="https://pivottable.js.org/dist/pivot.css">
+
+  <style>
+
+    #container{
+      font-size:2.5rem;
+    }
+
+
+  </style>
+
+{% endblock %}
+
+{% block body %}
+
+    <p><span class="font-weight-bold">Nota : </span>El cálculo para obtener las ganancias por producto en cada una de las ventas se realiza de la siguiente manera : </p>
+    <p>
+        <span class="font-weight-bold">GANANCIA = </span>
+        [(Cantidad a vender) x (Precio de compra que se toma según se va gastando el stock)] - 
+        [(Cantidad a vender) x (Precio de venta)]
+
+    </p>
+    <p>Este cálculo es realizado debido a que el precio de compra de un producto varía en el tiempo.</p>
+
+
+    <input type="button" class="btn btn-success" name="exportar" id="exportar" value="Exportar" />
+    <div id="output" style="margin: 30px;overflow:scroll;height:500px;"></div>
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }}
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" ></script>
+    {#<script type="text/javascript" src="https://pivottable.js.org/dist/pivot.js" ></script>#}
+    <script src="{{asset('js/pivot-excel.js')}}"></script>
+
+    <script type="text/javascript" src="https://pivottable.js.org/dist/export_renderers.js" ></script>
+
+    <script type="text/javascript">
+
+        function exportTableToExcel(tableID, filename = '')
+        {
+
+            var downloadLink;
+            var dataType = 'application/vnd.ms-excel';
+            var tableSelect = document.getElementById(tableID);
+            var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+
+            filename = filename?filename+'.xls':'excel_data.xls';
+            downloadLink = document.createElement("a");
+
+            document.body.appendChild(downloadLink);
+
+            if(navigator.msSaveOrOpenBlob){
+                var blob = new Blob(['\ufeff', tableHTML], {type: dataType});
+
+                navigator.msSaveOrOpenBlob( blob, filename);
+            }
+            else
+            {
+                downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+                downloadLink.download = filename;
+                downloadLink.click();
+            }
+        }
+
+
+        $(function(){
+
+            var tpl = $.pivotUtilities.aggregatorTemplates;
+            var renderers = $.extend($.pivotUtilities.renderers,$.pivotUtilities.export_renderers);
+
+            $("#output").pivotUI({{ventas | raw }},         
+                {
+                    renderers: renderers,
+                    unusedAttrsVertical : true,
+                    rows: ["Ano","Mes","Local","Fecha","Documento","Cliente","Ticket"],cols: ["Producto"],
+                    //rendererName: "TSV Export",
+                    aggregators: {
+                        "Cantidad": function() { return tpl.sum()(["Cantidad"]) },
+                        "Subtotal": function() { return tpl.sum()(["Subtotal"]) },
+                        "Precio Costo": function() { return tpl.sum()(["Precio_costo"]) },
+                        "Ganancia": function() { return tpl.sum()(["Ganancia"]) },
+                    },
+                    sorters: {
+                        Mes: $.pivotUtilities.sortAs(
+                                ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Setiembre","Octubre","Noviembre","Diciembre"]),
+                        //Local: $.pivotUtilities.sortAs(["INGRESOS","EGRESOS"]),
+                        //Age: function(a,b){ return b-a; } //sort backwards
+                    }                                       
+                }
+            );
+         });
+
+        $(document).ready(function() {
+
+            $('#exportar').on('click',function(){
+
+                exportTableToExcel('testTable','exportado');
+
+            });            
+
+        });        
+
+
+    </script>
+
+{% endblock %}

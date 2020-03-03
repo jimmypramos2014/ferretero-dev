@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Facturaventas list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Fecha</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for facturaVentum in facturaVentas %}
+            <tr>
+                <td><a href="{{ path('facturaventa_show', { 'id': facturaVentum.id }) }}">{{ facturaVentum.id }}</a></td>
+                <td>{% if facturaVentum.fecha %}{{ facturaVentum.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('facturaventa_show', { 'id': facturaVentum.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('facturaventa_edit', { 'id': facturaVentum.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('facturaventa_new') }}">Create a new facturaVentum</a>
+        </li>
+    </ul>
+{% endblock %}

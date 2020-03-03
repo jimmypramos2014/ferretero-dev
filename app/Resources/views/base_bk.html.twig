@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}{{ titulo }}{% endblock %}</title>
+        {% block stylesheets %}
+
+            <!-- Bootstrap Core CSS -->
+            <link href="{{asset('template/vendor/bootstrap/css/bootstrap.css')}}" rel="stylesheet">
+
+            <!-- Custom CSS -->
+            <link href="{{asset('template/css/sb-admin.min.css')}}" rel="stylesheet">
+            <link href="{{asset('template/css/ferretero.css')}}" rel="stylesheet">
+
+            <!-- Custom Fonts -->
+            <link href="{{asset('template/vendor/font-awesome/css/font-awesome.min.css')}}" rel="stylesheet" type="text/css">
+
+            <!-- Custom Datatables -->
+            <link href="{{asset('template/vendor/datatables/dataTables.bootstrap4.css')}}" rel="stylesheet" type="text/css">
+            <link href="{{asset('template/vendor/datatables/select.bootstrap4.min.css')}}" rel="stylesheet" type="text/css">
+            
+            <link rel="stylesheet" type="text/css" media="screen" href="{{asset('template/css/chosen.min.css') }}">
+
+            <!-- Datepicker -->
+            <link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css" >
+        {% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    </head>
+    <body class="fixed-nav sticky-footer bg-dark" id="page-top">
+
+          <!-- Navigation-->
+          <nav class="navbar navbar-expand-lg  navbar-dark bg-dark fixed-top" style="position: absolute !important;"  id="mainNav">
+
+            {% set redireccion = 'dashboard' %}
+            {% if 'ROLE_VENDEDOR' in app.user.roles or 'ROLE_ALMACENERO' in app.user.roles and 'ROLE_SUPER_ADMIN' not in app.user.roles %}
+              {% set redireccion = 'almacen_productosxlocal' %}
+            {% endif %}
+            {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
+              {% set redireccion = 'empresa_index' %}
+            {% endif %}
+
+            <a class="navbar-brand" href="{{ path(redireccion) }}">Ferretero</a>
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+              <ul class="navbar-nav navbar-sidenav ml-auto" id="exampleAccordion">
+
+                {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+                    <a class="nav-link" href="{{ path('empresa_index') }}">
+                      <i class="fa fa-fw fa-dashboard"></i>
+                      <span class="nav-link-text">Empresa</span>
+                    </a>
+                  </li>
+
+                {% endif %}
+
+                {% if 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in app.user.roles %}
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+                    <a class="nav-link" href="{{ path('dashboard') }}">
+                      <i class="fa fa-fw fa-dashboard"></i>
+                      <span class="nav-link-text">Dashboard</span>
+                    </a>
+                  </li>
+
+                {% endif %}
+
+                {% if 'ROLE_VENDEDOR' in app.user.roles  or 'ROLE_ALMACENERO' in app.user.roles or 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in app.user.roles %}
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Punto de venta">{#{{ path('detalleventa_puntoventa') }}#}
+                    <a class="nav-link" href="#" onclick="PopupCenter('{{ path('detalleventa_puntoventa') }}','xtf','1250','700');">
+                      <i class="fa fa-fw fa-dashboard"></i>
+                      <span class="nav-link-text">Punto de venta</span>
+                    </a>
+                  </li>
+
+                {% endif %}
+
+
+              {% if 'ROLE_VENDEDOR' in app.user.roles  or 'ROLE_ALMACENERO' in app.user.roles or 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in app.user.roles %}
+
+                      {% if  'ROLE_ADMIN' in app.user.roles %}
+
+                          <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Ventas">
+
+                            <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#ventas" data-parent="#exampleAccordion">
+                              <i class="fa fa-fw fa-table"></i>
+                              <span class="nav-link-text">Ventas</span>
+                            </a>
+
+                            <ul class="sidenav-second-level collapse" id="ventas">
+    {#                           <li>
+                                <a href="{{ path('detalleventa_puntoventa') }}">Registrar venta</a>
+                              </li> #}
+                            
+
+                              {% if  'ROLE_ADMIN' in app.user.roles %}
+
+                                <li>
+                                  <a href="{{ path('detalleventa_lista') }}">Lista de ventas</a>
+                                </li>
+                                
+                                <li>
+                                  <a href="{{ path('cliente_index') }}">Clientes</a>
+                                </li>
+
+                              {% endif %}
+
+                              </ul>
+
+                          </li>
+
+                     {% endif %}
+
+                      {% if  'ROLE_ADMIN' in app.user.roles %}
+
+
+                        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Compras">
+                          <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#compras" data-parent="#exampleAccordion">
+                            <i class="fa fa-fw fa-list"></i>
+                            <span class="nav-link-text">Compras</span>
+                          </a>
+                          <ul class="sidenav-second-level collapse" id="compras">
+                            <li>
+                              <a href="{{ path('detallecompra_index') }}">Registrar compra</a>
+                            </li>
+                            <li>
+                              <a href="{{ path('facturacompra_index') }}">Lista de compras</a>
+                            </li>
+                            <li>
+                              <a href="{{ path('proveedor_index') }}">Proveedores</a>
+                            </li>
+
+                          </ul>
+                        </li>
+
+                      {% endif %}
+                      
+                      {% if  'ROLE_VENDEDOR' in app.user.roles or 'ROLE_ALMACENERO' in app.user.roles or 'ROLE_ADMIN' in app.user.roles %}
+
+                        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Almacen">
+                          <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#almacen" data-parent="#exampleAccordion">
+                            <i class="fa fa-fw fa-list"></i>
+                            <span class="nav-link-text">Almacen</span>
+                          </a>
+                          <ul class="sidenav-second-level collapse" id="almacen">
+                            <li>
+                              <a href="{{ path('almacen_productosxlocal') }}">Stock</a>
+                            </li>
+
+                            {% if  'ROLE_ALMACENERO' in app.user.roles or 'ROLE_ADMIN' in app.user.roles %}
+
+                              <li>
+                                <a href="{{ path('almacen_lista_transferencia') }}">Lista de transferencias</a>
+                              </li>
+                              
+                            {% endif %}
+
+                          </ul>
+                        </li>
+
+                      {% endif %}
+
+                {% endif %}
+
+
+                {% if 'ROLE_ALMACENERO' in app.user.roles or 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in app.user.roles %}
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Producto">
+                    <a class="nav-link" href="{{ path('productoxlocal_index') }}">
+                      <i class="fa fa-fw fa-dashboard"></i>
+                      <span class="nav-link-text">Productos</span>
+                    </a>
+                  </li>
+
+                  {% if  'ROLE_ADMIN' in app.user.roles %}
+
+                    <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Unidad">
+                      <a class="nav-link" href="{{ path('productounidad_index') }}">
+                        <i class="fa fa-fw fa-dashboard"></i>
+                        <span class="nav-link-text">Unidades</span>
+                      </a>
+                    </li>
+                    
+                  {% endif %}
+
+                {% endif %}
+
+
+                {% if 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in app.user.roles %}
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Gasto">
+                    <a class="nav-link" href="{{ path('gasto_index') }}">
+                      <i class="fa fa-fw fa-dashboard"></i>
+                      <span class="nav-link-text">Gastos</span>
+                    </a>
+                  </li>
+
+                {% endif %}
+
+
+                {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Administrador">
+                    <a class="nav-link" href="{{ path('administrador_index') }}">
+                      <i class="fa fa-fw fa-dashboard"></i>
+                      <span class="nav-link-text">Administrador</span>
+                    </a>
+                  </li>
+
+                {% endif %}
+
+
+
+
+                {% if 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in app.user.roles %}
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Reportes">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#reportes" data-parent="#exampleAccordion">
+                      <i class="fa fa-fw fa-list"></i>
+                      <span class="nav-link-text">Reportes</span>
+                    </a>
+                    <ul class="sidenav-second-level collapse" id="reportes">
+                      <li>
+                        <a href="{{ path('reporte_productosmasvendidos') }}">Productos más vendidos</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('reporte_ventasdiarias') }}">Ventas diarias</a>
+                      </li>
+
+
+                      <li>
+                        <a href="{{ path('reporte_ventasanuladas') }}">Ventas anuladas</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('reporte_ventascredito') }}">Ventas a crédito</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('reporte_ventascontado') }}">Ventas al contado</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('reporte_ventastarjetacredito') }}">Ventas con tarjeta crédito</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('reporte_ventasnotacredito') }}">Ventas nota de crédito</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('reporte_detalleventa') }}">Detalle de ventas</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('reporte_modificacionstockproducto') }}">Stock modificado</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('reporte_proveedor') }}">Proveedores</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('reporte_cliente') }}">Clientes</a>
+                      </li>
+
+                    </ul>
+                  </li>
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Servicio">
+                    <a class="nav-link" href="{{ path('servicio_index') }}">
+                      <i class="fa fa-fw fa-dashboard"></i>
+                      <span class="nav-link-text">Servicios</span>
+                    </a>
+                  </li>
+
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Usuarios">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#usuarios" data-parent="#exampleAccordion">
+                      <i class="fa fa-fw fa-table"></i>
+                      <span class="nav-link-text">Administración</span>
+                    </a>
+                    <ul class="sidenav-second-level collapse" id="usuarios">
+
+                        <li>
+                          <a href="{{ path('empresalocal_index') }}">Locales</a>
+                        </li>
+                        <li>
+                          <a href="{{ path('empleado_index') }}">Empleado</a>
+                        </li>                        
+
+
+                    </ul>
+                  </li>
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Alertas">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#alertas" data-parent="#exampleAccordion">
+                      <i class="fa fa-fw fa-list"></i>
+                      <span class="nav-link-text">Alertas</span>
+                    </a>
+                    <ul class="sidenav-second-level collapse" id="alertas">
+                      <li>
+                        <a href="{{ path('alerta_transferencia') }}">Alerta transferencia tienda</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('alerta_modificacionnombreproducto') }}">Alerta modificación nombre de Productos</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('alerta_modificacionprecioproducto') }}">Alerta modificación precio productos</a>
+                      </li>
+                                                                
+                    </ul>
+                  </li>
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Finanzas">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#finanzas" data-parent="#exampleAccordion">
+                      <i class="fa fa-fw fa-list"></i>
+                      <span class="nav-link-text">Finanzas</span>
+                    </a>
+                    <ul class="sidenav-second-level collapse" id="finanzas">
+                      <li>
+                        <a href="{{ path('finanzas_ventatrabajadordiaria') }}">Venta por trabajador diaria</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('finanzas_ventatrabajadormensual') }}">Venta por trabajador mensual</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('finanzas_ventalocaldiaria') }}">Venta por local diaria</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('finanzas_ventalocalmensual') }}">Venta por local mensual</a>
+                      </li>
+                                                                  
+                    </ul>
+                  </li>
+
+
+
+                  <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Sunat">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#sunat" data-parent="#exampleAccordion">
+                      <i class="fa fa-fw fa-list"></i>
+                      <span class="nav-link-text">Sunat</span>
+                    </a>
+                    <ul class="sidenav-second-level collapse" id="sunat">
+                      <li>
+                        <a href="{{ path('sunat_formato131') }}">Formato 13.1</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ path('sunat_formato121') }}">Formato 12.1</a>
+                      </li>
+
+                    </ul>
+                  </li>
+
+
+                {% endif %}               
+
+
+
+
+
+              </ul>
+
+
+{#               <ul class="navbar-nav sidenav-toggler">
+                <li class="nav-item">
+                  <a class="nav-link text-center" id="sidenavToggler">
+                    <i class="fa fa-fw fa-angle-left"></i>
+                  </a>
+                </li>
+              </ul> #}
+
+              <ul class="navbar-nav ml-auto">
+
+                <li class="nav-item">
+                  <a class="nav-link text-left" >
+                    <i class="fa fa-fw fa-clock-o"></i>{{ "now" | date('d/m/Y H:i') }}
+                  </a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link text-left" >
+                    <i class="fa fa-fw fa-user"></i>{{ app.session.get('rol') ~ ' (' ~ app.user.username ~ ')'}}
+                  </a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" data-toggle="modal" data-target="#salirModal">
+                    <i class="fa fa-fw fa-sign-out"></i>Salir
+                  </a>
+                </li>
+              </ul>
+
+            </div>
+
+          </nav>
+
+          <div class="content-wrapper">
+              <div class="container-fluid">
+
+                  <div class="row">
+                      <div class="col-lg-12">
+                          <h1 class="page-header">{{titulo}}</h1>
+                      </div>
+                      <!-- /.col-lg-12 -->
+                  </div>
+                  <!-- /.row -->
+                  
+                  {% block body %}{% endblock %}
+
+              </div>
+
+              <footer class="sticky-footer">
+                <div class="container">
+                  <div class="text-center">
+                    <small>Copyright © Intimedia 2018</small>
+                  </div>
+                </div>
+              </footer>
+
+              <!-- Scroll to Top Button-->
+              <a class="scroll-to-top rounded" href="#page-top">
+                <i class="fa fa-angle-up"></i>
+              </a>
+              <!-- Logout Modal-->
+              <div class="modal fade" id="salirModal" tabindex="-1" role="dialog" aria-labelledby="salirModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">¿Está seguro de salir?</h5>
+                      <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">Selecciona "Cerrar sesión" si estás seguro.</div>
+                    <div class="modal-footer">
+                      <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                      <a class="btn btn-primary" href="{{ path('fos_user_security_logout')}}">Cerrar sesión</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+
+
+
+        {% block javascripts %}
+            <!-- jQuery -->
+            <script src="{{asset('template/vendor/jquery/jquery.min.js')}}"></script>
+
+            <!-- Bootstrap Core JavaScript -->
+            <script src="{{asset('template/vendor/bootstrap/js/popper.min.js')}}"></script>
+
+            <!-- Bootstrap Core JavaScript -->
+            <script src="{{asset('template/vendor/bootstrap/js/bootstrap.min.js')}}"></script>
+
+            <!-- Custom Theme JavaScript -->
+            <script src="{{asset('template/js/sb-admin.min.js')}}"></script>
+
+            <!-- Custom Theme Alerts -->
+            <script src="{{asset('template/js/bootbox.min.js')}}"></script>
+
+            <!-- Datatables -->
+            <script src="{{asset('template/vendor/datatables/jquery.dataTables.js')}}"></script>
+            <script src="{{asset('template/vendor/datatables/dataTables.bootstrap4.js')}}"></script>
+            <script src="{{asset('template/js/sb-admin-datatables.js')}}"></script>
+
+            <script src="{{asset('template/js/chosen.jquery.min.js') }}"></script>
+            <!-- Datepicker -->   
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
+            <script src="{{asset('template/js/bootstrap-datepicker.es.js')}}" charset="UTF-8"></script>
+
+            
+  
+            <script type="text/javascript">
+
+                    function PopupCenter(url, title, w, h) {
+                        // Fixes dual-screen position                         Most browsers      Firefox
+                        var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
+                        var dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
+
+                        var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+                        var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+                        var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+                        var top = ((height / 2) - (h / 2)) + dualScreenTop;
+                        var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+
+                        // Puts focus on the newWindow
+                        if (window.focus) {
+                            newWindow.focus();
+                        }
+                    }
+
+                    /***ACTIVANDO MENÚ DEL SISTEMA**/              
+                    function stripTrailingSlash(str='') {
+
+                      if(str.substr(-1) == '/') {
+                        return str.substr(0, str.length - 1);
+                      }
+
+                      return str;
+                    }
+
+                    // var i = 0;
+                    function activarSubmenu(_li, submenu_clase) {
+
+                      if (_li.hasClass(submenu_clase)){
+
+                        var _link = _li.parent().siblings();
+
+                        if (_link.hasClass('nav-link-collapse')) {
+                          _link.trigger('click');
+                          activarSubmenu(_link.parent(), submenu_clase);
+                        }
+
+                      }
+                      return false;
+                    }
+
+                    var url         = window.location.pathname;
+                    var activePage  = stripTrailingSlash(url);
+                    
+
+                    // Obteniendo el ultimo caracter de la url
+                    if(activePage.charAt(activePage.length - 1) == '/')
+                    {
+                      activePage = activePage.substring(0, activePage.length-1);
+
+                    }
+
+                    $('.navbar-sidenav li a').on('click',function(){
+
+                      var diplay = $( this ).next().css( "display" );
+
+                      if(diplay == 'block'){
+
+                        $(this).next().css( "display", "none" );
+                        $(this).attr( "aria-expanded", "true" );
+                        $(this).next().removeClass( "collapse");
+
+                        
+                      }else{
+
+                        $(this).next().css( "display", "block" );
+                        $(this).attr( "aria-expanded", "false" );
+                        $(this).next().addClass( "collapse");
+
+                      }
+                      //console.log(diplay);
+
+                    });
+
+                    $('.navbar-sidenav li a').each(function(){
+                      
+                        var opcion         = $(this);
+                        var opcion_li      = opcion.parent();
+                        var currentPage    = stripTrailingSlash(opcion.attr('href'));
+
+                        
+                       
+                        if(currentPage.charAt(currentPage.length - 1) == '/')
+                        {
+                            currentPage = currentPage.substring(0, currentPage.length-1);
+                        }
+
+                        
+
+                        if (String(activePage+'/').indexOf(String(currentPage+'/')) != -1){
+                            
+                            opcion_clase = opcion_li.attr('class');
+                            console.log(opcion_clase);
+                          
+                            if ( /\o$/.test(opcion_clase) ) {
+                                
+                                activarSubmenu(opcion_li, opcion_clase);
+                            };
+
+                            opcion_li.parent().css('display','block');
+                            opcion_li.addClass('active');
+                            
+                        }                
+                    });
+                    /***FIN ACTIVANDO MENÚ DEL SISTEMA**/
+
+
+              (function() {
+                'use strict';
+                window.addEventListener('load', function() {
+                  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                  var forms = document.getElementsByClassName('needs-validation');
+                  // Loop over them and prevent submission
+                  var validation = Array.prototype.filter.call(forms, function(form) {
+
+                    form.addEventListener('submit', function(event) {
+
+                      if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }
+                      form.classList.add('was-validated');
+                    }, false);
+
+                  });
+                }, false);
+              })();
+
+              $(document).ready(function() {
+
+                $(".chosen-select").chosen({width: "100%",no_results_text: "No se encontraron resultados!",allow_single_deselect: true});
+
+                $('.datepicker').datepicker({
+                    format: 'dd/mm/yyyy',
+                    language: 'es',
+                    autoclose: true
+                });
+
+                $(function () {
+                  $('[data-toggle="tooltip"]').tooltip()
+                })
+
+              });
+
+
+
+            </script>
+
+        {% endblock %}
+    </body>
+</html>

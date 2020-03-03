@@ -1,0 +1,19 @@
+{% extends "@FOSUser/layout.html.twig" %}
+
+{% block fos_user_content %}
+
+	<div class="panel panel-success" style="margin-top:1%;margin-left:20%;margin-right:20%;"> 
+		<div class="panel-heading"> 
+			<h3 class="panel-title">Contraseña restablecida</h3> 
+		</div> 
+		<div class="panel-body">
+
+		  {% include "@FOSUser/Profile/show_content.html.twig" %}
+		  <p class="pull-right"><a href="{{ path('fos_user_security_login')}}">Ir al Login</a></p>
+		</div> 
+	</div>  
+
+
+
+
+{% endblock fos_user_content %}

@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Detalleventaentregas list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Cantidad</th>
+                <th>Fecha</th>
+                <th>Identificador</th>
+                <th>Cliente</th>
+                <th>Direccion</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for detalleVentaEntrega in detalleVentaEntregas %}
+            <tr>
+                <td><a href="{{ path('detalleventaentrega_show', { 'id': detalleVentaEntrega.id }) }}">{{ detalleVentaEntrega.id }}</a></td>
+                <td>{{ detalleVentaEntrega.cantidad }}</td>
+                <td>{% if detalleVentaEntrega.fecha %}{{ detalleVentaEntrega.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{{ detalleVentaEntrega.identificador }}</td>
+                <td>{{ detalleVentaEntrega.cliente }}</td>
+                <td>{{ detalleVentaEntrega.direccion }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('detalleventaentrega_show', { 'id': detalleVentaEntrega.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('detalleventaentrega_edit', { 'id': detalleVentaEntrega.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('detalleventaentrega_new') }}">Create a new detalleVentaEntrega</a>
+        </li>
+    </ul>
+{% endblock %}

@@ -1,0 +1,63 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * CajaApertura
+ *
+ * @ORM\Table(name="caja_apertura")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\CajaAperturaRepository")
+ */
+class CajaApertura
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="fecha", type="datetime", nullable=true)
+     */
+    private $fecha;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="monto_apertura", type="float", nullable=true)
+     */
+    private $montoApertura;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="estado", type="boolean", nullable=true)
+     */
+    private $estado;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Caja", inversedBy="cajaApertura", cascade={"persist"})
+     * @ORM\JoinColumn(name="caja_id", referencedColumnName="id")
+     */
+    private $caja;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Usuario", inversedBy="cajaApertura", cascade={"persist"})
+     * @ORM\JoinColumn(name="usuario_id", referencedColumnName="id")
+     */
+    private $usuario;
+
+     /**
+     * @ORM\OneToMany(targetEntity="CajaAperturaDetalle", mappedBy="cajaApertura" , cascade={"remove","persist"})
+     */
+    protected $cajaAperturaDetalle;
+
+
+}

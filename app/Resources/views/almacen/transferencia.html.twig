@@ -1,0 +1,393 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }} 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+    <style>
+        .no-border {
+            border: 0;
+            box-shadow: none;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <form id="form" action="{{ path('almacen_new_transferencia') }}" class="form-horizontal needs-validation" role="form" method="post" enctype="multipart/form-data" novalidate>    
+
+        <div class="row mt-2 mb-2">
+
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xl-6">
+
+                <div class="card mb-2">
+                    <div class="card-header">
+                        Datos de transferencia
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                {{ form_row(formProducto.local_inicio) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                 
+                            </div>
+
+                            <div class="form-group col-4">
+                                {{ form_row(formProducto.local_fin) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>  
+
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-4">
+                                {{ form_row(formProducto.documento) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                  
+                            </div>
+                            <div class="form-group col-4">
+                                {{ form_row(formProducto.numero_documento) }}
+                                  
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div class="card mb-2">
+                    <div class="card-header">
+                        Agregar producto 
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-row">
+                            <div class="form-group col-8">
+                                {{ form_row(formProducto.productoXLocal) }} 
+                                <input type="hidden" value="" name="codigo_producto" id="codigo_producto" />
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                  
+                            </div>
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.precio) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>  
+                            </div>
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.cantidad) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                  
+                            </div>  
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-3">
+                                {{ form_row(formProducto.codigo_producto) }}
+                            </div>
+                            <div class="form-group col-3">
+                                {{ form_row(formProducto.stock) }}
+                            </div>                                                
+                        </div>
+                        <div class="form-row">
+                          
+                            <div class="form-group col-6">
+                                {{ form_row(formProducto.descripcion) }}                               
+                            </div>                        
+
+                        </div>
+                        <p class="text-right">
+                            <input type="button" class="btn btn-small btn-primary" id="agregar" value="Agregar >>">
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+    
+
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xl-6">    
+
+                <table id="tblProductosSelect" class="table ">
+
+                    <thead class="thead-dark">
+                        <tr>
+                            <th></th>                        
+                            <th width="50%">Producto</th>                        
+                            <th width="15%">Precio</th>
+                            <th width="15%">Cantidad</th>
+                            <th width="15%">Importe</th>
+                        </tr>
+                    </thead>                        
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+                <div class="mr-4">
+
+                    <p class="h4 text-right">
+                        TOTAL : <input type="text" id="valor_total" name="valor_total" size="4" class=" no-border"/>
+                    </p>
+                    <p class="text-right">
+                        <input type="submit" class="btn btn-primary btn-lg" id="guardar" value="Guardar">
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }} 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="{{asset('js/es.js')}}" ></script>
+
+    <script type="text/javascript">
+
+        function eliminar(id) {
+
+            var txtvalortotal       = $('#valor_total');
+            
+            $("#tr_"+id).remove();
+
+            var total = 0;
+
+            $("input:text.subtotal").each( function () {
+                total += Number($(this).val());
+            });
+
+            txtvalortotal.val(total.toFixed(2));            
+        } 
+
+
+        $(document).ready(function() {
+
+            var selecttiendainicio      = $('#appbundle_detalletransferencia_producto_local_inicio');
+            var selecttiendafin         = $('#appbundle_detalletransferencia_producto_local_fin');
+            var txtproductoId           = $('#appbundle_detalletransferencia_producto_productoXLocal');
+            var txtproductoCodigo       = $('#appbundle_detalletransferencia_producto_codigo_producto');
+            var txtprecio               = $('#appbundle_detalletransferencia_producto_precio');
+            var txtcantidad             = $('#appbundle_detalletransferencia_producto_cantidad');
+
+            var btnagregar              = $('#agregar');
+
+            var txtproductonuevo        = $('#appbundle_detalletransferencia_producto_producto_nuevo');
+            var txtproductoStock        = $('#appbundle_detalletransferencia_producto_stock');
+            var guardar                 = $('#guardar');
+
+            var txtvalortotal           = $('#valor_total');
+
+            $(".select2").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenerproductos')}}",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        local: $('#appbundle_detalletransferencia_producto_local_inicio').val(),
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },
+                placeholder: 'Buscar productos',
+                minimumInputLength: 3,
+
+            });
+
+
+            $('.select2').on('select2:select', function (e) {
+
+                var data = e.params.data;
+                var txtproductovalue  = data.id;
+
+                console.log(txtproductovalue);
+
+
+                var data = {
+                  producto   : txtproductovalue,
+                }
+
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('obtenercodigoproducto')}}",
+                    data: data,
+                    success: function(data){
+
+                        console.log(data);
+                        if( data ){
+                            txtproductoStock.val(data.stock);
+                            txtproductoCodigo.val(data.codigo);
+                            txtprecio.val(data.precio);
+                        }
+                    }
+
+                });
+
+
+
+
+            });
+
+
+            selecttiendainicio.on("change", function() {
+
+                if(this.value != ''){
+                    $("#appbundle_detalletransferencia_producto_local_fin option[value=" + this.value + "]").attr('disabled','disabled')
+                        .siblings().removeAttr('disabled');
+                }
+
+            });
+
+            selecttiendafin.on("change", function() {
+                if(this.value != ''){
+                    $("#appbundle_detalletransferencia_producto_local_inicio option[value=" + this.value + "]").attr('disabled','disabled')
+                        .siblings().removeAttr('disabled');
+                }
+            });
+
+            txtproductoId.on("change", function() {
+
+                var txtproductonombre = txtproductoId.find("option:selected").text();
+                var txtproductovalue  = txtproductoId.val();
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('obtenercodigoproducto')}}",
+                  data: { producto: txtproductovalue }
+                })
+                  .done(function( data ) {
+
+                    if( data ){
+                        txtproductoStock.val(data.stock);
+                        txtproductoCodigo.val(data.codigo);
+                        txtprecio.val(data.precio);
+                    }
+
+                });   
+
+            });
+
+
+            btnagregar.on('click',function () {
+
+                if(txtproductoId.val() == '' || txtprecio.val() == '' || txtcantidad.val() == ''){
+
+                    bootbox.alert("Debe seleccionar producto y agregar un precio y cantidad.");
+
+
+                }else{
+
+                    if(Number(txtproductoStock.val()) <= 0  || Number(txtcantidad.val()) > Number(txtproductoStock.val()) ){
+
+                        bootbox.alert("No se puede agregar un producto sin stock suficiente.");
+
+                    }
+                    else
+                    {
+
+                        var txtproductonombre = txtproductoId.find("option:selected").text();
+
+                        var subtotal = txtprecio.val() * txtcantidad.val();
+
+                        $('#tblProductosSelect tr:last').after('<tr id="tr_'+txtproductoId.val()+'" class="prd"><td><input type="hidden" name="productoid_'+txtproductoId.val()+'" value="'+txtproductoId.val()+'"/><a href="javascript:eliminar('+txtproductoId.val()+')" ><i class="fa fa-remove fa-lg"></a></i></td><td ><input type="text" name="producto_'+txtproductoId.val()+'" class="form-control no-border " value="'+txtproductonombre+'" /></td><td><input type="text" name="precio_'+txtproductoId.val()+'" class="form-control no-border" value="'+txtprecio.val()+'" /></td><td><input type="text" name="cantidad_'+txtproductoId.val()+'" class="form-control no-border" value="'+txtcantidad.val()+'" /> </td><td><input type="text" name="" class="form-control no-border subtotal" value="'+subtotal.toFixed(2)+'" /></td></tr>');
+
+                        var total = 0;
+
+                        $("input:text.subtotal").each( function () {
+                            total += Number($(this).val());
+                        });
+
+                        txtvalortotal.val(total.toFixed(2));
+
+                    }                   
+
+                }
+
+            });
+
+            $("form").submit(function(){
+
+                var prd = $("#tblProductosSelect").find("tr.prd");
+
+                if(prd.length == 0){
+
+                    bootbox.alert("No existen productos agregados!");                    
+                    return false;
+
+                }else{
+
+                    // bootbox.confirm("¿Está seguro de guardar la información?", function(result){
+
+                    //     alert(result);
+
+                    //     if(result === true){
+                    //         return true;
+                    //     }
+
+                    // });
+
+                    return true;
+                }
+
+            });
+
+
+
+        });
+
+
+    </script>
+          
+{% endblock %}
+
+

@@ -1,0 +1,40 @@
+{% extends 'form_div_layout.html.twig' %}
+
+{% block form_label %}
+    {{ parent() }}
+
+    {% if required %}
+        <span class="required" title="Este campo es requerido"> *</span>
+    {% endif %}
+{% endblock form_label %}
+
+{% block form_errors %}
+    {% spaceless %}
+        {% if errors|length > 0 %}
+            {% for error in errors %}
+                <br>
+                <span class="text-danger">{{ error.message }} </span>
+            {% endfor %}
+
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_errors %}
+
+{% block form_widget_simple %}
+    {% if form.vars.errors|length > 0 %}
+        {% set class = attr.class is defined ? attr.class ~ ' is-invalid' : 'is-invalid' %}
+        {% set attr = attr|merge({'class': class}) %}
+    {% endif %}
+    {% spaceless %}
+        {% set type = type|default('text') %}
+        <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+    {% endspaceless %}
+{% endblock form_widget_simple %}
+
+{% block form_row %}
+    {% spaceless %}
+            {{ form_label(form) }}
+            {{ form_errors(form) }}
+            {{ form_widget(form) }}
+    {% endspaceless %}
+{% endblock form_row %}

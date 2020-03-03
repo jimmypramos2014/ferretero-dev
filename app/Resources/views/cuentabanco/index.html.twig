@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+{% endblock %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+<div class="container">
+
+    <div class="card mx-auto mt-5">
+        <div class="card-body">
+
+            <div class="row pr-3">
+                <div class="col-lg-12 ">
+                    <a href="{{ path('cuentabanco_new') }}" class="btn btn-primary pull-right">Registrar cuenta</a>
+                </div>
+            </div>
+            <div class="row mt-2 ">
+                <div class="col-lg-12">
+                    <table id="dtCuenta" class="table table-striped table-bordered "  style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Banco</th>
+                                <th>Número de cuenta</th>
+                                <th>Código interbancario</th>
+                                <th>Moneda</th>
+
+                                <th class="no-sort">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% set item = 1 %}
+                        {% for cuenta in cuentaBancos %}
+                            <tr>
+                                <td>{{ cuenta.banco | upper  }}</td>
+                                <td>{{ cuenta.numero }}</td>
+                                <td>{{ cuenta.numeroInterbancario }}</td>
+                                <td>{{ cuenta.moneda.nombre }}</td>
+
+                                <td class="text-center">
+
+                                    <a href="javascript:eliminar({{cuenta.id}})" class="mr-2" data-toggle="tooltip" data-target="" title="Eliminar">
+                                        <i class="fa fa-remove fa-lg"></i>
+                                    </a>
+
+                                    <a href="{{ path('cuentabanco_edit', { 'id': cuenta.id }) }}"><i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar"></i></a>
+                                </td>
+
+                            </tr>
+                            {% set item = item + 1 %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+                
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+    <script type="text/javascript">
+
+        function eliminar(id) {
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                    },
+                    cancel: {
+                        label: 'Cancelar',
+                    }
+                },                
+                size: 'small',
+                message: "¿Está seguro de eliminar el registro?", 
+                callback: function(res){ 
+                    if(res){
+                        location = id+'/delete';
+                    }
+                }
+            });
+        } 
+
+        $(document).ready(function() {
+            $('#dtCuenta').DataTable( {
+
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },
+                responsive: true,                                  
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'print',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    }
+                ]
+
+            });
+        });
+
+
+    </script>
+          
+{% endblock %}

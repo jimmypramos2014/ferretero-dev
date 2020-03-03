@@ -1,0 +1,358 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+
+/**
+ * ProductoXLocal
+ *
+ * @ORM\Table(name="producto_x_local")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\ProductoXLocalRepository")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class ProductoXLocal
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="stock", type="float", nullable=true)
+     */
+    private $stock;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="EmpresaLocal", inversedBy="productoXLocal", cascade={"persist"})
+     * @ORM\JoinColumn(name="empresa_local_id", referencedColumnName="id")
+     * 
+     */
+    protected $local;
+
+    /**
+     * @Assert\Valid
+     *
+     * @ORM\ManyToOne(targetEntity="Producto", inversedBy="productoXLocal", cascade={"persist"})
+     * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
+     * 
+     */
+    protected $producto;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="estado", type="boolean", nullable=true,options={"default":1, "comment":"Estado del registro"})
+     */
+    private $estado;
+
+     /**
+     * @ORM\OneToMany(targetEntity="TransferenciaXProducto", mappedBy="productoXLocal" , cascade={"remove"})
+     */
+    protected $transferenciaXProducto;
+
+     /**
+     * @ORM\OneToMany(targetEntity="DetalleVenta", mappedBy="productoXLocal" , cascade={"remove","persist"})
+     */
+    protected $detalleVenta;
+    
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="stock_inicial", type="float", nullable=true)
+     */
+    private $stockInicial;
+    
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Usuario", inversedBy="caja", cascade={"persist"})
+     * @ORM\JoinColumn(name="usuario_creacion", referencedColumnName="id")
+     */
+    private $usuarioCreacion;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Usuario", inversedBy="caja", cascade={"persist"})
+     * @ORM\JoinColumn(name="usuario_modificacion", referencedColumnName="id")
+     */
+    private $usuarioModificacion;
+
+    /** 
+     * created Time/Date 
+     * 
+     * @var \DateTime 
+     * 
+     * @ORM\Column(name="fecha_creacion", type="datetime", nullable=true) 
+     */  
+    protected $fechaCreacion;  
+  
+    /** 
+     * updated Time/Date 
+     * 
+     * @var \DateTime 
+     * 
+     * @ORM\Column(name="fecha_modificacion", type="datetime", nullable=true) 
+     */  
+    protected $fechaModificacion;  
+
+
+    public function __toString()
+    {
+        return '['.$this->getProducto()->getCodigo().']'.$this->getProducto()->getNombre().' - '.$this->getProducto()->getMarca();
+    }
+
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->transferenciaXProducto = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->detalleVenta = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setUsuarioCreacion()
+    {
+        $usuario = $GLOBALS['kernel']->getContainer()->get('security.token_storage')->getToken()->getUser();
+        $this->usuarioCreacion = $usuario;
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function setUsuarioModificacion()
+    {
+        $usuario = $GLOBALS['kernel']->getContainer()->get('security.token_storage')->getToken()->getUser();
+        $this->usuarioModificacion = $usuario;
+
+    }
+
+    /** 
+     * Set FechaCreacion 
+     * 
+     * @ORM\PrePersist 
+     */  
+    public function setFechaCreacion()  
+    {  
+        $this->fechaCreacion = new \DateTime();  
+        $this->fechaModificacion = new \DateTime();  
+    }  
+  
+    /** 
+     * Set FechaModificacion 
+     * 
+     * @ORM\PreUpdate 
+     */  
+    public function setFechaModificacion()  
+    {  
+        $this->fechaModificacion = new \DateTime();  
+    }  
+
+    
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set stock
+     *
+     * @param float $stock
+     *
+     * @return ProductoXLocal
+     */
+    public function setStock($stock)
+    {
+        $this->stock = $stock;
+
+        return $this;
+    }
+
+    /**
+     * Get stock
+     *
+     * @return float
+     */
+    public function getStock()
+    {
+        return $this->stock;
+    }
+
+    /**
+     * Set estado
+     *
+     * @param boolean $estado
+     *
+     * @return ProductoXLocal
+     */
+    public function setEstado($estado)
+    {
+        $this->estado = $estado;
+
+        return $this;
+    }
+
+    /**
+     * Get estado
+     *
+     * @return boolean
+     */
+    public function getEstado()
+    {
+        return $this->estado;
+    }
+
+    /**
+     * Set local
+     *
+     * @param \AppBundle\Entity\EmpresaLocal $local
+     *
+     * @return ProductoXLocal
+     */
+    public function setLocal(\AppBundle\Entity\EmpresaLocal $local = null)
+    {
+        $this->local = $local;
+
+        return $this;
+    }
+
+    /**
+     * Get local
+     *
+     * @return \AppBundle\Entity\EmpresaLocal
+     */
+    public function getLocal()
+    {
+        return $this->local;
+    }
+
+    /**
+     * Set producto
+     *
+     * @param \AppBundle\Entity\Producto $producto
+     *
+     * @return ProductoXLocal
+     */
+    public function setProducto(\AppBundle\Entity\Producto $producto = null)
+    {
+        $this->producto = $producto;
+
+        return $this;
+    }
+
+    /**
+     * Get producto
+     *
+     * @return \AppBundle\Entity\Producto
+     */
+    public function getProducto()
+    {
+        return $this->producto;
+    }
+
+    /**
+     * Add transferenciaXProducto
+     *
+     * @param \AppBundle\Entity\TransferenciaXProducto $transferenciaXProducto
+     *
+     * @return ProductoXLocal
+     */
+    public function addTransferenciaXProducto(\AppBundle\Entity\TransferenciaXProducto $transferenciaXProducto)
+    {
+        $this->transferenciaXProducto[] = $transferenciaXProducto;
+
+        return $this;
+    }
+
+    /**
+     * Remove transferenciaXProducto
+     *
+     * @param \AppBundle\Entity\TransferenciaXProducto $transferenciaXProducto
+     */
+    public function removeTransferenciaXProducto(\AppBundle\Entity\TransferenciaXProducto $transferenciaXProducto)
+    {
+        $this->transferenciaXProducto->removeElement($transferenciaXProducto);
+    }
+
+    /**
+     * Get transferenciaXProducto
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTransferenciaXProducto()
+    {
+        return $this->transferenciaXProducto;
+    }
+
+    /**
+     * Add detalleVentum
+     *
+     * @param \AppBundle\Entity\DetalleVenta $detalleVentum
+     *
+     * @return ProductoXLocal
+     */
+    public function addDetalleVentum(\AppBundle\Entity\DetalleVenta $detalleVentum)
+    {
+        $this->detalleVenta[] = $detalleVentum;
+
+        return $this;
+    }
+
+    /**
+     * Remove detalleVentum
+     *
+     * @param \AppBundle\Entity\DetalleVenta $detalleVentum
+     */
+    public function removeDetalleVentum(\AppBundle\Entity\DetalleVenta $detalleVentum)
+    {
+        $this->detalleVenta->removeElement($detalleVentum);
+    }
+
+    /**
+     * Get detalleVenta
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getDetalleVenta()
+    {
+        return $this->detalleVenta;
+    }
+
+    /**
+     * Set stockInicial
+     *
+     * @param float $stockInicial
+     *
+     * @return ProductoXLocal
+     */
+    public function setStockInicial($stockInicial)
+    {
+        $this->stockInicial = $stockInicial;
+
+        return $this;
+    }
+
+    /**
+     * Get stockInicial
+     *
+     * @return float
+     */
+    public function getStockInicial()
+    {
+        return $this->stockInicial;
+    }
+}

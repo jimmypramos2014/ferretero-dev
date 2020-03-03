@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Notacredito</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ notaCredito.id }}</td>
+            </tr>
+            <tr>
+                <th>Numero</th>
+                <td>{{ notaCredito.numero }}</td>
+            </tr>
+            <tr>
+                <th>Serie</th>
+                <td>{{ notaCredito.serie }}</td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{% if notaCredito.fecha %}{{ notaCredito.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Fechavencimiento</th>
+                <td>{% if notaCredito.fechaVencimiento %}{{ notaCredito.fechaVencimiento|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Estado</th>
+                <td>{% if notaCredito.estado %}Yes{% else %}No{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Tipoventa</th>
+                <td>{{ notaCredito.tipoVenta }}</td>
+            </tr>
+            <tr>
+                <th>Documentomodifica</th>
+                <td>{{ notaCredito.documentoModifica }}</td>
+            </tr>
+            <tr>
+                <th>Valortipocambio</th>
+                <td>{{ notaCredito.valorTipoCambio }}</td>
+            </tr>
+            <tr>
+                <th>Numeroguiaremision</th>
+                <td>{{ notaCredito.numeroGuiaRemision }}</td>
+            </tr>
+            <tr>
+                <th>Ordencompra</th>
+                <td>{{ notaCredito.ordenCompra }}</td>
+            </tr>
+            <tr>
+                <th>Placavehiculo</th>
+                <td>{{ notaCredito.placaVehiculo }}</td>
+            </tr>
+            <tr>
+                <th>Condicionpago</th>
+                <td>{{ notaCredito.condicionPago }}</td>
+            </tr>
+            <tr>
+                <th>Observacion</th>
+                <td>{{ notaCredito.observacion }}</td>
+            </tr>
+            <tr>
+                <th>Total</th>
+                <td>{{ notaCredito.total }}</td>
+            </tr>
+            <tr>
+                <th>Totalgravada</th>
+                <td>{{ notaCredito.totalGravada }}</td>
+            </tr>
+            <tr>
+                <th>Totalexonerada</th>
+                <td>{{ notaCredito.totalExonerada }}</td>
+            </tr>
+            <tr>
+                <th>Totalgratuita</th>
+                <td>{{ notaCredito.totalGratuita }}</td>
+            </tr>
+            <tr>
+                <th>Descuentoglobal</th>
+                <td>{{ notaCredito.descuentoGlobal }}</td>
+            </tr>
+            <tr>
+                <th>Descuentoxitem</th>
+                <td>{{ notaCredito.descuentoXItem }}</td>
+            </tr>
+            <tr>
+                <th>Fechacreacion</th>
+                <td>{% if notaCredito.fechaCreacion %}{{ notaCredito.fechaCreacion|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Fechamodificacion</th>
+                <td>{% if notaCredito.fechaModificacion %}{{ notaCredito.fechaModificacion|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('notacredito_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('notacredito_edit', { 'id': notaCredito.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

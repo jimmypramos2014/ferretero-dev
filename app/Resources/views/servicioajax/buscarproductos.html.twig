@@ -1,0 +1,92 @@
+{% if modo == 'true' %}
+
+    {% set total = productoXLocals | length %}
+    {% for producto in productoXLocals %}
+
+            <div class="col-md-12 imgproductos"  title="{{ 'Stock: ' ~ producto.stock }}"  >
+              <div class="producto" id="" style="width:auto;">
+                <a href="#" >
+
+                    <div class=" caracteristicas " style="background-color: #ffffff;text-align: left;font-size: 1rem;">
+                        <div class="nombre d-inline" style="color:black;">{{ producto.nombre ~ ' [' ~ producto.marca | slice(0, 15) ~ ']'}}  </div>
+                        <div class=" d-inline pull-right" style="color:black;"><span class="precio" >{{ producto.precio | number_format(2,'.','')  }}</span></div>
+                        
+
+                        {% if producto.precio_x_mayor > 0 %}
+                            <div class="d-inline pull-right mr-2" style="color:black;"> {{ producto.precio_x_mayor | number_format(2,'.','')  }}</div>
+                        {% endif %}                                                        
+
+
+                        <input type="hidden" class="atributos" id="{{ producto.id }}" />
+                        <input type="hidden" class="unidades" id="{{ producto.unidad }}" />
+                        <input type="hidden" class="stock" id="{{ producto.stock }}" />
+                    </div>
+                </a>
+              </div>
+            </div>
+
+    {% endfor %}      
+                        
+{% else  %}
+
+    {% set item = 1 %}
+    {% set cierre = 0 %}
+    {% set total = productoXLocals | length %}
+    {% for producto in productoXLocals %}
+
+        {% if  cierre == 1 or item == 1 %}
+
+            {% set cierre = 0 %}
+            <div class="row fila-producto">
+
+        {% endif %}                            
+
+            <div class="col d-flex imgproductos" data-toggle="tooltip" data-placement="top" title="{{ 'Stock: ' ~ producto.stock }}">
+              <div class="producto" >
+                {% set imagen_ruta = 'noimage.png' %}
+
+                {% if producto.imagen %}
+
+                    {% set imagen_ruta = producto.imagen %}
+
+                {% else %}
+
+                    {% set imagen_ruta = obtenerImagenProductoDefault(app.session.get('local')) %}                                   
+
+                {% endif %}     
+
+                <a href="javascript:void(0)" data-target="#modalImagen" imgnombre="{{ producto.nombre }}" imglink="{{ asset('uploads/imagenes/500x500/' ~ producto.imagen ) }}">
+                    <img imgnombre="{{ producto.nombre }}" imglink="{{ asset('uploads/imagenes/500x500/' ~ producto.imagen ) }}" class="img-fluid imagen" src="{{ asset('uploads/imagenes/100x100/' ~ imagen_ruta ) }}"  />
+                    <div class="caracteristicas">
+                        <div class="nombre">{{ producto.nombre ~ ' [' ~ producto.marca | slice(0, 15) ~ ']'}}</div>
+                        <div><em class="simbolo_moneda">S./ </em><span class="precio">{{ producto.precio | number_format(2,'.','') }}</span></div>
+
+                        {% if producto.precio_x_mayor > 0 %}
+                            <div><em class="x_mayor">X Mayor: </em> <em class="simbolo_moneda">S./ </em> {{ producto.precio_x_mayor | number_format(2,'.','')  }}</div>
+                        {% endif %}
+
+                        <input type="hidden" class="atributos" id="{{ producto.id }}" />
+                        <input type="hidden" class="unidades" id="{{ producto.unidad }}" />
+                        <input type="hidden" class="stock" id="{{ producto.stock }}" />
+                    </div>
+                </a>
+              </div>
+            </div>
+
+        {% if item is divisible by(4) or  item == total %}
+
+            {% set cierre = 1 %}
+
+            </div>
+
+        {% endif %}                            
+
+        {% set item = item + 1 %}
+
+    {% endfor %}
+
+{% endif %}
+
+
+
+

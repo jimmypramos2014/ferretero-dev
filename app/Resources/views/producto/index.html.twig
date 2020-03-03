@@ -1,0 +1,194 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+
+{% endblock %}
+
+
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="container-fluid">
+
+{#         <div class="card mx-auto mt-5">
+            <div class="card-header">
+                Filtros
+            </div>
+            <div class="card-body">
+                Activo fijo <input type="checkbox" id="activo_fijo" name="activo_fijo"  />
+            </div>
+        </div>
+
+ #}
+        <p ><span class="font-weight-bold">Nota : </span>El precio de compra que se muestra es el precio de la última compra registrada para ese producto. </p>
+        <div class="card mx-auto mt-2">
+            <div class="card-body">
+
+                <div class="row pr-3">
+                    <div class="col-lg-12 ">
+                        <a href="{{ path('producto_new') }}" class="btn btn-primary pull-right">Registrar producto</a>
+                    </div>
+                </div>
+                <div class="row mt-2 ">
+                    <div class="col-lg-12">
+                        <table id="dtProducto" class="table ">
+                            <thead>
+                                <tr>
+                                    <th>Ítem</th>
+                                    <th>Producto</th>
+                                    <th>Codigo</th>
+                                    <th>Precio unitario</th>
+                                    <th>Precio por mayor</th>
+                                    <th>Precio compra</th>
+                                    <th>Marca</th>
+                                    <th>Unidad Venta</th>
+                                    <th>Posición</th>
+                                    <th>Peso</th>
+                                    <th class="no-sort">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% set item = 1 %}
+                            {% for producto in productos %}
+                                <tr>
+                                    <td>{{ item }}</td>
+                                    <td>{{ producto.nombre | upper }}</td>
+                                    <td>{{ producto.codigo }}</td>
+                                    <td>{{ producto.precioUnitario | number_format(3,'.',',') }}</td>
+                                    <td>{{ producto.precioCantidad | number_format(3,'.',',') }}</td>
+                                    <td>{{ producto.precioCompra | number_format(4,'.',',') }}</td>
+                                    <td>{{ producto.marca | upper }}</td>
+                                    <td>{{ producto.unidadVenta | upper }}</td>
+                                    <td>{{ producto.posicion }}</td>
+                                    <td>{{ producto.peso }}</td>
+
+                                    <td class="text-center">
+
+                                        <a href="javascript:eliminar({{producto.id}})" class="mr-2" data-toggle="tooltip" data-target="" title="Eliminar">
+                                            <i class="fa fa-remove fa-lg"></i>
+                                        </a>
+
+                                        <a href="{{ path('producto_edit', { 'id': producto.id }) }}">
+                                            <i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar"></i>                                    
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                                {% set item = item + 1 %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        function eliminar(id) {
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                    },
+                    cancel: {
+                        label: 'Cancelar',
+                    }
+                },                
+                size: 'small',
+                message: "¿Está seguro de eliminar el registro?", 
+                callback: function(res){ 
+                    if(res){
+                        location = id+'/delete';
+                    }
+                }
+            });
+        } 
+
+        $(document).ready(function() {
+            var table = $('#dtProducto').DataTable( {
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },                
+                dom: 'Bfrtp',
+                responsive: true,
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        //text: '<span class="fa fa-file-excel-o"></span>Excel',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}',
+                        exportOptions: {
+                            modifier: {
+                                search: 'applied',
+                                order: 'applied'
+                            }
+                        }
+                    }
+                ],
+            });
+
+
+            // #column3_search is a <input type="text"> element
+            // $('#activo_fijo').on( 'change', function () {
+
+            //     if ($('#activo_fijo').is(":checked"))
+            //     {
+            //         var valor = 'SI';
+            //     }
+            //     else
+            //     {
+            //         var valor = '';
+            //     }               
+
+            //     table
+            //         .columns( 6 )
+            //         .search( valor )
+            //         .draw();                
+
+
+            // });
+
+
+        });
+
+    </script>
+          
+{% endblock %}

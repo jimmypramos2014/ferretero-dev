@@ -1,0 +1,198 @@
+{% extends 'base.html.twig' %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.css"/>
+{% endblock %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="container">
+
+        <div class="card mx-auto mt-5">
+            <div class="card-body">
+
+                <div class="row pr-3">
+                    <div class="col-lg-12 ">
+                        <a href="{{ path('cliente_new') }}" class="btn btn-primary pull-right">Registrar cliente</a>
+                    </div>
+                </div>
+                <div class="row mt-2 ">
+                    <div class="col-lg-12">
+                        <table id="dtCliente" class="table table-striped table-bordered "  style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Nombre o Razon social</th>
+                                    <th>RUC o DNI</th>                                    
+                                    <th>Teléfono</th>
+                                    <th>Celular</th>
+                                    <th>Email</th>
+                                    <th>Estado en SUNAT</th>
+                                    <th>Habilitado en el sistema</th>
+                                    <th class="no-sort">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% set item = 1 %}
+                            {% for cliente in clientes %}
+                                <tr>
+                                    <td>{{ cliente.razonSocial | upper }}</td>
+                                    <td>{{ cliente.ruc }}</td>
+                                    <td>{{ cliente.telefono }}</td>
+                                    <td>{{ cliente.celular }}</td>
+                                    <td>{{ cliente.email }}</td>
+                                    {% set clase = '' %}
+                                    {% set claseestado = '' %}
+                                    {% if cliente.condicion == 'ACTIVO' %} {% set clase = 'bg-success text-white' %} {% endif %}
+                                    {% if cliente.condicion == 'BAJA DEFINITIVA' %} {% set clase = 'bg-danger text-white' %}{% endif %}
+
+                                    {% if cliente.estado == false %} {% set claseestado = 'bg-danger text-white' %} {% endif %}
+
+                                    <td><span class="{{ clase }}">{{ cliente.condicion ? cliente.condicion : '' }}</span></td>
+
+                                    <td><span class="{{ claseestado }}">{{ cliente.estado ? 'SI' : 'NO' }}</span></td>
+
+                                    <td class="text-center">
+
+                                        <a href="javascript:eliminar({{cliente.id}})" class="mr-2" data-toggle="tooltip" data-target="" title="Eliminar">
+                                            <i class="fa fa-remove fa-lg"></i>
+                                        </a>
+
+                                        <a href="{{ path('cliente_edit', { 'id': cliente.id }) }}"><i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar"></i></a>
+
+                                        {% if cliente.estado == false %}
+
+                                            <a href="javascript:habilitar({{cliente.id}})" class="" data-toggle="tooltip" data-target="" title="Habilitar">
+                                                <i class="fa fa-check fa-lg"></i>
+                                            </a>
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+                                {% set item = item + 1 %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>   
+{% endblock %}
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+    <script type="text/javascript">
+
+        function eliminar(id) {
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                    },
+                    cancel: {
+                        label: 'Cancelar',
+                    }
+                },                
+                size: 'small',
+                message: "¿Está seguro de eliminar el registro?", 
+                callback: function(res){ 
+                    if(res){
+                        location = id+'/delete';
+                    }
+                }
+            });
+        } 
+
+        function habilitar(id) {
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                    },
+                    cancel: {
+                        label: 'Cancelar',
+                    }
+                },                
+                size: 'small',
+                message: "¿Está seguro de habilitar el registro?", 
+                callback: function(res){ 
+                    if(res){
+                        location = id+'/habilitar';
+                    }
+                }
+            });
+        } 
+
+        $(document).ready(function() {
+
+            var table = $('#dtCliente').DataTable({
+
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtered from _MAX_ total records)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },
+                "columns": [
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                ],
+                responsive: true,
+                "order": [[ 0, "asc" ]],        
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    },
+                    {
+                        extend: 'print',
+                        messageTop: 'Generado por : {{ app.user.username }} . Fecha de generación :  {{ "now" | date("d/m/Y H:i") }}'
+                    }
+                ]        
+
+            });
+            
+        });
+
+
+    </script>
+          
+{% endblock %}

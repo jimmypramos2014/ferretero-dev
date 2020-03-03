@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+		<div class="row mb-2 ">
+			<div class="col-lg-12">
+			
+    		<form id="form" action="{{ path('finanzas_ventatrabajadormensual') }}" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+	        <div class="form-row">
+	            <div class="form-group  col-md-2">
+	                {{ form_row(form.fecha_inicio,{'attr':{'value':fecha_inicio}}) }}
+
+	            </div>
+	            <div class="form-group  col-md-2">
+	                {{ form_row(form.fecha_fin,{'attr':{'value':fecha_fin}}) }}
+
+	            </div>
+	            <p class="pull-right mt-4"> 
+	            	<input type="submit" class="btn btn-small btn-primary" value="Buscar" />           
+	          	</p>
+	        </div>
+        </form>
+
+			</div>
+		</div>
+
+		<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+		<div class="row mt-2 "></div>
+
+    <div class="row mt-4 ">
+        <div class="col-lg-12">
+            <table id="dtProducto" class="table ">
+                <thead>
+                    <tr>
+                        <th>Ítem</th>
+                        <th>Trabajador</th>
+                        <th>Total venta</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                {% set item = 1 %}
+                {% for d in data | jsonDecode %}
+                    <tr>
+                        <td>{{ item }}</td>
+                        <td>{{ d.name }}</td>
+                        <td>{{ d.y  | number_format(2,'.',',') }}</td>
+
+                    </tr>
+                    {% set item = item + 1 %}
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+{{ parent() }}
+
+	<script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+
+
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/highcharts-3d.js"></script>
+	<script src="https://code.highcharts.com/modules/data.js"></script>
+	<script src="https://code.highcharts.com/modules/drilldown.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+	<script src="https://code.highcharts.com/modules/export-data.js"></script>
+
+	<script>
+		// creamos el grafico
+		var chart = Highcharts.chart('container', {
+		    chart: {
+		        type: 'column',
+		        options3d: {
+		            enabled: true,
+		            alpha: 0,
+		            beta: 20,
+		            depth: 60,
+		            viewDistance: 25
+		        }			        
+		    },
+		    title: {
+		        text: 'Venta total por trabajador.'
+		    },
+		    subtitle: {
+		        text: ''
+		    },
+		    yAxis: {
+		        title: {
+		            text: 'Total venta en soles'
+		        }
+
+		    },		    
+		    plotOptions: {
+		        column: {
+		            depth: 25
+		        }
+		    },
+
+		    tooltip: {
+		        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+		        pointFormat: '<span style="color:{point.color}">{point.name}</span> S./ <b>{point.y:.2f}</b> <br/>'
+		    },
+		    series: [
+		    	{% for d in data | jsonDecode %}
+				    {
+				    	  name: '{{d.name}}',
+				    	  fillColor: '#00FF00',
+				        data: [{{d.data}}]
+				    },
+		    	{% endfor %}
+		    ],
+
+        exporting: {
+            buttons: {
+                contextButton: {
+                      menuItems: [{
+                            text:'Descargar imagen',
+                            textKey: 'downloadJPEG',
+                            onclick: function () {
+                                this.exportChart({
+                                  type: 'image/jpeg'
+                                });
+                            }
+                        }, {
+                            text:'Descargar PDF',
+                            textKey: 'downloadPDF',
+                            onclick: function () {
+                                this.exportChart({
+                                    type: 'application/pdf'
+                                });
+                            }
+                        }]
+                }
+            }
+        }      
+
+
+		});
+
+
+
+	</script>
+
+	<script>
+
+		$(document).ready(function() {
+		  $('#dtProducto').DataTable( {
+		      "language": {
+		          "lengthMenu": "Mostrar _MENU_ registros por página",
+		          "zeroRecords": "No se encontraron registros",
+		          "info": "Mostrando página _PAGE_ de _PAGES_",
+		          "infoEmpty": "No existen registros",
+		          "infoFiltered": "(filtrado de _MAX_ total registros)",
+		          "search": "Buscar:",
+		          "paginate": {
+		              "first":      "Primero",
+		              "last":       "Último",
+		              "next":       "Siguiente",
+		              "previous":   "Anterior"
+		          },
+		      },                
+		      dom: 'Bfrtp',
+		      buttons: [
+		          //'copyHtml5',
+		          'excelHtml5',
+		          'csvHtml5',
+		          //'pdfHtml5'
+		      ]
+		  });
+		});
+
+	</script
+
+{% endblock %}

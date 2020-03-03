@@ -1,0 +1,867 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }} 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .no-border {
+            border: 0;
+            box-shadow: none;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+    
+    {% set tipo_de_cambio_compra = '' %}
+    {% set tipo_de_cambio_venta = '' %}
+    {% set alerta = 'warning' %}
+    {% if tipoCambio %}
+        {% set tipo_de_cambio_compra = tipoCambio.compra %}
+        {% set tipo_de_cambio_venta = tipoCambio.venta %}
+        {% set alerta = 'info' %}
+    {% endif %}
+
+    <div class="alert alert-{{ alerta }}" role="alert">
+        Dólar : {{ tipo_de_cambio_compra != '' and tipo_de_cambio_venta != ''  ? 'Compra = S/. ' ~ tipo_de_cambio_compra ~ ';' ~ ' Venta = S/. ' ~ tipo_de_cambio_venta  : 'Definir el valor del dólar para el día de HOY. Ir a Contabilidad >> Tipo de cambio'}}
+
+        <input type="hidden" value="{{ tipo_de_cambio_compra }}" id="tipo_de_cambio" name="tipo_de_cambio" />
+    </div>
+
+    <form id="form" action="{{ path('detallecompra_new') }}" class="form-horizontal  needs-validation" role="form" method="post" enctype="multipart/form-data" novalidate>    
+
+
+
+        <div class="row mt-2 mb-2">
+
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xl-6">
+
+
+                <div class="card" >
+                    <div class="card-body">
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+
+
+                                {{ form_label(formProducto.proveedor_select) }}
+                                <div class="input-group">
+                                    {{ form_widget(formProducto.proveedor_select) }}
+                                  
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="agregar_proveedor" ><i class="fa fa-plus fa-lg" data-toggle="tooltip" title="Agregar proveedor"></i></span>
+                                        <span class="input-group-text" id="editar_proveedor"><i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar proveedor"></i></span>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div>
+
+
+                            </div>
+
+                            <div class="form-group col-4">
+                                {{ form_row(formProducto.local) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>  
+
+                            </div>
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.moneda) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                  
+                            </div>  
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-3">
+                                {{ form_row(formProducto.fecha) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                  
+                            </div>                            
+                            <div class="form-group col-3">
+                                {{ form_row(formProducto.documento) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                  
+                            </div>
+                            <div class="form-group col-3">
+                                {{ form_row(formProducto.numero_documento) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                    
+                            </div>
+
+                            <div class="form-group col-3">
+                                {{ form_row(formProducto.archivo) }}                            
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-row">
+
+                            <div class="form-group col-3">
+                                {{ form_row(formProducto.voucher) }}                            
+                            </div>
+
+                            <div class="form-group col-6">
+                                {{ form_row(formProducto.observacion) }}
+                               
+                            </div>                            
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-3">
+                                {{ form_row(formProducto.forma_pago) }}                            
+                            </div>
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.numero_dias) }}
+                               
+                            </div>                            
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.condicion) }}
+                               
+                            </div> 
+                             
+                        </div>
+
+                        <div class="row d-none" id="nota_credito">
+
+                            <div class="card w-100" >
+                                <div class="card-header">
+                                    Datos de nota de crédito
+                                </div>
+                                <div class="card-body">
+
+                                    <div class="form-row">
+
+                                        <div class="form-group col-4">
+                                            {{ form_row(formProducto.num_notacredito) }}                            
+                                        </div>
+
+                                        <div class="form-group col-4">
+                                            {{ form_row(formProducto.doc_rel_notacredito) }}
+                                        </div>
+
+                                        <div class="form-group col-4">
+                                            {{ form_row(formProducto.valor_notacredito) }}
+                                        </div>                                                                                 
+                                    </div>
+                        
+
+                                </div>
+                            </div>
+   
+
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+                <div class="card">
+
+                    <div class="card-body">
+
+                        <div class="form-row">
+
+                            <div class="form-group col-12">
+                                {{ form_row(formProducto.productoXLocal) }} 
+
+                                <input type="hidden" value="" name="codigo_producto" id="codigo_producto" />
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                              
+                            </div>                    
+
+                        </div>
+
+                        <div class="form-row">
+
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.unidad) }}
+                               
+                            </div>  
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.precio) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>  
+                            </div>
+
+                            <div class="form-group col-2">
+                                {{ form_row(formProducto.cantidad) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                  
+                            </div>
+
+
+
+                        </div>
+
+                        <p class="text-right">
+                            <input type="button" class="btn btn-small btn-primary" id="agregar" value="Agregar >>">
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xl-6">
+
+                <table id="tblProductosSelect" class="table ">
+
+                    <thead class="thead-dark">
+                        <tr>
+                            <th width="5%"></th>                        
+                            <th width="55%">Producto</th>                        
+                            <th width="15%">Precio</th>
+                            <th width="10%">Cantidad</th>
+                            <th width="15%">Importe</th>
+                        </tr>
+                    </thead>                        
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+                <div class="mr-2">
+
+                    <p class="h4 text-right">
+                        TOTAL : <input type="text" id="valor_total" name="valor_total" size="8" class=" no-border"/>
+                    </p>
+
+
+                    <p class="text-right">
+                        <input type="submit" class="btn btn-primary btn-lg btn-block" id="comprar" value="Comprar">
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+        </div>
+
+    </form>
+
+    <div class="modal proveedor" tabindex="-1" role="dialog" id="modalProveedor">
+      <div class="modal-dialog " role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Proveedor</h5>
+            <button type="button" class="close" onclick="$('#modalProveedor').modal('hide');" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for"ruc_proveedor">RUC</label>                    
+
+                    <div class="input-group mb-3">
+                        <input type="text" id="ruc_proveedor" name="ruc_proveedor" class="form-control"/>
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="buscar_ruc"><i class="fa fa-search fa-lg " data-toggle="tooltip" title="Buscar"></i></span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group col-md-12">
+                    <label for"nombre_proveedor">Nombre de proveedor</label>
+                    <input type="text" id="nombre_proveedor" name="nombre_proveedor" class="form-control"/>
+                </div>
+
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for"direccion_proveedor">Dirección</label>
+                    <input type="text" id="direccion_proveedor" name="direccion_proveedor" class="form-control"/>
+                </div>
+            </div>     
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for"telefono_proveedor">Teléfono</label>
+                    <input type="text" id="telefono_proveedor" name="telefono_proveedor" class="form-control"/>
+                </div>
+            </div>            
+            
+            <input type="hidden" id="id_proveedor" name="id_proveedor" class="form-control"/>
+            <input type="hidden" id="distrito_proveedor" name="distrito_proveedor" class="form-control"/>
+            <input type="hidden" id="condicion_proveedor" name="condicion_proveedor" class="form-control"/>
+
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-12">
+                <div class="d-none" id="mensaje_proveedor"></div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            
+            <button type="button" class="btn btn-primary" id="guardar_proveedor">Guardar</button>
+            <button type="button" class="btn btn-secondary" onclick="$('#modalProveedor').modal('hide');">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }} 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="{{asset('js/es.js')}}" ></script>
+    <script src="{{asset('js/jquery.number.min.js')}}" ></script>
+
+    <script type="text/javascript">
+
+        function get_detail()
+        {
+            var size=$('#appbundle_detallecompra_producto_archivo')[0].files[0].size;
+            var extension=$('#appbundle_detallecompra_producto_archivo').val().replace(/^.*\./, '');
+            
+            $("#file_detail").html("File Size : "+size+" <br>Extension : "+extension+"");
+        }
+
+
+        function eliminar(id)
+        {
+
+            var txtvalortotal       = $('#valor_total');
+            
+            $("#tr_"+id).remove();
+
+            var total = 0;
+
+            $("input:text.subtotal").each( function () {
+                total += Number($(this).val());
+            });
+
+            txtvalortotal.val(total);
+            txtvalortotal.number( true, 5 );
+
+        } 
+
+        function obtenerValorTipoCambio(fecha) {
+
+            var fecha = $('#appbundle_detallecompra_producto_fecha').val();
+            var respuesta = '';
+
+            $.ajax({
+                method: "POST",
+                async : false ,
+                url: "{{ path('obtenervalortipocambio')}}",
+                data: { fecha: fecha}
+            })
+            .done(function( data ) {
+
+                respuesta = data;
+
+            });
+
+            return respuesta;
+        }
+
+        $(document).ready(function() {
+
+            var txtproductoId           = $('#appbundle_detallecompra_producto_productoXLocal');
+            var txtproductoCodigo       = $('#codigo_producto');
+            var txtprecio               = $('#appbundle_detallecompra_producto_precio');
+            var txtcantidad             = $('#appbundle_detallecompra_producto_cantidad');
+            var txtmoneda               = $('#appbundle_detallecompra_producto_moneda');
+
+            var btnagregar              = $('#agregar');
+
+            var txtproductonuevo        = $('#appbundle_detallecompra_producto_producto_nuevo');
+            var txtcodigoproductonuevo  = $('#appbundle_detallecompra_producto_codigo_producto_nuevo');
+
+            var txtunidad               = $('#appbundle_detallecompra_producto_unidad');
+            var comprar                 = $('#comprar');
+
+            var txtvalortotal           = $('#valor_total');
+
+            var fileArchivo             = $('#appbundle_detallecompra_producto_archivo');
+            var tipo_de_cambio          = $('#tipo_de_cambio');
+            var local                   = $('#appbundle_detallecompra_producto_local');
+            var formapago               = $('#appbundle_detallecompra_producto_forma_pago');
+            var condicionpago           = $('#appbundle_detallecompra_producto_condicion');
+
+            formapago.on("change",function(e){
+
+                if($(this).val() == 4){
+                    condicionpago.val('pendiente');
+                    $('#nota_credito').removeClass('d-none');
+                }else{
+                    $('#nota_credito').addClass('d-none');
+                }
+
+                if($(this).val() == 2){
+                    condicionpago.val('pendiente');
+                }
+
+                if($(this).val() == 1){
+                    condicionpago.val('pagado');
+                }
+
+            });
+
+
+            //Limpìamos la lista de productos seleccionados al hacer cambio de moneda
+            $('body').on('focusin', '#appbundle_detallecompra_producto_moneda', function(){
+
+                $(this).data('val', $(this).val());
+
+            }).on('change','#appbundle_detallecompra_producto_moneda',function(e){
+
+                var prev = $(this).data('val');
+
+
+                bootbox.confirm({
+                    title: null,
+                    message: "La lista de productos agregados será limpiada. ¿Desea continuar?",
+                    buttons: {
+                        cancel: {
+                            label: '<i class="fa fa-times"></i> Cancelar'
+                        },
+                        confirm: {
+                            label: '<i class="fa fa-check"></i> Confirmar'
+                        }
+                    },
+                    callback: function (result) {
+
+                        if(result){
+
+
+                            $(".prd").each( function () {
+                                $(this).remove();
+                            });
+
+                            $('#valor_total').val($.number( 0, 2, '.', ',' ));
+
+                        }
+                        else
+                        {
+                            $('#appbundle_detallecompra_producto_moneda').val(prev);
+
+                        }
+
+                    }
+                });
+
+
+            });
+
+
+            $(".select2").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenerproductos')}}",//"https://api.github.com/search/repositories",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        local: local.val(),
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },
+                placeholder: 'Buscar productos',
+                //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+                minimumInputLength: 3,
+                //templateResult: formatRepo,
+                //templateSelection: formatRepoSelection
+            });
+
+            function formatRepo (repo) {
+
+                if (repo.loading) {
+                    return repo.text;
+                }
+
+                var markup = "<div class='select2-result-repository clearfix'>" +
+                                "<div class='select2-result-repository__meta'>" +
+                                    "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+
+                 markup += "</div></div>";
+
+                return markup;
+            }
+
+            function formatRepoSelection (repo) {
+
+                return repo.text;
+            }
+
+            $('.select2').on('select2:select', function (e) {
+
+                var data = e.params.data;
+                var txtproductovalue  = data.id;
+
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('obtenercodigoproducto')}}",
+                    data: { producto: txtproductovalue }
+                    })
+                    .done(function( data ) {
+                      //console.log(data);
+                      if( data ){
+                        txtunidad.val(data.unidad);
+                      }
+
+                });   
+
+            });
+
+
+            btnagregar.on('click',function () {
+
+                if(txtproductoId.val() == '' || txtprecio.val() == '' || txtcantidad.val() == ''){
+
+                    bootbox.alert("Debe seleccionar producto y agregar un precio y cantidad.");
+
+                }else{
+
+
+                    if(txtmoneda.val() == 2){
+
+                        //var tipocambio = tipo_de_cambio.val();
+
+                        var resp = obtenerValorTipoCambio();
+                        var tipocambio = resp.valor;
+
+
+                        if(tipocambio == ''){
+
+                            bootbox.alert("Debe definir el tipo de cambio para la fecha seleccionada. Ir a Contabilidad >> Tipo de cambio");
+
+                            return false;
+
+                        }
+
+                        var txtproductonombre = txtproductoId.find("option:selected").text();
+
+                        var subtotal = Number(txtprecio.val()) * Number(txtcantidad.val()) * Number(tipocambio);
+                        var precio_linea = Number(txtprecio.val()) * Number(tipocambio);
+
+                        $('#tblProductosSelect tr:last').after('<tr id="tr_'+txtproductoId.val()+'" class="prd"><td><input type="hidden" name="productoid_'+txtproductoId.val()+'" value="'+txtproductoId.val()+'"/><a href="javascript:eliminar('+txtproductoId.val()+')" ><i class="fa fa-remove fa-lg"></a></i></td><td><input type="text" name="producto_'+txtproductoId.val()+'" class="form-control no-border" value="'+txtproductonombre+'" /></td><td><input type="text" name="precio_'+txtproductoId.val()+'" class="form-control no-border" value="'+precio_linea.toFixed(5)+'" /></td><td><input type="text" name="cantidad_'+txtproductoId.val()+'" class="form-control no-border" value="'+txtcantidad.val()+'" /> </td><td><input type="text" name="" class="form-control no-border subtotal" value="'+subtotal.toFixed(5)+'" /></td></tr>');
+
+                        var total = 0;
+
+                        $("input:text.subtotal").each( function () {
+                            total += Number($(this).val());
+                        });
+                        txtvalortotal.val(total);
+                        txtvalortotal.number( true, 5 );
+
+
+                    }else{
+
+
+                        var txtproductonombre = txtproductoId.find("option:selected").text();
+
+                        var subtotal = Number(txtprecio.val()) * Number(txtcantidad.val());
+                        var precio_linea = Number(txtprecio.val()) ;
+
+                        $('#tblProductosSelect tr:last').after('<tr id="tr_'+txtproductoId.val()+'" class="prd"><td><input type="hidden" name="productoid_'+txtproductoId.val()+'" value="'+txtproductoId.val()+'"/><a href="javascript:eliminar('+txtproductoId.val()+')" ><i class="fa fa-remove fa-lg"></a></i></td><td><input type="text" name="producto_'+txtproductoId.val()+'" class="form-control no-border" value="'+txtproductonombre+'" /></td><td><input type="text" name="precio_'+txtproductoId.val()+'" class="form-control no-border" value="'+precio_linea.toFixed(5)+'" /></td><td><input type="text" name="cantidad_'+txtproductoId.val()+'" class="form-control no-border" value="'+txtcantidad.val()+'" /> </td><td><input type="text" name="" class="form-control no-border subtotal" value="'+subtotal.toFixed(5)+'" /></td></tr>');
+
+                        var total = 0;
+
+                        $("input:text.subtotal").each( function () {
+                            total += Number($(this).val());
+                        });
+                        txtvalortotal.val(total);
+                        txtvalortotal.number( true, 5 );
+
+                    }
+
+                    txtproductoId.val('');
+                    txtprecio.val('');
+                    txtcantidad.val('');
+                    var newOption = new Option('', '', false, true);
+                    $('#appbundle_detallecompra_producto_productoXLocal').append(newOption).trigger('change');
+
+                }
+
+            });
+
+            $("form").submit(function(){
+
+                var prd = $("#tblProductosSelect").find("tr.prd");
+
+                if(prd.length == 0){
+
+                    bootbox.alert("No existen productos agregados!");                    
+                    return false;
+
+                }else{
+
+                    var extension = fileArchivo.val().replace(/^.*\./, '');
+
+                    if(extension == 'jpg' || extension == 'png' || extension == 'gif' || extension == 'svg'  || extension == 'jpeg'  || extension == 'pdf' || extension == ''){
+                        return true;
+                    }else{
+                        bootbox.alert("El archivo adjunto no tiene el formato permitido (jpg,png,jpeg,gif,pdf)");
+                        return false;
+                    }
+                   
+                }
+
+            });
+
+
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".setcurrentdate").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+            $(".setcurrentdate").datepicker("setDate", startDate);
+
+
+
+            /*Funcionalidad para agregar y/o editar un proveedor*/
+            function obtenerProveedor() {
+
+                var proveedor = $('#appbundle_detallecompra_producto_proveedor_select').val();
+                var respuesta = '';
+
+                $.ajax({
+                    method: "POST",
+                    async : false ,
+                    url: "{{ path('obtenerproveedor')}}",
+                    data: { id: proveedor}
+                })
+                .done(function( data ) {
+
+                    respuesta = data;
+
+                });
+
+                return respuesta;
+            }
+
+            $('#agregar_proveedor').on('click',function(e){
+
+                e.preventDefault();
+
+                $('.proveedor').modal('show');
+
+            });
+
+            $('#editar_proveedor').on('click',function(e){
+
+                e.preventDefault();
+
+                var proveedor = $('#appbundle_detallecompra_producto_proveedor_select').val();
+
+                if(proveedor == ''){
+
+                    bootbox.alert("Debe seleccionar un proveedor para que pueda editar.");                    
+                    return false;
+
+                }else{
+
+                    var respuesta = obtenerProveedor(function(output){});
+
+                    var nombre       = respuesta.nombre;
+                    var ruc          = respuesta.ruc;
+                    var telefono     = respuesta.telefono;
+                    var direccion    = respuesta.direccion;
+                    var distrito     = respuesta.distrito;
+                    var condicion    = respuesta.condicion;
+                    var id           = respuesta.id;
+
+                    $('#nombre_proveedor').val(nombre);
+                    $('#ruc_proveedor').val(ruc);
+                    $('#telefono_proveedor').val(telefono);
+                    $('#direccion_proveedor').val(direccion);
+                    $('#id_proveedor').val(id);
+                    $('#distrito_proveedor').val(distrito);
+                    $('#condicion_proveedor').val(condicion);
+
+                    $('.proveedor').modal('show');
+
+                }
+
+            });
+
+            // Selecciona el proveedor
+            $(".prov").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenerproveedores')}}",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        //console.log(data.results);
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },
+                placeholder: 'Buscar proveedor por nombre o RUC',
+                minimumInputLength: 3,
+            });
+
+            $('#guardar_proveedor').on('click',function (e) {
+
+                e.preventDefault();
+
+                var nombre_proveedor = $('#nombre_proveedor').val();
+                var ruc_proveedor  = $('#ruc_proveedor').val();
+                var telefono_proveedor     = $('#telefono_proveedor').val();
+                var direccion_proveedor    = $('#direccion_proveedor').val();
+                var distrito_proveedor    = $('#distrito_proveedor').val();
+                var condicion_proveedor    = $('#condicion_proveedor').val();
+                var id_proveedor     = $('#id_proveedor').val();
+
+                if(nombre_proveedor == '' || ruc_proveedor == '' ){
+
+                    bootbox.alert("Debe obligatoriamente ingresar un nombre y el RUC.");                    
+                    return false;
+
+                }
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('registrar_proveedor_nuevo')}}",
+                  data: { nombre: nombre_proveedor, ruc: ruc_proveedor, telefono: telefono_proveedor ,id: id_proveedor,direccion:direccion_proveedor,distrito:distrito_proveedor,condicion:condicion_proveedor}
+                })
+                  .done(function( data ) {
+
+
+                    if(data.mensaje != ''){
+                        $('#mensaje_proveedor').removeClass('d-none');
+                        $('#mensaje_proveedor').addClass('bg-danger text-white');
+                        $('#mensaje_proveedor').html(data.mensaje);
+
+                    }else{
+
+                        var newOption = new Option(data.text, data.id, false, true);
+                        $('#appbundle_detallecompra_producto_proveedor_select').append(newOption).trigger('change');
+                        $('.proveedor').modal('hide');
+
+                    }
+
+
+
+
+                });   
+
+            });
+
+            /*Fin de funcionalidad para agregar y/o editar un proveedor*/
+
+            $('#buscar_ruc').on("click", function(){
+
+                var data = {
+                  ruc   : $('#ruc_proveedor').val(),
+                  token  : '5JFQh5toA0sWhj-YV3NXmt4dzE4JvJjwgYzzPJtYHgA',
+                }
+                //console.log(provruc_text.val());
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('obtenerdatosempresa')}}",
+                    data: data,
+                    success: function(data){
+
+                        $('#nombre_proveedor').val(data.nombre_o_razon_social);
+                        $('#direccion_proveedor').val(data.direccion_completa);
+                        $('#distrito_proveedor').val(data.distrito_id);
+                        $('#condicion_proveedor').val(data.estado_del_contribuyente);
+
+                        if(data.estado_del_contribuyente != 'ACTIVO'){
+                            bootbox.alert("El proveedor no esta habilitado en la SUNAT");
+                        }                        
+                    }
+
+                });
+            });
+
+        });
+
+
+    </script>
+          
+{% endblock %}
+
+

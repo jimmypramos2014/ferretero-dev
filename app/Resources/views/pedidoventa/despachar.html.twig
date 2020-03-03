@@ -1,0 +1,572 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="container">
+
+        <div class="row pr-3">
+            <div class="col-lg-12 ">
+                <a href="{{ path('pedidoventa_index') }}" class="btn btn-primary pull-left">Regresar</a>
+            </div>
+        </div>
+
+        <form id="form" onsubmit="return submitResult();" action="{{ path('pedidoventa_despachar', {'id': pedidoVenta.id}) }}" class="form-horizontal needs-validation " role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Lista de despachos realizados
+                </div>
+                <div class="card-body">
+
+                    <table id="despachos" class="table table-striped table-bordered">                            
+                        <thead>
+                            <tr>
+                                <th>Nro.Despacho</th>
+                                <th>Fecha</th>
+                                <th>Local de salida</th>
+                                <th class="text-center">Acciones</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set item = 1 %}
+                            {% for despacho in despachos %}
+                                <tr>
+                                    <td>{{ despacho.numeroDocumento | upper }} </td>
+                                    <td>{{ despacho.fecha | date('d/m/Y H:i') }}</td>
+                                    <td>{{ despacho.localInicio | upper }}</td>
+                                    <td class="text-center">
+                                        {% if despacho.guiaRemision[0].enlacePdf %}                                        
+                                            <a href="{{ despacho.guiaRemision[0].enlacePdf }}" target="_blank"><i class="fa fa-print fa-lg" data-toggle="tooltip" title="Imprimir"></i></a>
+                                        {% endif %}                                       
+                                    </td>
+
+                                </tr>
+                                {% set item = item + 1 %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+            
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Seleccione los productos que va despachar.
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-4 col-lg-4 col-xs-12">
+                                    <label for="" class="required">Cliente</label>
+                                    <input type="text" id="" name="" class="form-control" style="" value="{{ pedidoVenta.cliente | upper }}" readonly />
+                                      
+                                </div>
+
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.fechaEmision) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <div class="row mt-2 ">
+                        <div class="col-lg-12">
+                            <table id="detalle" class="table table-striped table-bordered">                            
+                                <thead>
+                                    <tr>
+                                        <th>Nro.Pedido</th>
+                                        <th>Producto</th>
+                                        <th>Local</th>
+                                        <th class="text-center">Cantidad pedida</th>
+                                        <th class="text-center">Cantidad entregada</th>
+                                        <th class="text-center">Stock</th>
+                                        <th class="text-center">Cantidad por despachar</th>
+                                        <th class="text-center"><input type="checkbox" id="select_todo" name="" /></th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% set item = 1 %}
+                                {% for detalle in pedidoVenta.pedidoVentaDetalle %}
+
+                                    {% if detalle.productoXLocal %}
+                                        <tr>
+                                            <td>{{ pedidoVenta.numeroPedido ? pedidoVenta.numeroPedido | upper : '' }}</td>
+                                            <td>{{ detalle.productoXLocal.producto.nombre | upper }}</td>
+                                            <td>{{ pedidoVenta.local | upper }}</td>
+                                            <td class="text-center">{{ detalle.cantidadPedida }}</td>
+                                            <td class="text-center">{{ detalle.cantidadEntregada ? detalle.cantidadEntregada : 0 }}</td>
+                                            <td class="text-center"><input type="text" id="stock_{{ detalle.id }}" class="form-control text-center stock" size="8" name="stock_{{ detalle.id }}" value="{{ detalle.productoXLocal.stock }}" readonly/></td>
+
+                                            {% set saldo_x_entregar = detalle.cantidadPedida - detalle.cantidadEntregada %}
+                                            {% if  saldo_x_entregar == 0 %} 
+                                                <td class="alert alert-success text-center">Producto entregado</td>
+                                            {% else %}
+                                                <td><input type="text" class="form-control solonumeros text-center" id="cantidad_entregada_{{ detalle.id }}" value="{{saldo_x_entregar}}" name="cantidad_entregada_{{ detalle.id }}" size="2"/></td>   
+                                            {% endif %}
+                                            
+                                            <td class="text-center">
+                                                {% if  saldo_x_entregar != 0 %}
+                                                    <input type="checkbox" id="select_{{ detalle.id }}" class="select" name="select_{{ detalle.id }}" />
+                                                {% endif %}
+                                            </td>
+                                            
+                                        </tr>
+                                        {% set item = item + 1 %}
+                                    {% endif %}
+                                    
+                                {% endfor %}
+                                <input type="hidden" class="form-control" id="pedido_venta_id" value="{{ pedidoVenta.id }}" name="pedido_venta_id" size="2"/>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Datos del traslado
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.fechaInicioTraslado) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.motivoTraslado) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.tipoTransporte) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-1 col-lg-1 col-xs-12">
+                                    {{ form_row(form.peso) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.numeroBultos) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Datos del transportista
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                    {{ form_row(form.transportistaDocumento) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                                <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                    {{ form_row(form.transportistaDocumentoNumero) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                    {{ form_row(form.transportistaDenominacion) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.transportistaPlaca) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Datos del conductor
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                    {{ form_row(form.conductorDocumento) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                                <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                    {{ form_row(form.conductorDocumentoNumero) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-4 col-lg-4 col-xs-12">
+                                    {{ form_row(form.conductorNombre) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Punto de partida
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-4 col-lg-4 col-xs-12">
+                                    {{ form_row(form.ubigeoPartida) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                                <div class="form-group col-md-6 col-lg-6 col-xs-12">
+                                    {{ form_row(form.puntoPartida) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Punto de llegada
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-4 col-lg-4 col-xs-12">
+                                    {{ form_row(form.ubigeoLlegada) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+                                <div class="form-group col-md-6 col-lg-6 col-xs-12">
+                                    {{ form_row(form.puntoLlegada) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Observaciones
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-6 col-lg-6 col-xs-12">
+                                    {{ form_row(form.observacion) }}
+                            
+                                </div> 
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            {{ form_widget(form._token) }}
+
+            <div class="row mt-2 mb-4 ">
+                <div class="col-lg-12 ">
+                    <input type="submit" class="btn btn-small btn-primary pull-right ml-2 " id="btn_procesar" value="Procesar despacho " />
+                </div>                    
+            </div>
+
+        </form>
+
+
+
+    </div>
+
+
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}
+
+    <script type="text/javascript">
+
+        function submitResult() {
+           if ( confirm("¿Esta seguro de generar la Guía de Remisión Electrónica? Recuerde que esta no se podrá anular después.") == false ) {
+              return false ;
+           } else {
+              return true ;
+           }
+        }
+
+
+        var ventaNegativo = '{{ permiteVentaConStockNegativo(pedidoVenta.local.id) }}';
+        $(document).ready(function() {
+
+            var btn_procesar  = $('#btn_procesar');
+
+            $("#form").submit(function(event){
+
+
+                var j = 0;
+                var k = 0;
+                $(".select").each( function (e) {
+
+                    var check = $(this).is(':checked');
+
+                    if(check)
+                    {
+                        j = j + 1;
+
+
+                        if(!ventaNegativo){
+
+                            var id = $(this).attr('id');
+                            var sd = id.replace(/[^0-9]/gi, '');
+
+                            var stock = Number($('#stock_'+sd).val());
+                            var cantidad_entregada = Number($('#cantidad_entregada_'+sd).val());
+
+                            if(stock < cantidad_entregada)
+                            {
+                                k = k + 1;
+                                $('#cantidad_entregada_'+sd).addClass('bg-danger text-white');
+                            }
+
+                        }    
+
+                    }
+
+                    
+                });
+
+
+                if(j == 0)
+                {
+                    bootbox.alert('Debe seleccionar los productos a despachar');
+                    return false;
+                }
+
+                if(k > 0)
+                {
+                    bootbox.alert('No se puede entregar productos que tienen stock menor a la cantidad que se quiere despachar.');
+                    return false;
+                }
+         
+                
+                var tipo_doc_transportista = $('#appbundle_guiaremision_transportistaDocumento').val();
+                var tipo_doc_conductor = $('#appbundle_guiaremision_conductorDocumento').val();
+                var num_doc_transportista = $('#appbundle_guiaremision_transportistaDocumentoNumero').val();
+                var num_doc_conductor = $('#appbundle_guiaremision_conductorDocumentoNumero').val();
+
+
+                if(tipo_doc_transportista == 'dni')
+                {
+                    if(num_doc_transportista.length != 8)
+                    {
+                        bootbox.alert('El número de documento del transportista debe tener 8 digitos.');
+                        return false;
+                    }
+
+                }
+
+                if(tipo_doc_transportista == 'ruc')
+                {
+                    if(num_doc_transportista.length != 11)
+                    {
+                        bootbox.alert('El número de documento del transportista debe tener 11 digitos.');
+                        return false;
+                    }
+
+                }
+
+
+                if(tipo_doc_conductor == 'dni')
+                {
+                    if(num_doc_conductor.length != 8)
+                    {
+                        bootbox.alert('El número de documento del conductor debe tener 8 digitos.');
+                        return false;
+                    }
+
+                }
+
+                if(tipo_doc_conductor == 'ruc')
+                {
+                    if(num_doc_conductor.length != 11)
+                    {
+                        bootbox.alert('El número de documento del conductor debe tener 11 digitos.');
+                        return false;
+                    }
+
+                }
+
+                return true;                
+
+
+            });
+
+            $('#select_todo').change(function() {
+
+                var check = $(this).is(':checked');
+
+                $(".select").each( function () {
+                    $(this).prop('checked', check);
+                });
+                
+            })
+
+
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".setcurrentdate").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+            $(".setcurrentdate").datepicker("setDate", startDate);
+
+
+            var btn_guardar         = $('#guardar_transporte');
+            var form_transporte     = $("#form_transporte");
+            var form_empresatransporte     = $("#form_empresatransporte");
+            var empresatransporte   = $("#appbundle_detalleventaentregadatosenvio_transporte");
+
+            var mostrar_guia        = $('#mostrar_guia');
+
+
+
+
+
+                                    
+        });
+
+    </script>
+
+{% endblock %}

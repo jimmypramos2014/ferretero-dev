@@ -1,0 +1,443 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="container">
+
+
+        <form id="form" onsubmit="return submitResult();"  action="{{ path('guiaremision_new') }}" class="form-horizontal needs-validation " role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Cliente
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-4 col-lg-4 col-xs-12">
+                                    {{ form_row(form.cliente) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                                <div class="form-group col-md-6 col-lg-6 col-xs-12">
+                                    {{ form_row(form.facturaVenta) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Datos del traslado
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.fechaInicioTraslado) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.motivoTraslado) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.tipoTransporte) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-1 col-lg-1 col-xs-12">
+                                    {{ form_row(form.peso) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.numeroBultos) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Datos del transportista
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                    {{ form_row(form.transportistaDocumento) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                                <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                    {{ form_row(form.transportistaDocumentoNumero) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                    {{ form_row(form.transportistaDenominacion) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                    {{ form_row(form.transportistaPlaca) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Datos del conductor
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                    {{ form_row(form.conductorDocumento) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                                <div class="form-group col-md-3 col-lg-3 col-xs-12">
+                                    {{ form_row(form.conductorDocumentoNumero) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+                                <div class="form-group col-md-4 col-lg-4 col-xs-12">
+                                    {{ form_row(form.conductorNombre) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                
+                                </div> 
+
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Punto de partida
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-4 col-lg-4 col-xs-12">
+                                    {{ form_row(form.ubigeoPartida) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                                <div class="form-group col-md-6 col-lg-6 col-xs-12">
+                                    {{ form_row(form.puntoPartida) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Punto de llegada
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-4 col-lg-4 col-xs-12">
+                                    {{ form_row(form.ubigeoLlegada) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+                                <div class="form-group col-md-6 col-lg-6 col-xs-12">
+                                    {{ form_row(form.puntoLlegada) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="card mx-auto mt-5">
+                <div class="card-header">
+                    Observaciones
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                            <div class="form-row">
+
+                                <div class="form-group col-md-6 col-lg-6 col-xs-12">
+                                    {{ form_row(form.observacion) }}
+                            
+                                </div> 
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            {{ form_widget(form._token) }}
+
+
+            <div class="mt-2">
+                <p class="pull-right">
+                    <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('guiaremision_index')}}'" />            
+                    <input type="submit" class="btn btn-small btn-primary" value="Generar Guia" />
+                </p>
+            </div>
+
+        </form>
+
+
+
+    </div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}
+
+    <script type="text/javascript">
+
+        function submitResult() {
+           if ( confirm("¿Esta seguro de generar la Guía de Remisión Electrónica? Recuerde que esta no se podrá anular después.") == false ) {
+              return false ;
+           } else {
+              return true ;
+           }
+        }
+
+        $(document).ready(function() {
+
+
+            $("#form").submit(function(event){
+
+                //event.preventDefault();
+
+                var tipo_doc_transportista  = $('#appbundle_guiaremision_transportistaDocumento').val();
+                var tipo_doc_conductor      = $('#appbundle_guiaremision_conductorDocumento').val();
+                var num_doc_transportista   = $('#appbundle_guiaremision_transportistaDocumentoNumero').val();
+                var num_doc_conductor       = $('#appbundle_guiaremision_conductorDocumentoNumero').val();
+
+                console.log(tipo_doc_transportista);
+                console.log(tipo_doc_conductor);
+                console.log(num_doc_transportista);
+                console.log(num_doc_conductor);
+
+
+                if(tipo_doc_transportista == 'dni')
+                {
+                    if(num_doc_transportista.length != 8)
+                    {
+                        bootbox.alert('El número de documento del transportista debe tener 8 digitos.');
+                        return false;
+                    }
+
+                }
+
+                if(tipo_doc_transportista == 'ruc')
+                {
+                    if(num_doc_transportista.length != 11)
+                    {
+                        bootbox.alert('El número de documento del transportista debe tener 11 digitos.');
+                        return false;
+                    }
+
+                }
+
+
+                if(tipo_doc_conductor == 'dni')
+                {
+                    if(num_doc_conductor.length != 8)
+                    {
+                        bootbox.alert('El número de documento del conductor debe tener 8 digitos.');
+                        return false;
+                    }
+
+                }
+
+                if(tipo_doc_conductor == 'ruc')
+                {
+                    if(num_doc_conductor.length != 11)
+                    {
+                        bootbox.alert('El número de documento del conductor debe tener 11 digitos.');
+                        return false;
+                    }
+
+                }
+
+                return true;
+
+
+            });
+
+
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".setcurrentdate").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+            $(".setcurrentdate").datepicker("setDate", startDate);
+
+
+
+            $('#appbundle_guiaremision_cliente').on('change',function(e){
+
+                $("#appbundle_guiaremision_facturaVenta option").each(function(){
+
+                   $('#appbundle_guiaremision_facturaVenta option[value="'+$(this).val()+'"]').attr("disabled", true);
+
+                });
+
+                $('#appbundle_guiaremision_facturaVenta').trigger("chosen:updated");
+
+                var data = {
+                  cliente      : $(this).val(),
+                  autorizado  : 'si',
+                }
+
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('obtener_factura_desde_cliente')}}",
+                    data: data,
+                    success: function(data){
+
+                        data.forEach(function(item) {
+                            $('#appbundle_guiaremision_facturaVenta option[value="'+item+'"]').attr("disabled", false);
+                        });
+
+                        $('#appbundle_guiaremision_facturaVenta').trigger("chosen:updated");
+                    }
+
+                });
+
+
+            });
+
+                                    
+        });
+
+    </script>
+
+{% endblock %}

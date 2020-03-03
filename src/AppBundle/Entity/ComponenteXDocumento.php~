@@ -1,0 +1,61 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * ComponenteXDocumento
+ *
+ * @ORM\Table(name="componente_x_documento")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\ComponenteXDocumentoRepository")
+ */
+class ComponenteXDocumento
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="posicion_x", type="string", length=32, nullable=true)
+     */
+    private $posicionX;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="posicion_y", type="string", length=32, nullable=true)
+     */
+    private $posicionY;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="estado", type="boolean", nullable=true)
+     */
+    private $estado;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Documento", inversedBy="componenteXDocumento", cascade={"persist"})
+     * @ORM\JoinColumn(name="documento_id", referencedColumnName="id")
+     * 
+     */
+    protected $documento;
+
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Componente", inversedBy="componenteXDocumento", cascade={"persist"})
+     * @ORM\JoinColumn(name="componente_id", referencedColumnName="id")
+     * 
+     */
+    protected $componente;
+
+
+}

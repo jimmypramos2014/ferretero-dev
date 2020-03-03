@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <meta charset="utf-8">
+    <head>
+        <title>Guia de entrega</title>
+        <style type="text/css">
+
+            body {
+                font-family:Arial;
+                font-size:13pt;
+                background-image: url({{ 'http://' ~ host ~ '/formatos/' ~ app.session.get('empresa') ~ '/guia_entrega.jpg' }});
+                background-repeat: no-repeat;
+                background-size: 100%;
+            }
+        
+        </style>
+    </head>
+
+    <body>
+
+        {% set fecha_X = 0 %}
+        {% set fecha_Y = 0 %}
+        {% set cantidad_X = 0 %}
+        {% set cantidad_Y = 0 %}
+        {% set mercaderia_X = 0 %}
+        {% set mercaderia_Y = 0 %}
+
+        {% set numTicket_X = 0 %}
+        {% set numTicket_Y = 0 %}
+        {% set numBoleta_X = 0 %}
+        {% set numBoleta_Y = 0 %}
+
+        {% set cliente_X = 0 %}
+        {% set cliente_Y = 0 %}
+        {% set direccion_X = 0 %}
+        {% set direccion_Y = 0 %}
+
+        {% set inicioDetalle_X = 0 %}
+        {% set inicioDetalle_Y = 0 %}
+        {% set finDetalle_X = 0 %}
+        {% set finDetalle_Y = 0 %}
+
+        {% set direccionEmpresa_X = 0 %}
+        {% set direccionEmpresa_Y = 0 %}
+        {% set contactoEmpresa_X = 0 %}
+        {% set contactoEmpresa_Y = 0 %}
+
+        {% for componenteXDocumento in componentesXDocumento %}
+            
+            {% if componenteXDocumento.componente.nombre == 'fecha' %}
+                {% set fecha_X = componenteXDocumento.posicionX %}
+                {% set fecha_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'cantidad' %}
+                {% set cantidad_X = componenteXDocumento.posicionX %}
+                {% set cantidad_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'mercaderia' %}
+                {% set mercaderia_X = componenteXDocumento.posicionX %}
+                {% set mercaderia_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            
+            {% if componenteXDocumento.componente.nombre == 'numTicket' %}
+                {% set numTicket_X = componenteXDocumento.posicionX %}
+                {% set numTicket_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'numBoleta' %}
+                {% set numBoleta_X = componenteXDocumento.posicionX %}
+                {% set numBoleta_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'cliente' %}
+                {% set cliente_X = componenteXDocumento.posicionX %}
+                {% set cliente_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'direccion' %}
+                {% set direccion_X = componenteXDocumento.posicionX %}
+                {% set direccion_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+
+            {% if componenteXDocumento.componente.nombre == 'inicioDetalle' %}
+                {% set inicioDetalle_X = componenteXDocumento.posicionX %}
+                {% set inicioDetalle_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'finDetalle' %}
+                {% set finDetalle_X = componenteXDocumento.posicionX %}
+                {% set finDetalle_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'direccionEmpresa' %}
+                {% set direccionEmpresa_X = componenteXDocumento.posicionX %}
+                {% set direccionEmpresa_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+            {% if componenteXDocumento.componente.nombre == 'contactoEmpresa' %}
+                {% set contactoEmpresa_X = componenteXDocumento.posicionX %}
+                {% set contactoEmpresa_Y = componenteXDocumento.posicionY %}
+            {% endif %}
+
+        {% endfor %}
+
+        {% if localObj.empresa.direccion %}
+
+        <span id="direccionEmpresa" style="position:absolute; top: {{direccionEmpresa_X}}px; left:{{direccionEmpresa_Y}}px; width: 500px; color: #253F8A;font-size:15pt;font-weight:bold;">{{ localObj.empresa.direccion }}</span>
+        {% endif %}
+
+        {% if localObj.telefono %}
+
+            <span id="contactoEmpresa" style="position:absolute; top: {{contactoEmpresa_X}}px; left:{{contactoEmpresa_Y}}px; width: 500px; color: #253F8A;font-size:12pt;font-weight:bold;">{{ 'Tel.:' ~ localObj.telefono ~ ' ' }} {{ localObj.email ? ' Email: ' ~ localObj.email:'' }}</span>
+
+        {% endif %}
+
+        <span class="numTicket" style="position:absolute; top:{{numTicket_X}}px; left:{{numTicket_Y}}px; width: 50px; color: #253F8A;font-size:20pt;">{{ random() }}
+        </span>
+
+
+        <span class="fecha" style="position:absolute; top:{{fecha_X}}px; left:{{fecha_Y}}px; width: 20px; color: black;">{{ "now" | date('d/m/Y') }}
+        </span>
+
+
+        <span class="cliente" style="position:absolute; top:{{cliente_X}}px; left:{{cliente_Y}}px; width: 600px; color: black;">
+            {% set datosEntrega = obtenerDatosEntrega(identificador,'detalle_venta_entrega_datos_envio') %}
+            {{ datosEntrega ? datosEntrega.cliente | upper : '' }}
+        </span>
+
+        <span class="direccion" style="position:absolute; top:{{direccion_X}}px; left:{{direccion_Y}}px; width: 600px; color: black;">
+            {{ datosEntrega ? datosEntrega.direccion | upper : '' }}
+        </span>
+
+        {% set top = inicioDetalle_X %}
+        {% set end = finDetalle_X %}
+        {% set item = 1 %}
+        {% set impuesto = 0 %}
+        {% set total = 0 %}
+
+        {% for detalle in facturaVenta.venta.detalleVenta %}
+
+            {% for dvi in detalleVentaEntrega %}
+
+                {% if detalle.id == dvi.detalleVenta.id %}
+
+                    <span class="numBoleta" style="position:absolute; top: {{ top ~ 'px'}}; left: {{numBoleta_Y}}px; width: 150px; color: black;">{{ facturaVenta.ticket }}
+                    </span>
+
+                    <span class="cantidad" style="position:absolute; top: {{ top ~ 'px'}}; left: {{cantidad_Y}}px; width: 60px; color: black;">{{ dvi.cantidad }}
+                    </span>
+
+
+                    <span class="mercaderia" style="position:absolute; top: {{ top ~ 'px'}}; left: {{mercaderia_Y}}px; width: 600px; color: black;">
+                        {{ detalle.productoXLocal.producto.nombre }}
+                    </span>
+                    
+
+                    {% set top = top + 20 %}
+                    {% set item = item + 1 %}
+                    {% set total = total + detalle.subtotal %}
+
+                    {% if top > end %}
+                       {% set top = top + 900 %}
+                    {% endif %}
+
+
+                {% endif %}
+
+            {% endfor %}
+            
+        {% endfor %}
+    
+
+        <span id="foot" style="position:absolute; top: 1400px; left: 0px; width: 20px; color: black;">.</span>
+
+
+    </body>
+</html>

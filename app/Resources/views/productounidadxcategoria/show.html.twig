@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Productounidadxcategorium</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ productoUnidadXCategorium.id }}</td>
+            </tr>
+            <tr>
+                <th>Tipo</th>
+                <td>{{ productoUnidadXCategorium.tipo }}</td>
+            </tr>
+            <tr>
+                <th>Estado</th>
+                <td>{% if productoUnidadXCategorium.estado %}Yes{% else %}No{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Ratio</th>
+                <td>{{ productoUnidadXCategorium.ratio }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('productounidadxcategoria_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('productounidadxcategoria_edit', { 'id': productoUnidadXCategorium.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

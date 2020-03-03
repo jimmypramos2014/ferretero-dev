@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Transportes list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Ruc</th>
+                <th>Estado</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for transporte in transportes %}
+            <tr>
+                <td><a href="{{ path('transporte_show', { 'id': transporte.id }) }}">{{ transporte.id }}</a></td>
+                <td>{{ transporte.nombre }}</td>
+                <td>{{ transporte.ruc }}</td>
+                <td>{% if transporte.estado %}Yes{% else %}No{% endif %}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('transporte_show', { 'id': transporte.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('transporte_edit', { 'id': transporte.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('transporte_new') }}">Create a new transporte</a>
+        </li>
+    </ul>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="container">
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">
+                <b>{{ local.empresa.nombre ~ ' - ' ~ local.nombre }}</b><br>
+                Seleccione un archivo en formato XLSX con la información de los productos,clientes y proveedores y con la estructura de columnas requerida.
+                
+            </div>
+            <div class="card-body">
+
+                <form id="form" action="{{ path('importacion_index',{'id':local.id}) }}"  method="post" class="form-horizontal " enctype="multipart/form-data" >
+
+                    
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            {{ form_widget(form.attachment) }}
+
+                            <div class="invalid-feedback">
+                                Este valor es requerido.
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {{ form_widget(form._token) }}
+
+
+                    <p class="pull-right">
+                        <input type="submit" id="btn_importar" class="btn btn-small btn-primary" name="importar" value="Importar" />
+                        <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('empresalocal_index')}}'"  name="cancelar"/>
+                    </p>
+
+                </form>
+
+            </div>
+            <div class="card-footer">
+                Descargar formato desde <a href="{{asset('test.xlsx')}}">aquí</a>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    {% endblock %}
+
+    {% block javascripts %}
+
+        {{ parent() }} 
+
+        <script type="text/javascript">
+
+        </script>
+
+    {% endblock %}

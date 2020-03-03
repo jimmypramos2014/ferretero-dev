@@ -1,0 +1,95 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * SunatF131
+ *
+ * @ORM\Table(name="sunat_f131")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\SunatF131Repository")
+ */
+class SunatF131
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="fecha", type="date", nullable=true)
+     */
+    private $fecha;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="serie", type="string", length=32, nullable=true)
+     */
+    private $serie;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="numero", type="string", length=32, nullable=true)
+     */
+    private $numero;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="entrada", type="float", nullable=true)
+     */
+    private $entrada;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="salida", type="float", nullable=true)
+     */
+    private $salida;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="cantidad", type="float", nullable=true)
+     */
+    private $cantidad;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="costo_unitario", type="float", nullable=true)
+     */
+    private $costo_unitario;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="SunatT10", inversedBy="sunatf131", cascade={"persist"})
+     * @ORM\JoinColumn(name="tipo", referencedColumnName="id")
+     * 
+     */
+    protected $tipo;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="SunatT12", inversedBy="sunatf131", cascade={"persist"})
+     * @ORM\JoinColumn(name="operacion", referencedColumnName="id")
+     * 
+     */
+    protected $operacion;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ProductoXLocal", inversedBy="sunatf131", cascade={"persist"})
+     * @ORM\JoinColumn(name="producto_x_local_id", referencedColumnName="id")
+     * 
+     */
+    protected $productoXLocal;
+
+
+}

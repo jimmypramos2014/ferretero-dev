@@ -1,0 +1,1467 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="https://printjs-4de6.kxcdn.com/print.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+
+    <style>
+        #resultado, #existente {
+            background-color: red;
+            color: white;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #resultado.ok, #existente.ok {
+            background-color: green;
+        }
+
+        .no-border {
+            border: 0;
+            box-shadow: none;
+        }
+
+        div.dataTables_filter{
+            text-align: left !important;
+        }
+
+        .punto-venta{
+            min-width: 960px;
+        }
+
+        .producto .caracteristicas{
+            background-color: #000000;
+            color: #FFFFFF;
+            text-align: center;
+            font-size: 0.75rem;
+
+        }
+
+        .producto a{
+            color: #FFFFFF;
+        }        
+
+        .producto .caracteristicas .precio{
+            
+        }        
+
+        .producto .caracteristicas .nombre{
+            min-height: 45px;
+        }
+
+        .fila-producto{
+            margin-bottom: 10px;
+        }
+
+        .borde{
+            border-left: 1px solid #CCCCCC;
+        }
+
+        .venta-cuenta .cabecera{
+            font-weight: bold;
+        }
+
+        .venta-total{
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .venta-impuestos{
+            font-size: 2rem;
+            font-weight: bold;
+        }        
+
+        .linea-separadora{
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .categorias{
+            margin-left: 0px;
+        }
+
+        .scrollable {
+          height:350px;
+          overflow-y: scroll;
+        }
+
+        .producto img{
+            border: 1px solid #000000;
+        }
+
+        .categorias img{
+            border: 1px solid #ea9f43;
+        }
+
+        .productos-slider{
+            overflow: auto;
+            overflow-x: hidden;
+            height: 400px;
+            padding-right: 10px;
+        }
+
+        /* width */
+        .productos-slider::-webkit-scrollbar {
+            width: 40px;
+        }
+        /* Track */
+        .productos-slider::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+         
+        /* Handle */
+        .productos-slider::-webkit-scrollbar-thumb {
+            background: #888; 
+        }
+
+        /* Handle on hover */
+        .productos-slider::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }        
+    
+        .puntoVenta{
+            width:960px;
+            /*margin-left:-200px;*/
+        }  
+
+        .producto{
+            width: 100px;
+        }  
+
+        #guiaHtml { 
+
+            height:297mm; 
+            width:210mm; 
+            margin-left:auto; 
+            margin-right:auto; 
+        }
+
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="{{asset('js/slick/slick.css')}}"/>        
+    <link rel="stylesheet" type="text/css" href="{{asset('js/slick/slick-theme.css')}}"/>
+{% endblock %}
+
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>                
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {% set tipo_de_cambio_compra = '' %}
+    {% set tipo_de_cambio_venta = '' %}
+    {% set alerta = 'warning' %}
+    {% if tipoCambio %}
+        {% set tipo_de_cambio_compra = tipoCambio.compra %}
+        {% set tipo_de_cambio_venta = tipoCambio.venta %}
+        {% set alerta = 'info' %}
+    {% endif %}
+
+    <div class="alert alert-{{ alerta }}" role="alert">
+        Dólar : {{ tipo_de_cambio_compra != '' and tipo_de_cambio_venta != ''  ? 'Compra = S/. ' ~ tipo_de_cambio_compra ~ ';' ~ ' Venta = S/. ' ~ tipo_de_cambio_venta  : 'Definir el valor del dólar para el día de HOY. Ir a Contabilidad >> Tipo de cambio'}}
+
+    </div>
+
+    <div class="alert alert-warning" role="alert">
+        IMPORTANTE : El descuento de un producto es aplicado al valor del producto SIN IGV.
+
+    </div>
+    <div class="container-fluid">
+        <form id="form"  onsubmit="return confirm('Estás seguro de emitir la Nota de Crédito?');"  action="{{ path('notacredito_new') }}" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data"  novalidate>
+
+            <div class="punto-venta"  >
+
+                <hr class="">
+
+                <div class="row">
+                    <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                        <div class="form-row">
+
+                            <div class="form-group col-sm-1 col-lg-1 col-xs-12">
+                                {{ form_row(form.fecha) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                
+                            </div> 
+
+                            <div class="form-group col-sm-1 col-lg-1 col-xs-12">
+                                {{ form_row(form.fechaVencimiento) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                
+                            </div> 
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+
+                                {{ form_row(form.notaCreditoTipo) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                
+
+                            </div>
+
+                            <div class="form-group col-md-2 col-lg-2 col-xs-12">
+                                {{ form_row(form.facturaVenta) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                   
+                            </div> 
+
+                            <div class="form-group col-sm-4 col-lg-4 col-xs-12">
+
+
+                                <label for="cliente_select" class="required">Cliente *</label>
+                                <div class="input-group">
+
+                                    <select class="form-control select2" name="cliente_select" id="cliente_select" required="required">
+                                      <option value="">Seleccionar cliente</option>
+                                    </select>
+                                  
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="agregar_cliente" ><i class="fa fa-plus fa-lg" data-toggle="tooltip" title="Agregar cliente"></i></span>
+                                        <span class="input-group-text" id="editar_cliente"><i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar cliente"></i></span>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div>
+
+
+
+
+                            </div>   
+
+
+
+                            <div class="form-group col-md-1 col-lg-1 col-xs-12">
+                                {{ form_row(form.moneda,{'value':'1'}) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                   
+                            </div>
+
+                            {{ form_widget(form.estado) }}
+                            {{ form_widget(form._token) }}
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                        <div class="form-row">
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12 d-none">
+                                {{ form_row(form.caja) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                
+                            </div>
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_row(form.condicionPago) }}
+                                                            
+                            </div> 
+
+                            <div class="form-group col-sm-1 col-lg-1 col-xs-12">
+                                {{ form_row(form.numeroGuiaRemision) }}
+                              
+                            </div>
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_row(form.tipoVenta) }}
+                              
+                            </div>
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_row(form.ordenCompra) }}
+                              
+                            </div>
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_row(form.placaVehiculo) }}
+                              
+                            </div>
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_row(form.observacion) }}
+                              
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <hr class="" style="margin-top: 0px">
+
+                <div class="row">
+                    <div class="col-sm-6 col-lg-6 col-xs-12">
+                        <div class="row">
+                            <div class="col-sm-10 col-md-10 col-xs-12">
+
+                                <div class="input-group">
+                                  <input type="text" class="form-control" placeholder="Buscar productos" name="txtbuscar" id="txtbuscar" aria-describedby="limpiar_buscador" onkeypress="return event.keyCode != 13;" /> 
+                                  <div class="input-group-append">
+                                    <span class="input-group-text" id="limpiar_buscador" onclick="$('#txtbuscar').val('');"><i class="fa fa-times fa-lg"></i></span>
+                                  </div>
+                                </div>
+
+                                                       
+                            </div>
+                            <div class="col-sm-2 col-md-2 col-xs-12 ">
+                                <button type="button" class="btn btn-primary w-100" id="buscar" >Buscar</button>
+                            </div>
+
+
+                        </div>
+
+                        <hr class="linea-separadora">
+
+                        <div class="row categorias">
+                            {# Categorías #}
+                            <div class="col-sm-12 col-lg-12 col-xs-12">
+                                <div class="categorias-slider ">
+
+                                    {% for categoria in categorias %}
+                                        
+                                        <a href="javascript:buscar({{categoria.id}})" class="nav-link text-center">
+                                            <div class="small font-weight-bold text-capitalize text-left">{{ categoria.nombre }}</div>
+
+                                            {% if categoria.imagen %}
+
+                                                <img class="img-fluid" data-lazy="{{ asset('uploads/imagenes/categoria/' ~ categoria.imagen ) }}" src="{{ asset('uploads/imagenes/categoria/' ~ categoria.imagen ) }}"   />
+
+                                            {% else %}
+
+                                                {% set imagen_categoria_default = obtenerImagenCategoriaDefault(app.session.get('local')) %}
+
+                                                <img class="img-fluid" data-lazy="{{ asset('uploads/imagenes/100x100/' ~ imagen_categoria_default ) }}" src="{{ asset('uploads/imagenes/100x100/' ~ imagen_categoria_default ) }}"   />
+
+                                            {% endif %}
+
+
+                                        </a>
+
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="linea-separadora">
+
+
+
+                        <div class="col-md-12 productos-slider d-none" id="producto-lista">
+                           
+                            {% set total = productoXLocals | length %}
+                            {% for producto in productoXLocals %}
+
+                                    <div class="col-md-12 imgproductos"  title="{{ 'Stock: ' ~ producto.stock }}"  >
+                                      <div class="producto" id="" style="width:auto;">
+                                        <a href="#" >
+
+                                            <div class=" caracteristicas " style="background-color: #ffffff;text-align: left;font-size: 1rem;">
+                                                <div class="nombre d-inline" style="color:black;">{{ producto.nombre ~ ' [' ~ producto.marca | slice(0, 15) ~ ']'}}  </div>
+                                                <div class=" d-inline pull-right" style="color:black;"><span class="precio" >{{ producto.precio | number_format(2,'.','')  }}</span></div>
+                                                
+
+                                                {% if producto.precio_x_mayor > 0 %}
+                                                    <div class="d-inline pull-right mr-2" style="color:black;"> {{ producto.precio_x_mayor | number_format(2,'.','')  }}</div>
+                                                {% endif %}
+                                                            
+                
+
+                                                <input type="hidden" class="atributos" id="{{ producto.id }}" />
+                                                <input type="hidden" class="unidades" id="{{ producto.unidad }}" />
+                                                <input type="hidden" class="stock" id="{{ producto.stock }}" />
+                                            </div>
+                                        </a>
+                                      </div>
+                                    </div>
+
+                            {% endfor %}                        
+
+                        </div>
+
+
+
+                        <div class="productos-slider" id="producto-slider" >
+
+
+                                {% set item = 1 %}
+                                {% set cierre = 0 %}
+                                {% set total = productoXLocals | length %}
+                                {% for producto in productoXLocals %}
+
+                                    {% if  cierre == 1 or item == 1 %}
+
+                                        {% set cierre = 0 %}
+                                        {#<div class="row fila-producto" >#}
+
+                                    {% endif %} 
+
+                                    {% set imagen_ruta = 'noimage.png' %}
+        
+                                    {% if producto.imagen %}
+
+                                        {% set imagen_ruta = producto.imagen %}
+
+                                    {% else %}
+
+                                        {% set imagen_ruta = obtenerImagenProductoDefault(app.session.get('local')) %}                                   
+
+                                    {% endif %}                          
+
+                                        <div class="mr-2 mb-2 imgproductos"  title="{{ 'Stock: ' ~ producto.stock }}"  style="float:left;height:180px;"  >
+                                          <div class="producto" id="" >
+                                            <a href="javascript:void(0)" >
+
+                                                <img imgnombre="{{ producto.nombre }}" imglink="{{ asset('uploads/imagenes/500x500/' ~ imagen_ruta ) }}" class="img-fluid imagen" src="{{ asset('uploads/imagenes/100x100/' ~ imagen_ruta ) }}"  />
+
+
+                                                <div class=" caracteristicas">
+                                                    <div class="nombre">{{ producto.nombre }}</div>
+                                                    <div><em class="simbolo_moneda">S./ </em><span class="precio">{{ producto.precio | number_format(2,'.','') }}</span></div>
+
+                                                    {% if producto.precio_x_mayor > 0 %}
+                                                        <div><em class="x_mayor">X Mayor: </em> <em class="simbolo_moneda">S./ </em> {{ producto.precio_x_mayor | number_format(2,'.','')  }}</div>
+                                                    {% endif %}
+
+                                                    <input type="hidden" class="atributos" id="{{ producto.id }}" />
+                                                    <input type="hidden" class="unidades" id="{{ producto.unidad }}" />
+                                                    <input type="hidden" class="stock" id="{{ producto.stock }}" />
+                                                </div>
+                                            </a>
+                                          </div>
+                                        </div>
+
+                                    {% if item is divisible by(4) or  item == total %}
+
+                                        {% set cierre = 1 %}
+
+                                        {#</div>#}
+
+                                    {% endif %}                            
+
+                                    {% set item = item + 1 %}
+
+                                {% endfor %}
+
+                        </div>
+
+
+                    </div>  
+
+
+                    <div class="col-sm-6 col-lg-6 col-xs-12 borde venta-cuenta" >
+                        <div class="row cabecera ml-1">
+
+                            <div class="col-md-3  p-0">
+                                Producto
+                            </div>
+                            <div class="col-md-2  p-0">
+                                Precio
+                            </div>
+                            <div class="col-md-2  p-0">
+                                Can.
+                            </div>
+                            <div class="col-md-2 p-0">
+                                IGV
+                            </div>                        
+                            <div class="col-md-1 p-0">
+                                Dcto.
+                            </div>                        
+                            <div class="col-md-2 ">
+                                Subt.
+                            </div>
+                        </div>
+
+                        <hr class="linea-separadora">
+
+
+                        <div class="row venta-impuestos">
+                            <div class="col-sm-5 col-lg-5 col-xs-12">
+                                <span>IGV </span><em id="igv_simbolo_moneda">S./ </em> 
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-xs-12">
+                                <span id="impuestos"></span>
+                            </div>                    
+                        </div>
+
+                        <hr class="linea-separadora">
+
+                        <div class="row venta-total">
+                            <div class="col-sm-5 col-lg-5 col-xs-12">
+                                <span>TOTAL </span>  <em id="total_simbolo_moneda">S./ </em>
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-xs-12">
+                                <span id="total"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-sm-6 col-lg-6 col-xs-12">
+                                <input type="button" value="Cancelar" class="btn btn-lg btn-block" id="cancelar" onclick="location.href='{{ path('notacredito_index')}}'" />
+                            </div>
+
+                            <div class="col-sm-6 col-lg-6 col-xs-12">
+                                <input type="submit" name="vender" id="vender" class="btn btn-primary btn-lg btn-block" value="Generar" />
+                            <div>
+                        </div>
+
+
+                    </div>
+
+
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <div class="modal cliente_factura" tabindex="-1" role="dialog" id="modalClienteFactura">
+      <div class="modal-dialog " role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Cliente</h5>
+            <button type="button" class="close" onclick="$('#modalClienteFactura').modal('hide');" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <div class="form-row">
+
+                <div class="form-group col-md-6">
+                    {{ form_row(formClientePv.tipoDocumento) }}
+
+                </div>
+
+                <div class="form-group col-md-6">
+
+                    {{ form_label(formClientePv.ruc) }}               
+                    <div class="input-group mb-3">
+                        {{ form_widget(formClientePv.ruc) }}
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="buscar_ruc">
+                                <i class="fa fa-search fa-lg " data-toggle="tooltip" title="Buscar por número de RUC"></i>
+                            </span>
+                        </div>
+                          
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group col-md-12">
+                    {{ form_label(formClientePv.razonSocial) }}
+                    {{ form_widget(formClientePv.razonSocial) }}
+                </div>
+
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    {{ form_label(formClientePv.direccion) }}
+                    {{ form_widget(formClientePv.direccion) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    {{ form_label(formClientePv.email) }}
+                    {{ form_widget(formClientePv.email) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    {{ form_label(formClientePv.telefono) }}
+                    {{ form_widget(formClientePv.telefono) }}
+                </div>
+                <div class="form-group col-md-6">
+                    {{ form_label(formClientePv.tipo) }}
+                    {{ form_widget(formClientePv.tipo) }}
+                </div>                
+            </div>    
+
+
+            <input type="hidden" id="distrito" name="distrito" class="form-control">
+            <input type="hidden" id="cliente_id" name="cliente_id" class="form-control">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="guardar_cliente">Guardar</button>
+            <button type="button" class="btn btn-secondary" onclick="$('#modalClienteFactura').modal('hide');">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }} 
+    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="{{asset('js/es.js')}}" ></script>
+    <script src="{{asset('js/jquery.number.min.js')}}" ></script>
+
+    <script type="text/javascript" src="{{asset('js/slick/slick.min.js')}}"></script>
+
+    <script type="text/javascript">
+
+
+        var item = '{{ form.notaCreditoDetalle | length }}';
+        var i = Number(item);
+
+        function eliminar(id) {
+
+            var total           = $('#total').text().replace(/,/g, '');
+            var subtotalinput   = $( ".subtotalinput" );
+            var subtotal        = $('#row_'+id).find(subtotalinput).val();    
+  
+
+            $("#row_"+id).remove();
+            $("#linea_"+id).remove();
+
+            //var total_act = Number(total) - Number(subtotal);
+
+            var total = 0;
+            var subtotal = 0;
+            var impuestos = 0;
+            $(".subtotalinput").each( function () {
+
+                subtotal += Number($(this).val());                    
+
+            });
+
+            impuestos = subtotal * 0.18;
+            total = subtotal + impuestos;
+            
+            $('#total').html(total.toFixed(2));
+            $('#impuestos').html(impuestos.toFixed(2));
+
+        } 
+
+        function obtenerCliente() {
+
+            var cliente = $('#cliente_select').val();
+            var respuesta = '';
+
+            $.ajax({
+                method: "POST",
+                async : false ,
+                url: "{{ path('obtenercliente')}}",
+                data: { id: cliente}
+            })
+            .done(function( data ) {
+
+                respuesta = data;
+
+            });
+
+            return respuesta;
+        }
+
+        function buscar(id) {
+
+            var fecha = $('#appbundle_notacredito_fecha').val();
+            var moneda = $('#appbundle_notacredito_moneda').val();
+
+            var cliente = obtenerCliente();
+            var tipo_cliente = cliente.tipo;
+
+            var modo = 'false';
+            if ($("#producto-slider").hasClass("d-none")) {
+               modo = 'true';
+            }
+
+            var cargandoTexto = '<div class="text-center"><i class="fa fa-circle-o-notch fa-spin"></i>Buscando.....</div>';
+        
+            //$('.productos-slider').html(cargandoTexto);
+
+            if(modo == 'false'){
+                $('#producto-slider').html(cargandoTexto);
+            }else{
+                $('#producto-lista').html(cargandoTexto);
+            }
+
+            $.ajax({
+              method: "POST",
+              url: "{{ path('buscar_productos')}}",
+              data: { categoria: id,modo:modo,moneda:moneda,fecha:fecha,tipo_cliente:tipo_cliente}
+            })
+              .done(function( data ) {
+
+                if(data.error){
+
+                    bootbox.alert(data.error);
+                    $('#appbundle_notacredito_moneda').val(1);
+                    $('#buscar').trigger("click");               
+
+                }
+                else
+                {
+
+                    if(modo == 'false'){
+                        $('#producto-slider').html(data);
+                    }else{
+                        $('#producto-lista').html(data);
+                    }
+
+                }
+
+                if(moneda == 2){
+                    $('.simbolo_moneda').html('$ ');
+                    $('#total_simbolo_moneda').html(' $');
+                    $('#igv_simbolo_moneda').html(' $');
+                }else
+                {
+                    $('.simbolo_moneda').html('S./ ');
+                    $('#total_simbolo_moneda').html(' S./');
+                    $('#igv_simbolo_moneda').html(' S./');                    
+                }
+
+                if(tipo_cliente == 'mayorista')
+                {
+                    $('.x_mayor').html('P.Un.: ');
+                }
+                else
+                {
+                    $('.x_mayor').html('X Mayor: ');
+                }
+
+            });               
+        }   
+
+
+        $(document).ready(function(){
+
+
+
+            $('.categorias-slider').slick({
+                /*lazyLoad: 'ondemand',
+                /*verticalSwiping: true,*/
+                //vertical: false,
+                infinite: true,
+                slidesToShow: 5,
+                slidesToScroll: 5
+            });
+
+
+
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".setcurrentdate").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true ,
+              
+            });
+            $(".setcurrentdate").datepicker("setDate", startDate);
+
+            //Agregar cliente
+            var btnagregarcliente   = $('#agregar_cliente');
+            //Editar cliente
+            var btneditarcliente    = $('#editar_cliente');
+            //Guardar cliente
+            var btnguardarcliente   = $('#guardar_cliente');
+
+            //Valores de cliente nuevo
+            var selectipodocumento      = $('#appbundle_cliente_pv_tipoDocumento');
+            var txtnombrerazonsocial    = $('#appbundle_cliente_pv_razonSocial');
+            var txtdniruc               = $('#appbundle_cliente_pv_ruc');
+            var txtdireccion            = $('#appbundle_cliente_pv_direccion');
+            var txtemail                = $('#appbundle_cliente_pv_email');
+            var txttelefono             = $('#appbundle_cliente_pv_telefono');
+            var txttipo                 = $('#appbundle_cliente_pv_tipo');
+            var txtdistrito             = $('#distrito');
+            var txtclienteid            = $('#cliente_id');
+
+            //Boton buscar productos
+            var btnbuscar               = $('#buscar');
+            //Valor a buscar 
+            var txtbuscar               = $('#txtbuscar');
+
+            //Buscar RUC
+            var btn_buscar              = $("#buscar_ruc");                   
+
+            btn_buscar.on("click", function(){
+
+                var data = {
+                  ruc   : txtdniruc.val(),
+                  token  : '5JFQh5toA0sWhj-YV3NXmt4dzE4JvJjwgYzzPJtYHgA',
+                }
+
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('obtenerdatosempresa')}}",
+                    data: data,
+                    success: function(data){
+
+                        txtnombrerazonsocial.val(data.nombre_o_razon_social);
+                        txtdireccion.val(data.direccion_completa);
+                        txtdistrito.val(data.distrito_id);
+                    }
+
+                });
+            });
+
+            btnagregarcliente.on('click',function(e){
+
+                e.preventDefault();
+
+                selectipodocumento.val('');
+                txtnombrerazonsocial.val('');
+                txtdniruc.val('');
+                txtdireccion.val('');
+                txtemail.val('');
+                txttelefono.val('');
+                txttipo.val('');                            
+                $('#cliente_id').val('');
+
+                selectipodocumento.prop('disabled', false);
+                txtnombrerazonsocial.prop('disabled', false);
+                txtdniruc.prop('disabled',false);
+                txtdireccion.prop('disabled',false);
+                txtemail.prop('disabled',false);
+                txttelefono.prop('disabled',false);
+                txttipo.prop('disabled',false);
+                btnguardarcliente.prop('disabled',false);
+
+                $('.cliente_factura').modal('show');
+
+            });
+
+            btneditarcliente.on('click',function(e){
+
+                e.preventDefault();
+
+                var cliente = $('#cliente_select').val();
+
+
+                if(cliente == ''){
+
+                    bootbox.alert("Debe seleccionar un cliente para que pueda editar.");                    
+                    return false;
+
+                }else{
+
+                    var respuesta = obtenerCliente(function(output){});
+
+                    var direccion        = respuesta.direccion;
+                    var email            = respuesta.email;
+                    var razon_social     = respuesta.razon_social;
+                    var numero_documento = respuesta.numero_documento;
+                    var tipo_documento   = respuesta.tipo_documento;
+                    var distrito         = respuesta.distrito;
+                    var cliente_id       = respuesta.id;
+                    var tipo             = respuesta.tipo;
+                    var telefono         = respuesta.telefono;
+
+
+                    selectipodocumento.val(tipo_documento);
+                    txtnombrerazonsocial.val(razon_social);
+                    txtdniruc.val(numero_documento);
+                    txtdireccion.val(direccion);
+                    txtemail.val(email);
+                    txtdistrito.val(distrito);
+                    txtclienteid.val(cliente_id);
+                    txttelefono.val(telefono);
+                    txttipo.val(tipo);
+
+                    if(numero_documento == '---')
+                    {
+                        selectipodocumento.prop('disabled', true);
+                        txtnombrerazonsocial.prop('disabled', true);
+                        txtdniruc.prop('disabled',true);
+                        txtdireccion.prop('disabled',true);
+                        txtemail.prop('disabled',true);
+                        txttipo.prop('disabled',true);
+                        txttelefono.prop('disabled',true);                        
+                        btnguardarcliente.prop('disabled',true);
+                    }
+                    else
+                    {
+                        selectipodocumento.prop('disabled', false);
+                        txtnombrerazonsocial.prop('disabled', false);
+                        txtdniruc.prop('disabled',false);
+                        txtdireccion.prop('disabled',false);
+                        txtemail.prop('disabled',false);
+                        txttipo.prop('disabled',false);
+                        txttelefono.prop('disabled',false);                           
+                        btnguardarcliente.prop('disabled',false);
+                    }
+
+                    $('.cliente_factura').modal('show');
+
+                }
+
+            });
+
+            btnguardarcliente.on('click',function (e) {
+
+                e.preventDefault();
+
+                var tipodocumento = selectipodocumento.val();
+                var nrazonsocial  = txtnombrerazonsocial.val();
+                var dniruc        = txtdniruc.val();
+                var direccion     = txtdireccion.val();
+                var email         = txtemail.val();
+                var distrito      = txtdistrito.val();
+                var clienteid     = txtclienteid.val();
+                var telefono      = txttelefono.val();
+                var tipo          = txttipo.val();
+
+                if(tipodocumento == '1'){
+
+                    if( nrazonsocial == '' || dniruc == '' ){
+
+                        bootbox.alert("Se ha seleccionado el tipo DNI. Debe ingresar el nombre y el número de documento.");                    
+                        return false;
+
+                    }
+
+                }else if(tipodocumento == '2'){
+
+                    if( nrazonsocial == '' || dniruc == '' || direccion == '' ){
+
+                        bootbox.alert("Se ha seleccionado el tipo RUC. Debe ingresar el nombre , el número de documento y la dirección.");                    
+                        return false;
+
+                    }
+
+                    if(dniruc.length != 11)
+                    {
+                        bootbox.alert("El número de documento debe tener 11 dígitos.");                    
+                        return false;
+                    }
+
+                }else{
+
+                    bootbox.alert("Debe seleccionar el tipo de documento.");                    
+                    return false;
+
+                }
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('registrar_cliente_nuevo')}}",
+                  data: { nrazonsocial: nrazonsocial, dniruc: dniruc, direccion: direccion ,distrito: distrito,tipodocumento: tipodocumento,clienteid: clienteid,email:email,tipo:tipo,telefono:telefono}
+                })
+                  .done(function( data ) {
+
+                    //$('#appbundle_pedidoventa_cliente').append("<option value='"+data.id+"'>"+data.text+"</option>");
+                    //$('#appbundle_pedidoventa_cliente').val(data.id);
+                    //$('#appbundle_pedidoventa_cliente').trigger("chosen:updated");
+
+
+                    var newOption = new Option(data.text, data.id, false, true);
+                    $('#cliente_select').append(newOption).trigger('change');
+                    $('#buscar').trigger("click");
+
+                    $('.cliente_factura').modal('hide');
+
+
+                });   
+
+            });
+
+            txtbuscar.on('keyup',function(e){
+
+                if(e.keyCode == 13){
+                    btnbuscar.click();
+                }
+
+            });
+
+            btnbuscar.on('click',function () {
+
+                var fecha = $('#appbundle_notacredito_fecha').val();
+                var moneda = $('#appbundle_notacredito_moneda').val();
+
+                var cliente = obtenerCliente();
+                var tipo_cliente = cliente.tipo;
+
+                var modo = 'false';
+                if ($("#producto-slider").hasClass("d-none")) {
+                   modo = 'true';
+                }
+
+                var $this = $(this);
+                var cargandoTexto = '<i class="fa fa-circle-o-notch fa-spin"></i>';
+                if ($(this).html() !== cargandoTexto) 
+                {
+                    $this.data('original-text', $(this).html());
+                    $this.html(cargandoTexto);
+                }
+
+                if(modo == 'false'){
+                    $('#producto-slider').html(cargandoTexto);
+                }else{
+                    $('#producto-lista').html(cargandoTexto);
+                }
+                
+                var textobuscar = txtbuscar.val();
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('buscar_productos')}}",
+                  data: { textobuscar: textobuscar,modo:modo,moneda: moneda,fecha: fecha,tipo_cliente:tipo_cliente}
+                })
+                  .done(function( data ) {
+
+
+                    setTimeout(function() {
+                      $this.html($this.data('original-text'));
+                    }, 50);
+
+                    if(data.error){
+
+                        bootbox.alert(data.error);
+                        $('#appbundle_notacredito_moneda').val(1);
+                        $('#buscar').trigger("click");               
+
+                    }
+                    else
+                    {
+
+                        if(modo == 'false'){
+                            $('#producto-slider').html(data);
+                        }else{
+                            $('#producto-lista').html(data);
+                        }
+
+                    }
+
+                    if(moneda == 2){
+                        $('.simbolo_moneda').html('$ ');
+                        $('#total_simbolo_moneda').html(' $');
+                        $('#igv_simbolo_moneda').html(' $');
+                    }
+                    else
+                    {
+                        $('.simbolo_moneda').html('S./ ');
+                        $('#total_simbolo_moneda').html(' S./');
+                        $('#igv_simbolo_moneda').html(' S./');                    
+                    }   
+
+                    if(tipo_cliente == 'mayorista')
+                    {
+                        $('.x_mayor').html('P.Un.: ');
+                    }
+                    else
+                    {
+                        $('.x_mayor').html('X Mayor: ');
+                    }
+
+                });   
+
+            });
+
+
+            //Agregamos los producos a la lista de pedido
+
+            var timer = 0;
+            var delay = 200;
+            var prevent = false;
+            var tipos_impuesto = '';
+
+            {% for tipoImpuesto in tiposImpuesto %}
+
+                var impuesto_nombre = '{{ tipoImpuesto.nombre }}';
+                var impuesto_id = '{{ tipoImpuesto.id }}';
+
+                tipos_impuesto += '<option value="'+impuesto_id+'">'+ impuesto_nombre +'</option>';
+
+            {% endfor %}
+
+            $('body')
+                .on('click','.producto a',function() {
+
+                    var self = this;
+
+                    timer = setTimeout(function() {
+
+                        if (!prevent) {
+                            
+                            var precio = $('span', self ).text();
+                            var nombre = $('.nombre', self ).html();
+                            var producto_id = $('.atributos', self ).attr('id');
+                            var unidad = $('.unidades', self ).attr('id');
+                            
+
+                            if($('#row_'+producto_id).length == 0 )
+                            {
+                                var cantidad = 1;
+                                var precio_vu   = Number(precio) / 1.18;
+                                var total_linea = Number(cantidad) * Number(precio_vu);
+
+                                $('.venta-impuestos').before('<div class="row prod" id="row_'+producto_id+'"><input type="hidden" class="productoid" id="productoid_'+producto_id+'" name="productoid_'+producto_id+'" value="'+producto_id+'"/><div class="col-md-3 p-0" ><a href="javascript:eliminar('+producto_id+')" class="mr-2" ><i class="fa fa-remove fa-lg"></i></a>'+ nombre +' <select id="appbundle_notacredito_notaCreditoDetalle_'+i+'_productoXLocal" name="appbundle_notacredito[notaCreditoDetalle]['+i+'][productoXLocal]" class="form-control d-none"><option value="'+producto_id+'" selected="selected"></option></select></div><div class="col-md-2 p-0"><input type="text" class="form-control precioinput solonumeros" name="appbundle_notacredito[notaCreditoDetalle]['+i+'][precio]" id="appbundle_notacredito_notaCreditoDetalle_'+i+'_precio" value="'+Number(precio).toFixed(2)+'" ></div><div class="col-md-2 p-0"><input type="text" class="form-control cantidadinput solonumeros" id="appbundle_notacredito_notaCreditoDetalle_'+i+'_cantidad" name="appbundle_notacredito[notaCreditoDetalle]['+i+'][cantidad]"  value="'+cantidad+'"></div><div class="col-md-2 p-0"><select id="appbundle_notacredito_notaCreditoDetalle_'+i+'_tipoImpuesto" name="appbundle_notacredito[notaCreditoDetalle]['+i+'][tipoImpuesto]" class="form-control tipoimpuesto" style="pointer-events:none;">'+ tipos_impuesto +'</select></div><div class="col-md-1 p-0"><input type="text" class="form-control descuentoinput solonumeros" id="appbundle_notacredito_notaCreditoDetalle_'+i+'_descuento" name="appbundle_notacredito[notaCreditoDetalle]['+i+'][descuento]"  value=""></div><div class="col-md-2 subtotal" id="subtotal_'+producto_id+'" ><input type="text" id="appbundle_notacredito_notaCreditoDetalle_'+i+'_subtotal" name="appbundle_notacredito[notaCreditoDetalle]['+i+'][subtotal]" class="form-control subtotalinput solonumeros" readonly="readonly" value="'+Number(total_linea).toFixed(3)+'" ></div></div><hr class="linea-separadora prod" id="linea_'+producto_id+'" >');
+
+                                i = i + 1;
+
+
+                            }
+                            else
+                            {
+                                var cantidadinput = $( ".cantidadinput" );
+                                var precioinput   = $( ".precioinput" );
+                                var subtotalinput = $( ".subtotalinput" );
+                                var descuentoinput = $( ".descuentoinput" );
+
+                                var cantidad_nueva  = Number($('#row_'+producto_id).find(cantidadinput).val()) + 1;
+
+
+                                $('#row_'+producto_id).find(cantidadinput).val(cantidad_nueva);
+
+                                
+                                var cantidad    = $('#row_'+producto_id).find(cantidadinput).val();
+                                var precio      = $('#row_'+producto_id).find(precioinput).val();
+                                var precio_vu   = Number(precio) / 1.18;
+                                var total_linea = (descuentoinput > 0) ? (cantidad * precio_vu) - Number(descuentoinput) : cantidad * precio_vu;
+
+                            
+                                $('#row_'+producto_id).find(subtotalinput).val(total_linea.toFixed(3));
+
+                            }
+
+                            var total = 0;
+                            var subtotal = 0;
+                            var impuestos = 0;
+                            $(".subtotalinput").each( function () {
+                                subtotal += Number($(this).val());                                
+                            });
+
+                            //impuestos = (total / 1.18) * 0.18;
+                            impuestos = subtotal * 0.18;
+                            total = subtotal + impuestos;
+                            
+                            $('#total').html(total.toFixed(2));
+                            $('#impuestos').html(impuestos.toFixed(2));
+
+
+                        }
+                        prevent = false;
+                    },delay);
+                });
+
+
+
+            $('body').on('change','.precioinput',function(){
+
+                var valor   = this.value;
+                var id      = this.id.replace(/[^0-9]/g, '');
+
+                var precio      = $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_precio').val();
+                var cantidad    = $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_cantidad').val();
+                var descuento   = $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_descuento').val();
+
+                var precio_vu   = Number(precio) / 1.18;
+                var total_linea = (descuento > 0) ? Number(cantidad) * Number(precio_vu) - Number(descuento) : Number(cantidad) * Number(precio_vu);
+
+                $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_subtotal').val(total_linea.toFixed(3));
+
+                var total = 0;
+                var subtotal = 0;
+                var impuestos = 0;
+                $(".subtotalinput").each( function () {
+
+                    subtotal += Number($(this).val());                    
+
+                });
+
+                impuestos = subtotal * 0.18;
+                total = subtotal + impuestos;
+                
+                $('#total').html(total.toFixed(2));
+                $('#impuestos').html(impuestos.toFixed(2));
+                                                
+
+            });
+
+            $('body').on('focusin','.cantidadinput',function(){
+
+                $(this).data('val', $(this).val());
+
+            });
+
+
+            $('body').on('change','.cantidadinput',function(){
+
+                var valor   = this.value;
+                var id      = this.id.replace(/[^0-9]/g, '');
+
+                var precio      = $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_precio').val();
+                var cantidad    = $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_cantidad').val();
+                var descuento   = $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_descuento').val();
+
+                var precio_vu   = Number(precio) / 1.18;
+                var total_linea = (descuento > 0) ? Number(cantidad) * Number(precio_vu) - Number(descuento) : Number(cantidad) * Number(precio_vu);
+                
+                $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_subtotal').val(total_linea.toFixed(3));
+
+                var total = 0;
+                var subtotal = 0;
+                var impuestos = 0;
+                $(".subtotalinput").each( function () {
+
+                    subtotal += Number($(this).val());                    
+
+                });
+
+                impuestos = subtotal * 0.18;
+                total = subtotal + impuestos;
+                
+                $('#total').html(total.toFixed(2));
+                $('#impuestos').html(impuestos.toFixed(2));
+         
+
+            });
+
+            $('body').on('change','.descuentoinput',function(){
+
+                var valor   = this.value;
+                var id      = this.id.replace(/[^0-9]/g, '');
+
+
+                var precio      = $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_precio').val();
+                var cantidad    = $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_cantidad').val();
+                var descuento   = $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_descuento').val();
+
+                var precio_vu   = Number(precio) / 1.18;
+                var total_linea = (descuento > 0) ? Number(cantidad) * Number(precio_vu) - Number(descuento) : Number(cantidad) * Number(precio_vu);
+                
+                $('#appbundle_notacredito_notaCreditoDetalle_'+id+'_subtotal').val(total_linea.toFixed(3));
+
+                var total = 0;
+                var subtotal = 0;
+                var impuestos = 0;
+                $(".subtotalinput").each( function () {
+
+                    subtotal += Number($(this).val());                    
+
+                });
+
+                impuestos = subtotal * 0.18;
+                total = subtotal + impuestos;
+                
+                $('#total').html(total.toFixed(2));
+                $('#impuestos').html(impuestos.toFixed(2));
+         
+
+            });
+
+
+            // Selecciona el cliente
+            $(".select2").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenerclientes')}}",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },          
+                placeholder: 'Buscar cliente por nombres,apellidos,razon social,DNI o RUC',
+                minimumInputLength: 2,
+            });
+
+
+            //Limpìamos la lista de productos seleccionados al hacer cambio de moneda
+
+            $('body').on('focusin', '#appbundle_notacredito_moneda', function(){
+
+                $(this).data('val', $(this).val());
+
+            }).on('change','#appbundle_notacredito_moneda',function(e){
+
+                var prev = $(this).data('val');
+
+
+                bootbox.confirm({
+                    title: null,
+                    message: "La lista de productos será limpiada. Desea continuar?",
+                    buttons: {
+                        cancel: {
+                            label: '<i class="fa fa-times"></i> Cancelar'
+                        },
+                        confirm: {
+                            label: '<i class="fa fa-check"></i> Confirmar'
+                        }
+                    },
+                    callback: function (result) {
+
+                        if(result){
+
+
+                            $(".prod").each( function () {
+                                $(this).remove();
+                            });
+
+
+                            $('#total').html($.number( 0, 2, '.', ',' ));
+                            $('#impuestos').html($.number( 0, 2, '.', ',' ));
+
+
+                            var moneda = $('#appbundle_notacredito_moneda').val();
+                            var fecha  = $('#appbundle_notacredito_fecha').val();
+
+                            var cliente = obtenerCliente();
+                            var tipo_cliente = cliente.tipo;
+
+                            var modo = 'false';
+                            if ($("#producto-slider").hasClass("d-none")) {
+                               modo = 'true';
+                            }
+
+                            var cargandoTexto = '<i class="fa fa-circle-o-notch fa-spin"></i>';
+
+                            if(modo == 'false'){
+                                $('#producto-slider').html(cargandoTexto);
+                            }else{
+                                $('#producto-lista').html(cargandoTexto);
+                            }
+
+                            var textobuscar = '';
+
+                            $.ajax({
+                              method: "POST",
+                              url: "{{ path('buscar_productos')}}",
+                              data: { textobuscar: textobuscar,modo: modo,moneda:moneda,fecha:fecha,tipo_cliente:tipo_cliente}
+                            })
+                              .done(function( data ) {
+
+                                if(data.error){
+
+                                    bootbox.alert(data.error);
+                                    $('#appbundle_notacredito_moneda').val(prev);
+                                    $('#buscar').trigger("click");               
+
+                                }
+                                else
+                                {
+
+                                    if(modo == 'false'){
+                                        $('#producto-slider').html(data);
+                                    }else{
+                                        $('#producto-lista').html(data);
+                                    }
+
+                                }
+
+                                if(moneda == 2)
+                                {
+                                    $('.simbolo_moneda').html('$ ');
+                                    $('#total_simbolo_moneda').html(' $');
+                                    $('#igv_simbolo_moneda').html(' $');
+                                }
+                                else
+                                {
+                                    $('.simbolo_moneda').html('S./ ');
+                                    $('#total_simbolo_moneda').html(' S./');
+                                    $('#igv_simbolo_moneda').html(' S./');                    
+                                }               
+
+                                if(tipo_cliente == 'mayorista')
+                                {
+                                    $('.x_mayor').html('P.Un.: ');
+                                }
+                                else
+                                {
+                                    $('.x_mayor').html('X Mayor: ');
+                                }
+
+                            });   
+
+
+                        }
+                        else
+                        {
+                            $('#appbundle_notacredito_moneda').val(prev);
+
+                        }
+
+                    }
+                });
+
+            });
+
+
+            // Seteamos el cliente por default
+            // $.ajax({
+            //     type: "GET",
+            //     url: "{{ path('obtener_cliente_default')}}",
+            // }).then(function (data) {
+
+            //     if(data.total_count != 0){
+
+            //         // create the option and append to Select2
+            //         var option = new Option(data.results.text, data.results.id, false, true);
+            //         $('#cliente_select').append(option).trigger('change');
+
+            //         // manually trigger the `select2:select` event
+            //         $('#cliente_select').trigger({
+            //             type: 'select2:select',
+            //             params: {
+            //                 data: data
+            //             }
+            //         });
+
+            //     }
+
+
+            // });
+
+        });
+
+
+    </script>
+
+{% endblock %}

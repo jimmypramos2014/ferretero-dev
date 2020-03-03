@@ -1,0 +1,591 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }} 
+
+    <style>
+    
+        .no-border {
+            border: 0;
+            box-shadow: none;
+        }
+
+        div.dataTables_filter{
+            text-align: left !important;
+        }
+
+    </style>
+{% endblock %}
+{% block body %}
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <form id="form" target="_blank" action="{{ path('detalleventa_new') }}" class="form-horizontal needs-validation" role="form" method="post" enctype="multipart/form-data" novalidate>    
+
+        <div class="row mt-2 mb-2">
+            <div class="col-lg-6 col-sm-12 col-md-12 col-xl-6">
+
+                <table id="dtVentas" class="table table-striped ">
+                    <thead class="thead-dark">
+                        <tr>                        
+                            <th class="no-sort">Nombre</th>                        
+                            <th class="no-sort">P.Venta</th>
+                            <th class="no-sort">Stock</th>
+                            <th class="no-sort">Codigo</th>
+                            <th class="no-sort">Marca</th>
+                            <th class="no-sort">P.Compra</th>
+                        </tr>
+           
+                    </thead>
+              
+                    <tbody>
+                    {% for productoXLocal in productoXLocals %}
+                        <tr id="{{ productoXLocal.id }}">                        
+                            <td id="producto">{{ productoXLocal.producto.nombre }}</td>                                                
+                            <td id="precio">{{ productoXLocal.producto.precioUnitario }}</td>
+                            <td id="stock">{{ productoXLocal.stock }}</td>
+                            <td id="codigo">{{ productoXLocal.producto.codigo }}</td>
+                            <td id="marca">{{ productoXLocal.producto.marca }}</td>
+                            <td id="pcompra">{{ productoXLocal.producto.precioCompra |number_format(2, '.', ',') }}</td>
+
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>P.Venta</th>
+                            <th>Stock</th>
+                            <th>Codigo</th>
+                            <th>Marca</th>
+                            <th>P.Compra</th>
+                        </tr>
+                    </tfoot>
+
+                </table>
+
+            </div>
+            <div class="col-lg-6 col-sm-12 col-md-12 col-xl-6">
+
+                <div class="card mb-2">
+                    <div class="card-header">
+                        Datos de cliente
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-row">
+                            <div class="form-group col-lg-4">
+                                {{ form_row(formCliente.vendedor) }}
+                            </div>
+
+                            <div class="form-group col-lg-6">
+                                {{ form_row(formCliente.forma_pago) }}
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                {{ form_row(formCliente.numero_dias) }}
+                            </div>  
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-lg-4">
+                                {{ form_row(formCliente.cliente) }}
+                            </div>
+                            <div class="form-group col-lg-3">
+                                {{ form_row(formCliente.cliente_nuevo) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                   
+                            </div>                        
+                            <div class="form-group col-lg-3">
+                                {{ form_row(formCliente.documento) }}
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                {{ form_row(formCliente.numero_voucher) }}
+                            </div>  
+                        </div>
+
+                        {{ form_row(formCliente.estado) }}
+                    </div>
+                </div>
+
+                <table id="tblProductosSelect" class="table ">
+
+                    <thead class="thead-dark">
+                        <tr>
+                            <th></th>                        
+                            <th>Nombre</th>                        
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>                        
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+                <p class="h4 text-right ml-4">
+                    TOTAL : <input type="text" id="valor_total" name="valor_total" size="4" class=" no-border"/>
+                </p>
+                <p class="text-left">
+                    <input type="submit" class="btn btn-primary btn-lg" id="vender" value="Vender">
+                </p>
+
+                {% if 'ROLE_ADMIN' in app.user.roles %}
+
+                    <div class="card mb-2">
+                        <div class="card-header">
+                            Anular venta
+                        </div>
+                        <div class="card-body">
+
+                            <div class="form-row">
+                                <div class="form-group col-lg-3">
+                                    {{ form_row(formCliente.ticket) }}
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    {{ form_row(formCliente.motivo_anulacion) }}
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div> 
+
+                                <p class="text-right mt-4">
+                                    <input type="button" class="btn btn-primary btn-small" id="anular" value="Anular ticket">
+                                </p>                                                  
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                {% endif %}
+
+
+            </div>
+        </div>
+
+        <div class="row mt-2 mb-2">
+            <div class="col-lg-6 col-sm-12 col-md-12 col-xl-6">
+
+                <div class="card ">
+                  <div class="card-header">
+                    Seleccionar productos
+                  </div>
+                  <div class="card-body ">
+
+                        <input type="hidden" name="appbundle_producto_id" id="appbundle_producto_id" />
+
+                        <div class="form-row">
+                            <div class="form-group col-lg-8">
+                                <label for="appbundle_producto_nombre" class="required">Nombre de producto</label><input type="text" id="appbundle_producto_nombre" name="appbundle_producto[nombre]" required="required" maxlength="100" class="form-control" readonly>
+                            </div>
+                            <div class="form-group col-lg-2">
+                                <label for="appbundle_producto_pcompra">P.compra</label>
+                                <input type="number" id="appbundle_producto_pcompra" name="appbundle_producto[pcompra]" class="form-control" min="0" readonly>
+                            </div>
+                            <div class="form-group col-lg-2">
+                                <label for="appbundle_producto_stock">Stock</label>
+                                <input type="number" id="appbundle_producto_stock" name="appbundle_producto[stock]" class="form-control" min="0" readonly>
+                            </div>                                        
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-lg-3">
+                                <label for="appbundle_producto_precio">Precio</label>
+                                <input type="text" id="appbundle_producto_precio" name="appbundle_producto[precio]" class="form-control">
+                            </div>
+
+                            <div class="form-group col-lg-3">
+                                <label for="appbundle_producto_cantidad" class="required">Cantidad</label>
+                                <input type="number" id="appbundle_producto_cantidad" name="appbundle_producto[cantidad]" required="required" min="0" class="form-control">
+                            </div>
+
+                        </div>
+
+                        <p class="pull-right">
+                            <input type="button" class="btn btn-small btn-primary" id="agregar" value="Agregar >>">
+                        </p>
+                                
+
+
+
+                  </div>
+
+                </div>
+
+
+            </div> 
+
+        </div>
+
+    </form>
+
+    <div class="modal cliente" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Cliente</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <div class="form-row">
+
+                <div class="form-group col-lg-6">
+                    <label for="nombre_razon_social">Nombre o Razón social</label>
+                    <input type="text" id="nombre_razon_social" name="nombre_razon_social" required="required" class="form-control">
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="dni_ruc" >DNI o RUC</label>
+                    <input type="text" id="dni_ruc" name="dni_ruc" required="required" class="form-control">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-lg-6">
+                    <label for="direccion" >Dirección</label>
+                    <input type="text" id="direccion" name="direccion" required="required" class="form-control">
+                </div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="guardar_cliente">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }} 
+
+
+    <script type="text/javascript">
+
+
+        function eliminar(id) {
+
+            var txtvalortotal       = $('#valor_total');
+            
+            $("#tr_"+id).remove();
+
+            var total = 0;
+
+            $("input:text.subtotal").each( function () {
+                total += Number($(this).val());
+            });
+
+            txtvalortotal.val(total.toFixed(2));            
+        } 
+
+
+        $(document).ready(function() {
+
+            var txtproductoId       = $('#appbundle_producto_id');
+            var txtproducto         = $('#appbundle_producto_nombre');
+            var txtstock            = $('#appbundle_producto_stock');
+            var txtprecio           = $('#appbundle_producto_precio');
+            var txtcantidad         = $('#appbundle_producto_cantidad');
+            var txtpcompra          = $('#appbundle_producto_pcompra');
+            var btnagregar          = $('#agregar');
+            var txtcliente          = $('#appbundle_detalleventa_cliente_cliente');
+            var txtclientenuevo     = $('#appbundle_detalleventa_cliente_cliente_nuevo');
+            var txttipodocumento    = $('#appbundle_detalleventa_cliente_documento');
+            var txtformapago        = $('#appbundle_detalleventa_cliente_forma_pago');
+            var btnvender           = $('#vender');
+            var btnanular           = $('#anular');
+            var btnguardarcliente   = $('#guardar_cliente');
+            var txtvalortotal       = $('#valor_total');
+            
+            var txtnrovoucher       = $('#appbundle_detalleventa_cliente_numero_voucher');          
+
+            //Valores de cliente nuevo
+            var txtnombrerazonsocial    = $('#nombre_razon_social');
+            var txtdniruc               = $('#dni_ruc');
+            var txtdireccion            = $('#direccion');
+
+            //Valores anulación venta
+            var txtticket               = $('#appbundle_detalleventa_cliente_ticket');
+            var txtmotivo               = $('#appbundle_detalleventa_cliente_motivo_anulacion');
+
+            var table = $('#dtVentas').DataTable( {
+                initComplete: function () {
+                    this.api().columns([0, 3, 4]).every( function () {
+                        var column = this;
+                        var select = $('<select class="form-control"><option value=""></option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+         
+                                column
+                                    .search( val ? '^'+val+'$' : '', true, false )
+                                    .draw();
+                            } );
+         
+                        column.data().unique().sort().each( function ( d, j ) {
+                            select.append( '<option value="'+d+'"  >'+d+'</option>' )
+                        } );
+                    } );
+                },
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No existen registros",
+                    "infoFiltered": "(filtrado de _MAX_ total registros)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first":      "Primero",
+                        "last":       "Último",
+                        "next":       "Siguiente",
+                        "previous":   "Anterior"
+                    },
+                },
+                "dom": 'frtp',
+                "columnDefs": [ 
+                    {"targets": 'no-sort',"orderable": false, },
+                ],
+                "scrollX":false,               
+
+            });
+
+            $('#dtVentas tbody').on( 'click', 'tr', function () {
+
+                var productoid = $(this).attr('id');
+                var producto = $(this).find("#producto").text();
+                var stock = $(this).find("#stock").text();
+                var precio = $(this).find("#precio").text();
+                var pcompra = $(this).find("#pcompra").text();
+
+                if ( $(this).hasClass('selected') ) {
+                    $(this).removeClass('selected');
+
+                    var productoid = '';
+                    var producto = '';
+                    var stock = '';
+                    var precio = '';
+                    var pcompra = '';
+
+                }
+                else {
+                    table.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                }
+
+                txtproducto.val(producto);
+                txtstock.val(stock);
+                txtprecio.val(precio);
+                txtcantidad.val(0);
+                txtproductoId.val(productoid);
+                txtpcompra.val(pcompra);
+
+            });
+
+            btnagregar.on('click',function () {                
+
+                //si el elemento existe aumentamos el campo cantidad solamente
+                if($('#productoid_'+txtproductoId.val()).length == 0 )
+                {
+                    var subtotal = txtprecio.val() * txtcantidad.val();
+
+                    $('#tblProductosSelect tr:last').after('<tr id="tr_'+txtproductoId.val()+'" class="prd"><td><input type="hidden" id="productoid_'+txtproductoId.val()+'" name="productoid_'+txtproductoId.val()+'" value="'+txtproductoId.val()+'"/><a href="javascript:eliminar('+txtproductoId.val()+')" ><i class="fa fa-remove fa-lg"></a></i></td><td width="40%"><input type="text" id="producto_'+txtproductoId.val()+'" name="producto_'+txtproductoId.val()+'" class="form-control no-border " value="'+txtproducto.val()+'" readonly /></td><td><input type="text" id="precio_'+txtproductoId.val()+'"  name="precio_'+txtproductoId.val()+'" class="form-control no-border" value="'+txtprecio.val()+'" readonly /></td><td><input type="text"  id="cantidad_'+txtproductoId.val()+'" name="cantidad_'+txtproductoId.val()+'" class="form-control no-border" value="'+txtcantidad.val()+'" readonly /> </td><td><input type="text" id="subtotal_'+txtproductoId.val()+'" name="subtotal_'+txtproductoId.val()+'" class="form-control no-border subtotal" value="'+subtotal.toFixed(2)+'" readonly /></td></tr>');
+
+
+                }else{
+                    var cantidad_nueva  = txtcantidad.val();
+                    var cantidad_actual = $('#cantidad_'+txtproductoId.val()).val();
+                    var cantidad_sumada = Number(cantidad_nueva) + Number(cantidad_actual);
+
+                    $('#cantidad_'+txtproductoId.val()).val(cantidad_sumada);
+
+                    var precio      = $('#precio_'+txtproductoId.val()).val();
+                    var cantidad    = $('#cantidad_'+txtproductoId.val()).val();
+
+                    var subtotal = Number(precio) * Number(cantidad);
+
+                    $('#subtotal_'+txtproductoId.val()).val(subtotal.toFixed(2));
+
+                }
+
+                var total = 0;
+
+                $("input:text.subtotal").each( function () {
+                    total += Number($(this).val());
+                });
+
+                txtvalortotal.val(total.toFixed(2));
+
+            });
+
+            txtcliente.on("change", function() {
+
+                var valor = this.value;
+                var cl = $(this).find("option:selected").text();
+
+                txtclientenuevo.val(cl);
+
+            });
+
+            txtprecio.on("change", function() {
+
+                var preciocompra  = Number(txtpcompra.val());
+                if(Number(this.value) < preciocompra){
+                    bootbox.alert("El precio ingresado no puede ser menor al precio de compra!");
+                }
+                
+            })
+
+            txttipodocumento.on("change", function() {
+
+                var tipodocumento = this.value;
+
+                if(tipodocumento != 'guia' && txtcliente.val() == ''){
+
+                    bootbox.confirm("Debe registrar los datos básicos del cliente. RUC o DNI, Nombre o Razón Social y Dirección", function(result){
+
+                        if(result){
+                            $('.cliente').modal('show');
+                        }
+
+                    });
+
+                }
+
+            });
+
+            txtformapago.on("change",function(){
+
+                var formapago = this.value;
+
+                if(formapago == 4){
+                    txtnrovoucher.prop('readonly', false);
+                    txtnrovoucher.prop('required', 'required');
+
+                    $( "<div class='invalid-feedback' id='voucher'>Este valor es requerido.</div>" ).insertAfter( "#appbundle_detalleventa_cliente_numero_voucher" );
+
+                }else{
+                    txtnrovoucher.prop('required', false);
+                    txtnrovoucher.prop('readonly', true);
+                    $( "#voucher" ).remove();
+                }
+
+            });
+
+            btnguardarcliente.on('click',function () {
+
+                var nrazonsocial = txtnombrerazonsocial.val();
+                var dniruc       = txtdniruc.val();
+                var direccion    = txtdireccion.val();
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('registrar_cliente_nuevo')}}",
+                  data: { nrazonsocial: nrazonsocial, dniruc: dniruc, direccion: direccion }
+                })
+                  .done(function( data ) {
+
+                    txtclientenuevo.val(data.cliente);
+                    txtcliente.val(data.cliente_id);
+                    $('.cliente').modal('hide');
+
+
+                });   
+
+            });
+
+            btnanular.on('click',function () {
+
+                var numticket   = txtticket.val();
+                var motivo      = txtmotivo.val();
+
+                if(numticket != '' && motivo != ''){
+
+                    $.ajax({
+                      method: "POST",
+                      url: "{{ path('anular_venta')}}",
+                      data: { numticket: numticket, motivo: motivo }
+                    })
+                      .done(function( data ) {
+
+                        if(data.estado == 'exito'){
+                            bootbox.alert("La venta fue anulada exitosamente.");
+                        }else{
+                            bootbox.alert("Hubo un error en el proceso.La venta no fue anulada.");
+                        }
+
+                    });
+
+                }else{
+
+                    bootbox.alert("Ingresar el número de ticket y el motivo de anulación.");
+                }
+
+            });
+
+
+            $("form").submit(function(event){
+
+                var prd = $("#tblProductosSelect").find("tr.prd");
+                var venta_total_mes = '{{ obtenerVentaTotalMes(local) }}';
+                var limite_venta = '{{ limite_venta }}';
+
+                if(prd.length == 0){
+
+                    bootbox.alert("No existen productos agregados!");                    
+                    return false;
+
+                }else{
+
+                    var dif = Number(venta_total_mes) + Number(txtvalortotal.val());
+
+                    if(dif > Number(limite_venta) && txttipodocumento.val() != 'guia' ){
+                        bootbox.alert("Se ha superado el límite de venta establecido para este mes, solo se pueden generar guías.");                    
+                        return false;
+                    }else{
+
+                        setTimeout(function(){                            
+                            location.reload();
+                        }, 1500);
+
+                        return true;
+                    }
+
+                    
+                }
+
+            });
+
+
+        });
+
+
+    </script>
+          
+{% endblock %}
+
+

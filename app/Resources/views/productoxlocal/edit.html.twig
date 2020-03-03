@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="container">
+
+    <form id="form" action="{{ path('productoxlocal_edit', {'id': productoXLocal.id}) }}" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Información general</div>
+            <div class="card-body">
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        
+                        {{ form_row(edit_form.producto.codigo) }}
+           
+                    </div>
+                 
+                    <div class="form-group col-md-4 ">
+
+                        <div class="col-md-12 text-center">
+                            {{ generarCodigoBarras(productoXLocal.producto.codigo) | raw }}
+                        </div>                
+
+                        <div class="col-md-12 text-center ">
+                            <input type="button" value="Imprimir código" class="btn btn-small btn-primary"  onclick="window.open('{{ path('producto_imprimircodigo')}}?codigo={{ productoXLocal.producto.codigo }}','_blank');" />
+                        </div>
+                        
+                    </div>
+
+                </div>
+
+
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.producto.categoria) }}
+                    </div>                    
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.producto.marca) }}
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form_row(edit_form.producto.nombre) }}
+                    </div>
+
+      
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.producto.moneda) }}
+                    </div>                      
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.producto.precioUnitario) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.producto.precioCantidad) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.producto.precioCompra) }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.producto.unidadVenta) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.producto.unidadCompra) }}
+                    </div>
+
+                    <div class="form-group col-md-1">
+                        {{ form_row(edit_form.stock) }}
+                    </div>      
+         
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.producto.peso) }}
+                    </div>   
+
+                </div>
+
+
+                <div class="form-row">
+                    {% if originalFile %}
+                        <div class="form-group col-md-2">
+                            <img src="{{ asset('uploads/imagenes/100x100/' ~ originalFile) }}" height="100" width="100"/>
+                        </div>                           
+                    {% endif %}            
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.producto.imagen) }}
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form_row(edit_form.producto.descripcion) }}
+                    </div>    
+
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.producto.codigoBarra) }}
+                    </div>                                    
+                </div>
+            
+            </div>
+        </div>
+        {{ form_widget(edit_form.estado) }}
+        {{ form_widget(edit_form._token) }}
+        <div class="mt-4">
+            <p class="pull-right">
+                <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('productoxlocal_index')}}'" />            
+                <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+            </p>
+        </div>
+        
+
+    </form>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }} 
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var um_venta_select          = $("#appbundle_productoxlocal_producto_unidadVenta");
+            var um_compra_select         = $("#appbundle_productoxlocal_producto_unidadCompra");    
+            
+            um_venta_select.on("change", function(){
+
+                um_compra_select.css('pointer-events','auto');
+
+                var data = {
+                  unventa      : this.value,
+                  autorizado  : 'si',
+                }
+
+                um_compra_select.val('').attr("disabled", "disabled");
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('obtener_unidad_compra')}}",
+                  data: data,
+                  success: function(data){
+                    um_compra_select.html(data).removeAttr("disabled");
+                  }
+
+                });
+            });
+
+
+        });
+
+    </script>
+
+{% endblock %}

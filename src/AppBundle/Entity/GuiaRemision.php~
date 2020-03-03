@@ -1,0 +1,271 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * GuiaRemision
+ *
+ * @ORM\Table(name="guia_remision")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\GuiaRemisionRepository")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class GuiaRemision
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="fecha_emision", type="datetime", nullable=true)
+     */
+    private $fechaEmision;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="tipo", type="string", length=32, nullable=true)
+     */
+    private $tipo;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="serie", type="string", length=4, nullable=true)
+     */
+    private $serie;
+
+    /**
+    * @var int
+    *
+    * @ORM\Column(name="numero", type="integer", nullable=true)
+    */
+    private $numero;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Cliente", inversedBy="guiaRemision", cascade={"persist"})
+     * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
+     * 
+     */
+    protected $cliente;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="EmpresaLocal", inversedBy="guiaRemision", cascade={"persist"})
+     * @ORM\JoinColumn(name="empresa_local_id", referencedColumnName="id")
+     * 
+     */
+    protected $local;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="fecha_inicio_traslado", type="datetime", nullable=true)
+     */
+    private $fechaInicioTraslado;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="motivo_traslado", type="string", length=32, nullable=true)
+     */
+    private $motivoTraslado;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="tipo_transporte", type="string", length=32, nullable=true)
+     */
+    private $tipoTransporte;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="peso", type="float", nullable=true)
+     */
+    private $peso;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="numero_bultos", type="float", nullable=true)
+     */
+    private $numeroBultos;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="transportista_documento", type="string", length=32, nullable=true)
+     */
+    private $transportistaDocumento;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="transportista_documento_numero", type="string", length=32, nullable=true)
+     */
+    private $transportistaDocumentoNumero;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="transportista_denominacion", type="string", length=100, nullable=true)
+     */
+    private $transportistaDenominacion;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="transportista_placa", type="string", length=32, nullable=true)
+     */
+    private $transportistaPlaca;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="conductor_documento", type="string", length=32, nullable=true)
+     */
+    private $conductorDocumento;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="conductor_documento_numero", type="string", length=32, nullable=true)
+     */
+    private $conductorDocumentoNumero;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="conductor_nombre", type="string", length=100, nullable=true)
+     */
+    private $conductorNombre;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="punto_partida", type="string", length=100, nullable=true)
+     */
+    private $puntoPartida;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="punto_llegada", type="string", length=100, nullable=true)
+     */
+    private $puntoLlegada;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="ubigeo_partida", type="string", length=32, nullable=true)
+     */
+    private $ubigeoPartida;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="ubigeo_llegada", type="string", length=32, nullable=true)
+     */
+    private $ubigeoLlegada;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="observacion", type="string", length=255, nullable=true)
+     */
+    private $observacion;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="estado", type="boolean", nullable=true)
+     */
+    private $estado;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="PedidoVentaEntrega", inversedBy="guiaRemision")
+     * @ORM\JoinTable(name="pedido_venta_entrega_guia_remision")
+     * 
+     */
+    private $pedidoVentaEntrega;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Usuario", inversedBy="guiaRemision", cascade={"persist"})
+     * @ORM\JoinColumn(name="usuario_creacion", referencedColumnName="id")
+     */
+    private $usuarioCreacion;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Usuario", inversedBy="guiaRemision", cascade={"persist"})
+     * @ORM\JoinColumn(name="usuario_modificacion", referencedColumnName="id")
+     */
+    private $usuarioModificacion;
+
+    /** 
+     * created Time/Date 
+     * 
+     * @var \DateTime 
+     * 
+     * @ORM\Column(name="fecha_creacion", type="datetime", nullable=true) 
+     */  
+    protected $fechaCreacion;  
+  
+    /** 
+     * updated Time/Date 
+     * 
+     * @var \DateTime 
+     * 
+     * @ORM\Column(name="fecha_modificacion", type="datetime", nullable=true) 
+     */  
+    protected $fechaModificacion;  
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setUsuarioCreacion()
+    {
+        $usuario = $GLOBALS['kernel']->getContainer()->get('security.token_storage')->getToken()->getUser();
+        $this->usuarioCreacion = $usuario;
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function setUsuarioModificacion()
+    {
+        $usuario = $GLOBALS['kernel']->getContainer()->get('security.token_storage')->getToken()->getUser();
+        $this->usuarioModificacion = $usuario;
+
+    }
+
+    /** 
+     * Set FechaCreacion 
+     * 
+     * @ORM\PrePersist 
+     */  
+    public function setFechaCreacion()  
+    {  
+        $this->fechaCreacion = new \DateTime();  
+        $this->fechaModificacion = new \DateTime();  
+    }  
+  
+    /** 
+     * Set FechaModificacion 
+     * 
+     * @ORM\PreUpdate 
+     */  
+    public function setFechaModificacion()  
+    {  
+        $this->fechaModificacion = new \DateTime();  
+    }
+
+
+}

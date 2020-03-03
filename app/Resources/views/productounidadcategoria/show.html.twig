@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Productounidadcategorium</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ productoUnidadCategorium.id }}</td>
+            </tr>
+            <tr>
+                <th>Codigo</th>
+                <td>{{ productoUnidadCategorium.codigo }}</td>
+            </tr>
+            <tr>
+                <th>Nombre</th>
+                <td>{{ productoUnidadCategorium.nombre }}</td>
+            </tr>
+            <tr>
+                <th>Descripcion</th>
+                <td>{{ productoUnidadCategorium.descripcion }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('productounidadcategoria_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('productounidadcategoria_edit', { 'id': productoUnidadCategorium.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

@@ -1,0 +1,369 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container">
+
+    <form id="form" action="{{ path('producto_edit', {'id': producto.id}) }}" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Información general</div>
+            <div class="card-body">
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        
+                        {{ form_row(edit_form.codigo) }}
+           
+                    </div>
+                 
+                    <div class="form-group col-md-4 ">
+
+                        <div class="col-md-12 text-center">
+                            {{ generarCodigoBarras(producto.codigo) | raw }}
+                        </div>                
+
+                        <div class="col-md-12 text-center ">
+                            <input type="button" value="Imprimir código" class="btn btn-small btn-primary"  onclick="window.open('{{ path('producto_imprimircodigo')}}?codigo={{ producto.codigo }}','_blank');" />
+                        </div>
+                        
+                    </div>
+
+                </div>
+
+
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.tipo) }}
+                    </div>                        
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.categoria) }}
+                    </div>                    
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.marca) }}
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form_row(edit_form.nombre) }}
+                    </div>
+
+      
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-6">
+
+                        <label for="codigo_sunat_select" class="required">Código SUNAT *</label>
+
+                        <select class="form-control select2" name="codigo_sunat_select" id="codigo_sunat_select" required="required">
+                        </select>
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                                   
+
+                    </div>    
+
+                </div>
+
+                <div class="form-row">
+                    {% if originalFile %}
+                        <div class="form-group col-md-2">
+                            <img src="{{ asset('uploads/imagenes/100x100/' ~ originalFile) }}" height="100" width="100"/>
+                        </div>                           
+                    {% endif %}            
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.imagen) }}
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.descripcion) }}
+                    </div>    
+
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.codigoBarra) }}
+                    </div>
+                    <div class="form-group col-md-1">
+                        {{ form_row(edit_form.posicion) }}
+                    </div>
+                    <div class="form-group col-md-1">
+                        {{ form_row(edit_form.peso) }}
+                    </div>
+                </div>
+            
+            </div>
+        </div>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Precios</div>
+            <div class="card-body">
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.moneda) }}
+                    </div>                      
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.precioUnitario) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.precioCantidad) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.precioCompra) }}
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.unidadVenta) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.unidadCompra) }}
+                    </div>
+      
+                </div>
+
+            </div>
+        </div>
+
+
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Stock</div>
+            <div class="card-body">
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+
+
+                        <table class="table ">
+
+                            <thead>
+                                <tr>
+                                    <th width="50%">Almacen</th>
+                                    <th width="25%">Stock</th>
+                                </tr>
+                            </thead>
+                            
+                            <tbody class="">
+                                {% for productoXLocal in edit_form.productoXLocal  %}
+
+                                    {% if productoXLocal.vars.value.local %}
+        
+                                        <tr class="">
+                                            <td> {{ form_widget(productoXLocal.local,{'attr':{'style':'pointer-events:none;'}}) }}</td>
+                                            <td>{{ form_widget(productoXLocal.stock) }}</td>
+                                            {{ form_widget(productoXLocal.estado) }}
+                                        </tr>
+
+                                    {% endif %}
+
+                                {% endfor  %}
+                            </tbody>
+
+
+                        </table>
+
+
+
+
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Precios por rango</div>
+            <div class="card-body">
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-6 col-md-offset-2" id="exp_list" data-prototype="{% filter escape %}{{ include('servicioajax/prototypeProductoXPrecio.html.twig', { 'form': edit_form.productoXPrecio.vars.prototype }) }} {% endfilter %} ">
+                        {# "{{ form_widget(form.transaccionDetalle.vars.prototype)|e('html_attr') }}"   #}
+
+                        <table class="table ">
+
+                            <thead>
+                                <tr>
+                                    <th width="30%">Rango inicial</th>
+                                    <th width="30%">Rango final</th>
+                                    <th width="30%">Precio</th>
+                                    <th width="10%"></th>
+                                </tr>
+                            </thead>
+                            
+
+                            <tbody class="transaccion">
+                                {% for productoXPrecio in edit_form.productoXPrecio  %}
+
+                                    <tr class="items">
+                                        <td>{{ form_widget(productoXPrecio.rangoInicial) }}</td>
+                                        <td>{{ form_widget(productoXPrecio.rangoFinal) }}</td>
+                                        <td>{{ form_widget(productoXPrecio.precio) }}</td>
+                                        <td><a href="javascript:void(0)" class="btn btn-danger remove-item" ><i class="fa fa-trash"></i></a></td>
+                                    </tr>
+
+                                {% endfor  %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td><a href="javascript:void(0)" class="btn btn-info add-item" ><i class="fa fa-plus "></i></a></td>
+                                    <td class="text-left" colspan="3"></td>
+                                </tr>
+                            </tfoot>
+
+
+
+                        </table>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+
+
+        {{ form_widget(edit_form._token) }}
+        <div class="mt-4">
+            <p class="pull-right">
+                <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('producto_index')}}'" />            
+                <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+            </p>
+        </div>
+        
+
+    </form>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }} 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        var $collectionHolder;
+
+        $(document).ready(function() {
+
+            var um_venta_select          = $("#appbundle_producto_unidadVenta");
+            var um_compra_select         = $("#appbundle_producto_unidadCompra");    
+            
+            um_venta_select.on("change", function(){
+
+                um_compra_select.css('pointer-events','auto');
+
+                var data = {
+                  unventa      : this.value,
+                  autorizado  : 'si',
+                }
+
+                um_compra_select.val('').attr("disabled", "disabled");
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('obtener_unidad_compra')}}",
+                  data: data,
+                  success: function(data){
+                    um_compra_select.html(data).removeAttr("disabled");
+                  }
+
+                });
+            });
+
+
+            // Obtenemos el objeto colector
+            $collectionHolder = $('#exp_list');
+
+            $collectionHolder.data('index',$collectionHolder.find('.items').length);
+
+            
+            $('.add-item').on('click',function(){
+
+                addNewForm($collectionHolder);
+
+            })
+
+
+            $('body')
+                .on('click','.remove-item',function(e) {
+
+                    $(e.target).parents('.items').remove();
+                    
+                });
+
+
+            function addNewForm($collectionHolder) {
+
+                $collectionHolder.data('index',$collectionHolder.find('.items').length);
+
+                //Creamos el nuevo formulario y agregamos al colector
+                // obteniendo el prototype
+                var prototype = $collectionHolder.data('prototype');
+                // obtenemos el index 
+                var index  =  $collectionHolder.data('index');
+                // Creamos el form
+                var newForm = prototype.replace(/__name__/g, index);
+
+                $collectionHolder.data('index',index++);
+
+                $('.transaccion').append(newForm);
+
+            }
+
+            var codigoText = '{{ producto.codigoSunat }}';
+            var codigoId = '{{ producto.codigoSunat.id }}';
+
+            var newOption = new Option(codigoText, codigoId, false, true);
+            $('#codigo_sunat_select').append(newOption).trigger('change');    
+
+
+            // Selecciona el codigo SUNAT
+            $(".select2").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenercodigosunat')}}",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },          
+                placeholder: 'Buscar código',
+                minimumInputLength: 2,
+            });
+
+
+
+        });
+
+    </script>
+
+{% endblock %}

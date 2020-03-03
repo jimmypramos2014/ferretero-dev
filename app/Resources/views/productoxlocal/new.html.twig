@@ -1,0 +1,192 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="container">
+
+    <form id="formProducto" action="{{ path('productoxlocal_new') }}" class="form-horizontal " role="form" method="post"  enctype="multipart/form-data" novalidate>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Información general</div>
+            <div class="card-body">
+
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+
+                        {{ form_row(form.producto.codigo) }}
+
+                    </div> 
+                    <div class="form-group col-md-4 ">
+
+                        <div class="col-md-12 text-center">
+                            {{ generarCodigoBarras(codigo) | raw }}
+                        </div>
+                        <div class="col-md-12 text-center">
+                            <input type="button" value="Imprimir código" class="btn btn-small btn-primary"  onclick="window.open('{{ path('producto_imprimircodigo')}}?codigo={{ codigo }}','_blank');" />
+                        </div>
+                        
+                    </div>
+                </div>
+
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.producto.categoria) }}
+                    </div>                    
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.producto.marca) }}
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form_row(form.producto.nombre) }}
+                    </div>      
+                </div>
+
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.producto.moneda) }}
+                    </div>                    
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.producto.precioUnitario) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.producto.precioCantidad) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.producto.precioCompra) }}
+                    </div>
+                </div>
+
+
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        {{ form_label(form.producto.unidadVenta) }}
+                        {{ form_widget(form.producto.unidadVenta,{'attr':{'value':'1'}}) }}
+                    </div>
+                    <div class="form-group col-md-2">
+                         {{ form_label(form.producto.unidadCompra) }}
+                        {{ form_widget(form.producto.unidadCompra,{'attr':{'value':'1'}}) }}
+                    </div>
+
+                    <div class="form-group col-md-1">
+                        {{ form_row(form.stock) }}
+                    </div>      
+         
+                    <div class="form-group col-md-2">
+                        {{ form_row(form.producto.peso) }}
+                    </div>   
+
+                </div>
+
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.producto.imagen) }}
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form_row(form.producto.descripcion) }}
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(form.producto.codigoBarra) }}
+                    </div>                                     
+                </div>
+
+
+            </div>
+        </div>
+
+        
+        {{ form_widget(form.estado) }}
+        {{ form_widget(form._token) }}
+
+        <div class="mt-4">
+            <p class="pull-right">
+                <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('productoxlocal_index')}}'" />            
+                <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+            </p>
+        </div>
+        
+
+    </form>
+
+    <div class="modal codigo" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Código de barras</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="guardar_cliente">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }} 
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var um_venta_select          = $("#appbundle_productoxlocal_producto_unidadVenta");
+            var um_compra_select         = $("#appbundle_productoxlocal_producto_unidadCompra");    
+            
+            um_venta_select.on("change", function(){
+
+                var data = {
+                  unventa      : this.value,
+                  autorizado  : 'si',
+                }
+
+                um_compra_select.val('').attr("disabled", "disabled");
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('obtener_unidad_compra')}}",
+                  data: data,
+                  success: function(data){
+                    um_compra_select.html(data).removeAttr("disabled");
+                  }
+
+                });
+            });
+
+            // um_compra_select.on("change", function(){
+
+            //     var data = {
+            //       unventa   : this.value,
+            //       autorizado  : 'si',
+            //     }
+
+            //     um_venta_select.val('').attr("disabled", "disabled");
+
+            //     $.ajax({
+            //       method: "POST",
+            //       url: "{{ path('obtener_unidad_compra')}}",
+            //       data: data,
+            //       success: function(data){
+            //         um_venta_select.html(data).removeAttr("disabled");
+            //       }
+
+            //     });
+            // });
+
+        });
+
+    </script>
+
+{% endblock %}

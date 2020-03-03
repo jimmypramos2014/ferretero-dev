@@ -1,0 +1,474 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+  {{ parent() }}
+
+  <style>
+
+    #container{
+      font-size:2.5rem;
+    }
+    #container2{
+      font-size:2.5rem;
+    }
+    .filtros{
+      font-size:2.5rem;
+    }
+
+    .dashboard-ventas .card-header{
+      background: #337ab7;
+      color: #FFFFFF;
+    }
+
+    .dashboard-ventas .card-body{
+      background: #FFFFFF;
+    }
+
+    .dashboard-ventas .card{
+      border-color: #337ab7;
+    }
+
+    .dashboard-compras .card-header{
+      background: #5cb85c;
+      color: #FFFFFF;
+    }
+
+    .dashboard-compras .card-body{
+      background: #FFFFFF;
+    }
+
+    .dashboard-compras .card{
+      border-color: #5cb85c;
+    }
+
+    .dashboard-gastos .card-header{
+      background: #5bc0de;
+      color: #FFFFFF;
+    }
+
+    .dashboard-gastos .card-body{
+      background: #FFFFFF;
+    }
+
+    .dashboard-gastos .card{
+      border-color: #5bc0de;
+    }
+
+    .dashboard-ganancias-positivo .card-header{
+      background: #337ab7;
+      color: #FFFFFF;
+    }
+
+    .dashboard-ganancias-positivo .card-body{
+      background: #FFFFFF;
+    }
+
+    .dashboard-ganancias-positivo .card{
+      border-color: #337ab7;
+    }
+
+    .dashboard-ganancias-negativo .card-header{
+      background: #d9534f;
+      color: #FFFFFF;
+    }
+
+    .dashboard-ganancias-negativo .card-body{
+      background: #d9534f;
+    }
+
+    .dashboard-ganancias-negativo .card{
+      border-color: #d9534f;
+    }
+
+    .bg-secondary{
+      background-color: #FFFFFF!important;;
+    }
+
+    .card-header{
+      color: #343a40;
+      font-size: 1.5rem;
+    }
+
+
+
+
+  </style>
+{% endblock %}
+
+{% block body %}
+
+  {% for label, messages in app.flashes %}
+      {% for message in messages %}
+          <div class="alert alert-{{ label }}">
+              {{ message }}
+          </div>
+      {% endfor %}
+  {% endfor %}
+        
+  <div class="row mb-2 filtros">
+
+    <div class="col-md-12">      
+
+        <form id="form" action="{{ path('dashboard') }}" class="form-inline" role="form" method="post"  enctype="multipart/form-data" novalidate>
+            
+            {{ form_label(form.local) }}
+            {{ form_widget(form.local,{'value':local_param | trim } ) }}
+            <input type="submit" class="btn btn-small btn-primary mb-2" value="Mostrar información" />
+
+        </form>      
+
+    </div>
+
+  </div>
+
+  <div class="row filtros">
+    
+    <div class="col-md-12">
+
+      <div class="card bg-secondary text-white ">
+        <div class="card-header">
+          Mes actual
+        </div>
+        <div class="card-body">
+              
+              <div class="card-group justify-content-center">
+                    <div class="col-md-3 dashboard-ventas">
+                      <div class="card text-center bg-ligth text-dark o-hidden h-100">
+                        <div class="card-header">VENTAS (S/)</div>
+                        <div class="card-body">
+                          <div class="mr-0">
+                            {% set ventas = obtenerVentaTotalMesXEmpresa(empresa,local_param) %}
+                            <h1 class="display-5">{{ ventas | number_format(2, '.', ',') }}</h1>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 dashboard-compras">
+                      <div class="card text-center bg-ligth text-dark border-success o-hidden h-100">
+                        <div class="card-header">COMPRAS (S/)</div>
+                        <div class="card-body">
+                          <div class="mr-0">
+                            {% set compras = obtenerCompraTotalMesXEmpresa(empresa,local_param) %}
+                            <h1 class="display-5">{{ compras | number_format(2, '.', ',') }}</h1>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 dashboard-gastos">
+                      <div class="card text-center bg-ligth text-dark border-success o-hidden h-100">
+                        <div class="card-header">GASTOS (S/)</div>
+                        <div class="card-body">
+                          <div class="mr-0">
+                            {% set gastos = obtenerGastoTotalMesXEmpresa(empresa,local_param) %}
+                            <h1 class="display-5">{{ gastos | number_format(2, '.', ',') }}</h1>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 dashboard-ganancias-positivo">
+                      <div class="card text-center bg-ligth text-dark border-success o-hidden h-100">
+                        <div class="card-header">GANANCIAS (S/)</div>
+                        <div class="card-body">
+                          <div class="mr-0">
+                            {% set ganancias =  ventas - compras - gastos %}
+                            <h1 class="display-5">{{ ganancias | number_format(2, '.', ',') }}</h1>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+              </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <hr class="col-xs-12">
+
+  <div class="row filtros">
+    
+    <div class="col-md-12">
+
+      <div class="card">
+        <div class="card-header">
+          Mes pasado
+        </div>
+        <div class="card-body">
+              
+              <div class="card-group justify-content-center">
+                    <div class="col-md-3">
+                      <div class="card text-center o-hidden h-100">
+                        <div class="card-header">VENTAS</div>
+                        <div class="card-body">
+                          <div class="mr-0">
+                            {% set ventas = obtenerVentaTotalMesXEmpresa(empresa,local_param,'mes_ant') %}
+                            <h1 class="display-5">{{ ventas | number_format(2, '.', ',') }}</h1>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="card text-center o-hidden h-100">
+                        <div class="card-header">COMPRAS</div>
+                        <div class="card-body">
+                          <div class="mr-0">
+                            {% set compras = obtenerCompraTotalMesXEmpresa(empresa,local_param,'mes_ant') %}
+                            <h1 class="display-5">{{ compras | number_format(2, '.', ',') }}</h1>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="card text-center o-hidden h-100">
+                        <div class="card-header">GASTOS</div>
+                        <div class="card-body">
+                          <div class="mr-0">
+                            {% set gastos = obtenerGastoTotalMesXEmpresa(empresa,local_param,'mes_ant') %}
+                            <h1 class="display-5">{{ gastos | number_format(2, '.', ',') }}</h1>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="card text-center o-hidden h-100">
+                        <div class="card-header">GANANCIAS</div>
+                        <div class="card-body">
+                          <div class="mr-0">
+                            {% set ganancias =  ventas - compras - gastos %}
+                            <h1 class="display-5">{{ ganancias | number_format(2, '.', ',') }}</h1>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+              </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <hr class="col-xs-12">
+
+
+  <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+  <hr class="col-xs-12">
+
+  <div id="container2" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+{% endblock %}
+{% block javascripts %}
+
+{{ parent() }}
+
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+
+  <script>
+    // Create the chart
+    Highcharts.chart('container', {
+
+        title: {
+            text: 'Flujo de los últimos 12 meses'
+        },
+
+        subtitle: {
+            text: ''
+        },
+
+        xAxis: {
+            categories: [
+            {% for mes in meses %}
+              '{{ mes }}',
+            {% endfor %}
+            ]
+        },
+
+        yAxis: {
+            title: {
+                text: 'Monto en soles'
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+            }
+        },
+
+        series: [
+
+          {
+              name: 'Ventas',
+              data: [{{ ventas_x_mes | raw}}]
+          }, 
+          {
+              name: 'Compras',
+              data: [{{ compras_x_mes | raw}}]
+          }, 
+          {
+              name: 'Gastos',
+              data: [{{ gastos_x_mes | raw}}]
+          }, 
+          {
+              name: 'Ganancias',
+              data: [{{ ganancias_x_mes | raw}}]
+          }
+
+        ],
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        },
+
+        exporting: {
+            buttons: {
+                contextButton: {
+                      menuItems: [{
+                            text:'Descargar imagen',
+                            textKey: 'downloadJPEG',
+                            onclick: function () {
+                                this.exportChart({
+                                  type: 'image/jpeg'
+                                });
+                            }
+                        }, {
+                            text:'Descargar PDF',
+                            textKey: 'downloadPDF',
+                            onclick: function () {
+                                this.exportChart({
+                                    type: 'application/pdf'
+                                });
+                            }
+                        }]
+                }
+            }
+        }        
+
+    });
+
+
+    // Create the chart
+    Highcharts.chart('container2', {
+
+        title: {
+            text: 'Flujo de los últimos 30 dias'
+        },
+
+        subtitle: {
+            text: ''
+        },
+
+        xAxis: {
+            categories: [
+            {% for dia in dias %}
+              '{{ dia }}',
+            {% endfor %}
+            ]
+        },
+
+        yAxis: {
+            title: {
+                text: 'Monto en soles'
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+            }
+        },
+
+        series: [
+
+          {
+              name: 'Ventas',
+              data: [{{ ventas_x_dia | raw}}]
+          }, 
+          {
+              name: 'Compras',
+              data: [{{ compras_x_dia | raw}}]
+          }, 
+          {
+              name: 'Gastos',
+              data: [{{ gastos_x_dia | raw}}]
+          }, 
+          {
+              name: 'Ganancias',
+              data: [{{ ganancias_x_dia | raw}}]
+          }
+
+        ],
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        },
+
+        exporting: {
+            buttons: {
+                contextButton: {
+                      menuItems: [{
+                            text:'Descargar imagen',
+                            textKey: 'downloadJPEG',
+                            onclick: function () {
+                                this.exportChart({
+                                  type: 'image/jpeg'
+                                });
+                            }
+                        }, {
+                            text:'Descargar PDF',
+                            textKey: 'downloadPDF',
+                            onclick: function () {
+                                this.exportChart({
+                                    type: 'application/pdf'
+                                });
+                            }
+                        }]
+                }
+            }
+        }      
+
+    });
+  </script>
+{% endblock %}

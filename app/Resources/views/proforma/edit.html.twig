@@ -1,0 +1,2148 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }} 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+
+    <style>
+        #resultado, #existente {
+            background-color: red;
+            color: white;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #resultado.ok, #existente.ok {
+            background-color: green;
+        }
+
+        .no-border {
+            border: 0;
+            box-shadow: none;
+        }
+
+        div.dataTables_filter{
+            text-align: left !important;
+        }
+
+        .punto-venta{
+            min-width: 1000px;
+        }
+
+        .producto .caracteristicas{
+            background-color: #000000;
+            color: #FFFFFF;
+            text-align: center;
+            font-size: 0.75rem;
+
+        }
+
+        .producto a{
+            color: #FFFFFF;
+        }        
+
+        .producto .caracteristicas .precio{
+            
+        }        
+
+        .producto .caracteristicas .nombre{
+            min-height: 40px;
+        }
+
+        .fila-producto{
+            margin-bottom: 10px;
+        }
+
+        .borde{
+            border-left: 1px solid #CCCCCC;
+        }
+
+        .venta-cuenta .cabecera{
+            font-weight: bold;
+        }
+
+        .venta-total{
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .venta-impuestos{
+            font-size: 2rem;
+            font-weight: bold;
+        }        
+
+        .linea-separadora{
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .linea-separadora2{
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .categorias{
+            margin-left: 0px;
+        }
+
+        .scrollable {
+          height:350px;
+          overflow-y: scroll;
+        }
+
+        .producto img{
+            border: 1px solid #000000;
+        }
+
+        .categorias img{
+            border: 1px solid #ea9f43;
+        }
+
+        .productos-slider{
+            overflow: auto;
+            overflow-x: hidden;
+            height: 400px;
+            padding-right: 10px;
+        }
+
+        /* width */
+        .productos-slider::-webkit-scrollbar {
+            width: 40px;
+        }
+        /* Track */
+        .productos-slider::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+         
+        /* Handle */
+        .productos-slider::-webkit-scrollbar-thumb {
+            background: #888; 
+        }
+
+        /* Handle on hover */
+        .productos-slider::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }        
+    
+        .puntoVenta{
+            width:1205px;
+            /*margin-left:-200px;*/
+        }    
+
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="{{asset('js/slick/slick.css')}}"/>        
+    <link rel="stylesheet" type="text/css" href="{{asset('js/slick/slick-theme.css')}}"/>
+{% endblock %}
+
+{% block body %}
+
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+
+    <div class="container">
+        <form id="form"  action="{{ path('proforma_edit', {'id': facturaVenta.id}) }}" class="form-horizontal needs-validation" role="form" method="post"  enctype="multipart/form-data"   novalidate>
+
+            <div class=" punto-venta">
+
+                <hr class="">
+
+                <div class="row">
+                    <div class="col-sm-12 col-lg-12 col-xs-12 ">
+
+                        <div class="form-row">
+        
+                            <div class="form-group col-sm-1 col-lg-1 col-xs-12">
+
+                                {{ form_widget(edit_form.fecha) }}                             
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>   
+                            </div>
+
+
+                            {% for ventaFormaPago in edit_form.venta.ventaFormaPago  %}
+
+
+                                <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+
+                                    {{ form_widget(ventaFormaPago.formaPago,{'value':'1'}) }}                             
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>   
+                                </div>
+                                <div class="form-group col-sm-1 col-lg-1 col-xs-12 ">
+                                    {{ form_widget(ventaFormaPago.montoACuenta) }}
+                                </div>
+
+                                <div class="form-group col-sm-1 col-lg-1 col-xs-12 ">
+                                    {{ form_widget(ventaFormaPago.numeroDias) }}
+                                </div>
+
+                            {% endfor %}                
+
+                            <div class="form-group col-sm-4 col-lg-4 col-xs-12">
+
+                                <div class="input-group">
+                                  
+                                    <select class="form-control select2" name="cliente_select" id="cliente_select" required="required">
+                                    </select>
+
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="agregar_cliente" ><i class="fa fa-plus fa-lg" data-toggle="tooltip" title="Agregar cliente"></i></span>
+                                        <span class="input-group-text" id="editar_cliente"><i class="fa fa-edit fa-lg" data-toggle="tooltip" title="Editar cliente"></i></span>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>                                   
+                                </div>
+     
+                            </div>   
+
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_widget(edit_form.documento) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>   
+                            </div>
+
+                            <div class="form-group col-sm-1 col-lg-1 col-xs-12 ">
+                                {{ form_label(edit_form.incluirIgv) }}
+                                {{ form_widget(edit_form.incluirIgv) }}
+     
+                            </div>
+
+                            <div class="form-group col-sm-1 col-lg-1 col-xs-12 d-none">
+                                {{ form_widget(edit_form.voucher) }}
+     
+                            </div>
+
+                            {{ form_widget(edit_form.venta.empleado) }}
+                            {{ form_widget(edit_form.local) }}
+                            {{ form_widget(edit_form.venta.estado) }}
+                            {{ form_widget(edit_form._token) }}
+                            
+
+                        </div>
+                        <div class="form-row">
+                            
+                            {% for ventaFormaPago in edit_form.venta.ventaFormaPago  %}
+
+                                <div class="form-group col-sm-1 col-lg-1 col-xs-12">
+
+                                    {{ form_widget(ventaFormaPago.moneda) }}                             
+                                    <div class="invalid-feedback">
+                                        Este valor es requerido.
+                                    </div>   
+                                </div>
+
+
+                            {% endfor %}          
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_widget(edit_form.numeroProforma) }}
+                            </div>
+
+                            <div class="form-group col-sm-3 col-lg-3 col-xs-12">
+                                {{ form_widget(edit_form.caja) }}
+                                <div class="invalid-feedback">
+                                    Este valor es requerido.
+                                </div>                                           
+                            </div> 
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_label(edit_form.numeroGuiaremision) }}
+                                {{ form_widget(edit_form.numeroGuiaremision) }}
+                            </div> 
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_row(edit_form.venta.condicion) }}
+                            </div>
+
+                            <div class="form-group col-sm-2 col-lg-2 col-xs-12">
+                                {{ form_label(edit_form.detraccion) }}
+                                {{ form_widget(edit_form.detraccion) }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="" style="margin-top: 0px">
+
+                <div class="row">
+                    <div class="col-sm-6 col-lg-6 col-xs-12">
+                        <div class="row">
+                            <div class="col-sm-9 col-lg-9 col-xs-12">
+
+
+                                <div class="input-group">
+                                  <input type="text" class="form-control" placeholder="Buscar productos" name="txtbuscar" id="txtbuscar" aria-describedby="limpiar_buscador" onkeypress="return event.keyCode != 13;" /> 
+                                  <div class="input-group-append">
+                                    <span class="input-group-text" id="limpiar_buscador" onclick="$('#txtbuscar').val('');"><i class="fa fa-times fa-lg"></i></span>
+                                  </div>
+                                </div>
+
+                            </div>
+                            <div class="col-sm-2 col-lg-2 col-xs-12 ">
+                                <button type="button" class="btn btn-primary" id="buscar" >Buscar</button>
+                            </div>
+
+                            <div class="col-sm-1 col-lg-1 col-xs-12 ">
+                                <div id="modo_lista">
+                                  <i class="fa fa-list fa-lg " data-toggle="tooltip" title="Cambiar modo de visualización"></i>
+                                </div>                                                       
+                            </div>       
+
+                        </div>
+
+                        <hr class="linea-separadora2">
+
+                        <div class="row categorias">
+                            <div class="col-sm-12 col-lg-12 col-xs-12">
+                                <div class="categorias-slider ">
+
+                                    {% for categoria in categorias %}
+                                        
+                                        <a href="javascript:buscar({{categoria.id}})" class="nav-link text-center">
+                                            <span class="small font-weight-bold text-capitalize ">{{ categoria.nombre }}</span>
+
+
+                                            {% set imgRuta =  '/uploads/imagenes/100x100/' ~ localObj.imagenCategoriaDefault %}
+                                            
+                                            {% if categoria.imagen %}
+                    
+                                                {% set imgRuta =  '/uploads/imagenes/categoria/' ~ categoria.imagen %}
+                                                
+                                            {% endif %}
+
+
+                                            <img class="img-fluid" data-lazy="{{ asset(imgRuta) }}" src="{{ asset(imgRuta) }}" />
+                                        </a>
+
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="linea-separadora2">
+
+                        <div class="col-md-12 productos-slider d-none" id="producto-lista">
+                           
+                            {% set total = productoXLocals | length %}
+                            {% for producto in productoXLocals %}
+
+                                    <div class="col-md-12 imgproductos"  title="{{ 'Stock: ' ~ producto.stock }}"  >
+                                      <div class="producto" id="" style="width:auto;">
+                                        <a href="#" >
+
+                                            <div class=" caracteristicas " style="background-color: #ffffff;text-align: left;font-size: 1rem;">
+                                                <div class="nombre d-inline" style="color:black;">{{ producto.nombre ~ ' [' ~ producto.marca | slice(0, 15) ~ ']'}}  </div>
+                                                <div class=" d-inline pull-right" style="color:black;"><span class="precio" >{{ producto.precio | number_format(2,'.','')  }}</span></div>
+                                                
+
+                                                {% if producto.precio_x_mayor > 0 %}
+                                                    <div class="d-inline pull-right mr-2" style="color:black;"> {{ producto.precio_x_mayor | number_format(2,'.','')  }}</div>
+                                                {% endif %}
+                                                            
+                
+
+                                                <input type="hidden" class="atributos" id="{{ producto.id }}" />
+                                                <input type="hidden" class="unidades" id="{{ producto.unidad }}" />
+                                                <input type="hidden" class="stock" id="{{ producto.stock }}" />
+                                            </div>
+                                        </a>
+                                      </div>
+                                    </div>
+
+                            {% endfor %}                        
+
+                        </div>
+
+                        <div class="productos-slider" id="producto-slider" >
+
+
+                                {% set item = 1 %}
+                                {% set cierre = 0 %}
+                                {% set total = productoXLocals | length %}
+                                {% for producto in productoXLocals %}
+
+                                    {% if  cierre == 1 or item == 1 %}
+
+                                        {% set cierre = 0 %}
+                                        <div class="row fila-producto" >
+
+                                    {% endif %} 
+
+                                    {% set imagen_ruta = 'noimage.png' %}
+        
+                                    {% if producto.imagen %}
+
+                                        {% set imagen_ruta = producto.imagen %}
+
+                                    {% else %}
+
+                                        {% set imagen_ruta = obtenerImagenProductoDefault(app.session.get('local')) %}                                   
+
+                                    {% endif %}                          
+
+
+                                        <div class="col d-flex imgproductos"  title="{{ 'Stock: ' ~ producto.stock }}"  >
+                                          <div class="producto" id="" >
+                                            <a href="javascript:void(0)" >
+                                                <img imgnombre="{{ producto.nombre }}" imglink="{{ asset('uploads/imagenes/500x500/' ~ producto.imagen ) }}" class="img-fluid imagen" src="{{ asset('uploads/imagenes/100x100/' ~ imagen_ruta ) }}"  />
+                                                <div class=" caracteristicas">
+                                                    <div class="nombre">{{ producto.nombre }}</div>
+                                                    <div><em class="simbolo_moneda">S./ </em><span class="precio">{{ producto.precio | number_format(2,'.','') }}</span></div>
+
+                                                    {% if producto.precio_x_mayor > 0 %}
+                                                        <div><em class="x_mayor">X Mayor: </em> <em class="simbolo_moneda">S./ </em> {{ producto.precio_x_mayor | number_format(2,'.','')  }}</div>
+                                                    {% endif %}
+
+                                                    <input type="hidden" class="atributos" id="{{ producto.id }}" />
+                                                    <input type="hidden" class="unidades" id="{{ producto.unidad }}" />
+                                                    <input type="hidden" class="stock" id="{{ producto.stock }}" />
+                                                </div>
+                                            </a>
+                                          </div>
+                                        </div>
+
+                                    {% if item is divisible by(4) or  item == total %}
+
+                                        {% set cierre = 1 %}
+
+                                        </div>
+
+                                    {% endif %}                            
+
+                                    {% set item = item + 1 %}
+
+                                {% endfor %}
+
+                        </div>
+
+
+                    </div>  
+
+
+                    <div class="col-sm-6 col-lg-6 col-xs-12 borde venta-cuenta">
+                        <div class="row cabecera">
+                            <div class="col-md-1 ">
+                                
+                            </div>
+                            <div class="col-md-4  p-0">
+                                Producto ({{ edit_form.venta.detalleVenta | length }})
+                            </div>
+                            <div class="col-md-2  p-0">
+                                Precio
+                            </div>
+                            <div class="col-md-1  p-0">
+                                Can.
+                            </div>
+                            <div class="col-md-1 p-0">
+                                Ent.
+                            </div>                        
+                            <div class="col-md-1 p-0">
+                                Un.
+                            </div>                        
+                            <div class="col-md-2 ">
+                                Subt. 
+                            </div>
+                        </div>
+
+                        <hr class="linea-separadora2">
+
+                        {% set total = 0 %}
+                        {% set impuesto = 0 %}
+                        {% set jj = 0 %}
+                        {% for detalle in edit_form.venta.detalleVenta  if  detalle.vars.value.productoXLocal %}
+
+
+                                <div class="row prod" id="row_{{ detalle.vars.value.productoXLocal.id }}">
+                                    <input type="hidden" class="productoid" id="productoid_{{ detalle.vars.value.productoXLocal.id }}" name="productoid_{{ detalle.vars.value.productoXLocal.id }}" value="productoid_{{ detalle.vars.value.productoXLocal.id }}" />
+                                    <div class="col-md-1 ">
+
+                                        <a href="javascript:eliminar({{ detalle.vars.value.productoXLocal.id }})" ><i class="fa fa-remove fa-lg"></i></a>
+
+                                    </div>
+                                    <div class="col-md-4 p-0" >
+                                        {{ detalle.vars.value.productoXLocal.producto.nombre }}
+
+
+                                        <select id="appbundle_facturaventa_venta_detalleVenta_{{ jj }}_productoXLocal" name="appbundle_facturaventa[venta][detalleVenta][{{ jj }}][productoXLocal]" class="form-control d-none"><option value="{{ detalle.vars.value.productoXLocal.id }}" selected>{{ detalle.vars.value.productoXLocal.producto.nombre }}</option></select>
+
+                                    </div>
+                                    <div class="col-md-2 p-0">
+
+                                        {{ form_widget(detalle.precio ) }}
+
+                                    </div>
+                                    <div class="col-md-1 p-0">
+
+                                        {% set cantidad_x_entregar =  detalle.vars.value.cantidad - detalle.vars.value.cantidadEntregada %}
+                                        {{ form_widget(detalle.cantidad,{'attr':{'data-productoid':detalle.vars.value.productoXLocal.id }}) }}
+
+                                    </div>
+                                    <div class="col-md-1 p-0">
+
+                                        {{ form_widget(detalle.cantidadEntregada) }}
+                                        <input type="hidden" value="{{ detalle.vars.value.cantidadEntregada }}" id="cantidad_entregada_{{ detalle.vars.value.productoXLocal.id }}" name="cantidad_entregada_{{ detalle.vars.value.productoXLocal.id}}" />
+
+                                    </div>
+
+                                    <div class="col-md-1 ">{{ detalle.vars.value.productoXLocal.producto.unidadVenta.abreviatura  }}</div>
+                                    <div class="col-md-2 subtotal " id="subtotal_{{ detalle.vars.value.productoXLocal.id }}" >
+                                        {% set subtotal = cantidad_x_entregar * detalle.vars.value.precio  %}
+
+                                        {{ form_widget(detalle.subtotal )  }}
+
+                                    </div>
+
+                                    
+                                    <select id="appbundle_facturaventa_venta_detalleVenta_{{ jj }}_venta" name="appbundle_facturaventa[venta][detalleVenta][{{ jj }}][venta]" class="form-control d-none"><option value="{{ detalle.vars.value.venta.id }}"></option></select>
+
+
+
+
+
+                                </div>
+
+                                <hr class="linea-separadora" id="linea_{{ detalle.vars.value.productoXLocal.id }}" >
+
+
+
+                                {% set total = total + detalle.vars.value.subtotal  %}
+
+                                {% if edit_form.vars.value.incluirIgv %}
+                                    {% set impuesto = impuesto + (detalle.vars.value.subtotal/1.18)*0.18 %}
+                                {% endif %}
+
+                            
+                                {% set jj = jj + 1 %}
+
+                        {% endfor %}
+                        
+                        {% if edit_form.vars.value.incluirIgv == false %}
+                            {% set impuesto = total * 0.18 %}
+                            {% set total = total + impuesto %}
+                        {% endif %}
+
+                        <div class="row venta-impuestos">
+                            <div class="col-sm-5 col-lg-5 col-xs-12">
+                                <span>IGV </span><em id="igv_simbolo_moneda">S./ </em> 
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-xs-12">
+                                <span id="impuestos">{{ impuesto ?  impuesto | number_format(2,'.',',') : '' }}</span>
+                            </div>                    
+                        </div>
+
+                        <hr class="linea-separadora2">
+
+                        <div class="row venta-total">
+                            <div class="col-sm-5 col-lg-5 col-xs-12">
+                                <span>TOTAL </span>  <em id="total_simbolo_moneda">S./ </em>
+                            </div>
+                            <div class="col-sm-4 col-lg-4 col-xs-12">
+                                <span id="total">{{ total | number_format(2,'.',',') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-4 col-lg-4 col-xs-12">
+                                <input type="submit" name="guardar" id="guardar" class="btn btn-primary btn-lg btn-block" value="Guardar"  />
+                            </div>
+
+                            <div class="col-sm-4 col-lg-4 col-xs-12">
+                                <input type="button" value="Cancelar" class="btn btn-lg btn-block" id="cancelar" onclick="location.href='{{ path('proforma_index')}}'" />
+                            </div>
+
+                            <div class="col-sm-4 col-lg-4 col-xs-12">
+                                <input type="submit" name="vender" id="vender" class="btn btn-primary btn-lg btn-block" value="Vender" />
+                            <div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+            </div>
+
+            <input type="hidden" name="btn_vender" id="btn_vender" value="">
+
+        </form>
+    </div>
+
+
+    <div class="modal cliente_factura" tabindex="-1" role="dialog" id="modalClienteFactura">
+      <div class="modal-dialog " role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Cliente</h5>
+            <button type="button" class="close" onclick="$('#modalClienteFactura').modal('hide');" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <div class="form-row">
+
+                <div class="form-group col-md-6">
+                    {{ form_row(formClientePv.tipoDocumento) }}
+                </div>
+
+                <div class="form-group col-md-6">
+
+                    {{ form_label(formClientePv.ruc) }}               
+                    <div class="input-group mb-3">
+                        {{ form_widget(formClientePv.ruc) }}
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="buscar_ruc">
+                                <i class="fa fa-search fa-lg " data-toggle="tooltip" title="Buscar por número de RUC"></i>
+                            </span>
+                        </div>
+                          
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group col-md-12">
+                    {{ form_label(formClientePv.razonSocial) }}
+                    {{ form_widget(formClientePv.razonSocial) }}
+                </div>
+
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    {{ form_label(formClientePv.direccion) }}
+                    {{ form_widget(formClientePv.direccion) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    {{ form_label(formClientePv.email) }}
+                    {{ form_widget(formClientePv.email) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    {{ form_label(formClientePv.telefono) }}
+                    {{ form_widget(formClientePv.telefono) }}
+                </div>
+                <div class="form-group col-md-6">
+                    {{ form_label(formClientePv.tipo) }}
+                    {{ form_widget(formClientePv.tipo) }}
+                </div>                
+            </div>    
+
+
+            <input type="hidden" id="distrito" name="distrito" class="form-control">
+            <input type="hidden" id="cliente_id" name="cliente_id" class="form-control">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary " id="guardar_cliente"  >Guardar</button>
+            <button type="button" class="btn btn-secondary" onclick="$('#modalClienteFactura').modal('hide');">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade imagen" id="modalImagen" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalImagenTitle">Modal title</h5>
+                    <button type="button" class="close" onclick="$('#modalImagen').modal('hide');" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" >
+                    <div class="row justify-content-center">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="$('#modalImagen').modal('hide');">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade " id="modalEspera" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered " role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalImagenTitle"></h5>
+                </div>
+                <div class="modal-body" >
+                    <div class="spinner-border" role="status">
+                      <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }} 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="{{asset('js/es.js')}}" ></script>
+    <script src="{{asset('js/jquery.number.min.js')}}" ></script>
+
+    <script type="text/javascript" src="{{asset('js/slick/slick.min.js')}}"></script>
+
+    <script type="text/javascript">
+
+
+        $('.categorias-slider').slick({
+            /*lazyLoad: 'ondemand',
+            /*verticalSwiping: true,*/
+            //vertical: false,
+            slidesToShow: 5
+        });
+
+
+    </script>
+
+    
+
+    <script type="text/javascript">
+
+        var item = '{{ edit_form.venta.detalleVenta | length }}';
+        var i = Number(item);
+        var total = 0;
+        var ventaNegativo = '{{ permiteVentaConStockNegativo(local) }}';
+
+        function eliminar(id) {
+
+            var total           = $('#total').text().replace(/,/g, '');
+            var subtotalinput   = $( ".subtotalinput" );
+            var subtotal        = $('#row_'+id).find(subtotalinput).val();    
+            var cantidad_entregada = Number($('#cantidad_entregada_'+id).val());
+
+            if(cantidad_entregada > 0){
+
+                bootbox.alert("No se puede eliminar este producto de la lista porque ya tiene entregas realizadas.");                    
+                return false;
+
+            }    
+
+            $("#row_"+id).remove();
+            $("#linea_"+id).remove();
+
+            var total_act = Number(total) - Number(subtotal);
+
+            var impuestos = 0;
+            var total = 0;
+            $(".subtotalinput").each( function () {
+                var subt = Number($(this).val());
+                total += subt;
+
+                if($('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                    impuestos += 0.18*(subt/1.18);
+                }                  
+
+            });
+
+
+            if(!$('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                impuestos = total * 0.18;
+                total_act = total + impuestos;
+            } 
+
+
+            $('#total').html(total_act.toFixed(2));
+            $('#impuestos').html(impuestos.toFixed(2));
+
+            //i = i - 1;    
+        } 
+
+        function deshabilitarBotones()
+        {
+            $('#vender').css('pointer-events','none');
+            $('#cancelar').css('pointer-events','none');
+            $('#buscar').css('pointer-events','none');
+            $('#guardar').css('pointer-events','none');
+
+            // $('#vender').prop('disabled', true);
+            // $('#cancelar').prop('disabled', true);
+            // $('#buscar').prop('disabled', true);
+            // $('#guardar').prop('disabled', true);
+        }
+
+        function habilitarBotones()
+        {
+            $('#vender').css('pointer-events','');
+            $('#cancelar').css('pointer-events','');
+            $('#buscar').css('pointer-events','');
+            $('#guardar').css('pointer-events','');
+
+            // $('#vender').prop('disabled', false);
+            // $('#cancelar').prop('disabled', false);
+            // $('#buscar').prop('disabled', false);
+            // $('#guardar').prop('disabled', false);
+        };
+
+        function obtenerCliente() {
+
+            var cliente = $('#cliente_select').val();
+            var respuesta = '';
+
+            $.ajax({
+                method: "POST",
+                async : false ,
+                url: "{{ path('obtenercliente')}}",
+                data: { id: cliente}
+            })
+            .done(function( data ) {
+
+                respuesta = data;
+
+            });
+
+            return respuesta;
+        };
+
+        function obtenerPrecioXRango(id,cantidad) {
+
+            var respuesta = null;
+
+            $.ajax({
+                method: "POST",
+                async : false ,
+                url: "{{ path('obtenerprecioxrango')}}",
+                data: { producto: id,cantidad: cantidad}
+            })
+            .done(function( data ) {
+
+                if(data.precio)
+                {
+                    respuesta = data.precio;
+                }
+
+            });
+
+            return respuesta;
+        }
+
+        function obtenerStockProducto(producto) {
+
+            var respuesta = '';
+
+            $.ajax({
+                method: "POST",
+                async : false ,
+                url: "{{ path('obtenerstockproducto')}}",
+                data: { id: producto}
+            })
+            .done(function( data ) {
+
+                respuesta = data;
+
+            });
+
+            return respuesta;
+        };
+        
+
+        function buscar(id) {
+
+            var fecha = $('#appbundle_facturaventa_fecha').val();
+            var moneda = $('#appbundle_facturaventa_venta_ventaFormaPago_0_moneda').val();
+
+            var cliente = obtenerCliente();
+            var tipo_cliente = cliente.tipo;
+
+            var modo = 'false';
+            if ($("#producto-slider").hasClass("d-none")) {
+               modo = 'true';
+            }
+
+            var cargandoTexto = '<div class="text-center"><i class="fa fa-circle-o-notch fa-spin"></i>Buscando.....</div>';
+        
+            //$('.productos-slider').html(cargandoTexto);
+            if(modo == 'false'){
+                $('#producto-slider').html(cargandoTexto);
+            }else{
+                $('#producto-lista').html(cargandoTexto);
+            }            
+
+            $.ajax({
+              method: "POST",
+              url: "{{ path('buscar_productos')}}",
+              data: { categoria: id,modo:modo,moneda:moneda,fecha:fecha,tipo_cliente:tipo_cliente}
+            })
+              .done(function( data ) {
+
+                if(data.error){
+
+                    bootbox.alert(data.error);
+                    $('#appbundle_facturaventa_venta_ventaFormaPago_0_moneda').val(1);
+                    $('#buscar').trigger("click");               
+
+                }
+                else
+                {
+
+                    if(modo == 'false'){
+                        $('#producto-slider').html(data);
+                    }else{
+                        $('#producto-lista').html(data);
+                    }
+
+                }
+
+                if(moneda == 2){
+                    $('.simbolo_moneda').html('$ ');
+                    $('#total_simbolo_moneda').html(' $');
+                    $('#igv_simbolo_moneda').html(' $');
+                }else
+                {
+                    $('.simbolo_moneda').html('S./ ');
+                    $('#total_simbolo_moneda').html(' S./');
+                    $('#igv_simbolo_moneda').html(' S./');                    
+                }
+
+                if(tipo_cliente == 'mayorista')
+                {
+                    $('.x_mayor').html('P.Un.: ');
+                }
+                else
+                {
+                    $('.x_mayor').html('X Mayor: ');
+                }              
+
+            });               
+        }; 
+
+
+        $(document).ready(function(){
+
+            var txtcliente          = $('#appbundle_facturaventa_cliente');
+            var txtclientenuevo     = $('#appbundle_facturaventa_clienteNombre');
+            var txtformapago        = $('#appbundle_facturaventa_venta_ventaFormaPago_0_formaPago');
+            var txtmontoacuenta     = $('#appbundle_facturaventa_venta_ventaFormaPago_0_montoACuenta');
+            var txtnrovoucher       = $('#appbundle_facturaventa_voucher');
+            var btnvender           = $('#vender');
+            var btnbuscar           = $('#buscar');
+            var txttipodocumento    = $('#appbundle_facturaventa_documento');
+            var txtmoneda           = $('#appbundle_facturaventa_venta_ventaFormaPago_0_moneda');
+
+            //Valores de cliente nuevo
+            var selectipodocumento      = $('#appbundle_cliente_pv_tipoDocumento');
+            var txtnombrerazonsocial    = $('#appbundle_cliente_pv_razonSocial');
+            var txtdniruc               = $('#appbundle_cliente_pv_ruc');
+            var txtdireccion            = $('#appbundle_cliente_pv_direccion');
+            var txtemail                = $('#appbundle_cliente_pv_email');
+            var txttelefono             = $('#appbundle_cliente_pv_telefono');
+            var txttipo                 = $('#appbundle_cliente_pv_tipo');            
+            var txtdistrito             = $('#distrito');
+            var txtclienteid            = $('#cliente_id');
+
+            //Valor a buscar 
+            var txtbuscar           = $('#txtbuscar');
+
+            //Buscar RUC
+            var btn_buscar          = $("#buscar_ruc");
+
+            //Boton limpiar
+            var btnlimpiar          = $('#limpiar');
+
+            //Agregar cliente
+            var btnagregarcliente  = $('#agregar_cliente');
+            //Editar cliente
+            var btneditarcliente   = $('#editar_cliente');
+            //Guardar cliente
+            var btnguardarcliente  = $('#guardar_cliente');
+
+            var clienteText = '{{ facturaVenta.cliente }}';
+            var clienteId = '{{ facturaVenta.cliente.id }}';
+
+            var newOption = new Option(clienteText, clienteId, false, true);
+            $('#cliente_select').append(newOption).trigger('change');          
+
+
+            //Limpìamos la lista de productos seleccionados al hacer cambio de moneda
+
+            $('body').on('focusin', '#appbundle_facturaventa_venta_ventaFormaPago_0_moneda', function(){
+
+                $(this).data('val', $(this).val());
+
+            }).on('change','#appbundle_facturaventa_venta_ventaFormaPago_0_moneda',function(e){
+
+                var prev = $(this).data('val');
+
+
+                bootbox.confirm({
+                    title: null,
+                    message: "La lista de productos será limpiada. Desea continuar?",
+                    buttons: {
+                        cancel: {
+                            label: '<i class="fa fa-times"></i> Cancelar'
+                        },
+                        confirm: {
+                            label: '<i class="fa fa-check"></i> Confirmar'
+                        }
+                    },
+                    callback: function (result) {
+
+                        if(result){
+
+
+                            $(".prod").each( function () {
+                                $(this).remove();
+                            });
+
+                            $(".prod-linea").each( function () {
+                                $(this).remove();
+                            });
+
+                            $('#total').html($.number( 0, 2, '.', ',' ));
+                            $('#impuestos').html($.number( 0, 2, '.', ',' ));
+
+
+                            var moneda = $('#appbundle_facturaventa_venta_ventaFormaPago_0_moneda').val();
+                            var fecha  = $('#appbundle_facturaventa_fecha').val();
+
+                            var cliente = obtenerCliente();
+                            var tipo_cliente = cliente.tipo;
+
+                            var modo = 'false';
+                            if ($("#producto-slider").hasClass("d-none")) {
+                               modo = 'true';
+                            }
+
+                            var cargandoTexto = '<i class="fa fa-circle-o-notch fa-spin"></i>';
+
+                            if(modo == 'false'){
+                                $('#producto-slider').html(cargandoTexto);
+                            }else{
+                                $('#producto-lista').html(cargandoTexto);
+                            }
+
+                            var textobuscar = '';
+
+                            $.ajax({
+                              method: "POST",
+                              url: "{{ path('buscar_productos')}}",
+                              data: { textobuscar: textobuscar,modo: modo,moneda:moneda,fecha:fecha,tipo_cliente:tipo_cliente}
+                            })
+                              .done(function( data ) {
+
+                                if(data.error){
+
+                                    bootbox.alert(data.error);
+                                    $('#appbundle_facturaventa_venta_ventaFormaPago_0_moneda').val(1);
+                                    $('#buscar').trigger("click");               
+
+                                }
+                                else
+                                {
+
+                                    if(modo == 'false'){
+                                        $('#producto-slider').html(data);
+                                    }else{
+                                        $('#producto-lista').html(data);
+                                    }
+
+                                }
+
+                                if(moneda == 2)
+                                {
+                                    $('.simbolo_moneda').html('$ ');
+                                    $('#total_simbolo_moneda').html(' $');
+                                    $('#igv_simbolo_moneda').html(' $');
+                                }
+                                else
+                                {
+                                    $('.simbolo_moneda').html('S./ ');
+                                    $('#total_simbolo_moneda').html(' S./');
+                                    $('#igv_simbolo_moneda').html(' S./');                    
+                                }               
+
+                                if(tipo_cliente == 'mayorista')
+                                {
+                                    $('.x_mayor').html('P.Un.: ');
+                                }
+                                else
+                                {
+                                    $('.x_mayor').html('X Mayor: ');
+                                }
+
+                            });   
+
+
+                        }
+                        else
+                        {
+                            $('#appbundle_facturaventa_venta_ventaFormaPago_0_moneda').val(prev);
+
+                        }
+
+                    }
+                });
+
+
+            });
+
+
+            if(txtmoneda.val() == 2)
+            {
+
+                $('.simbolo_moneda').html('$ ');
+                $('#total_simbolo_moneda').html(' $');
+                $('#igv_simbolo_moneda').html(' $');
+
+                //$('#buscar').trigger("click");
+
+
+            }
+            else
+            {
+                $('.simbolo_moneda').html('S./ ');
+                $('#total_simbolo_moneda').html(' S./');
+                $('#igv_simbolo_moneda').html(' S./');                    
+
+            }
+
+
+            selectipodocumento.on("change", function(e) {
+
+                e.preventDefault();
+
+                var valor = this.value;
+
+                if(valor == 1){
+
+                    txtdniruc.prop('maxLength', 8);
+
+
+                }else if(valor == 2){
+
+                    txtdniruc.prop('maxLength', 11);
+
+                }else{
+
+                    txtdniruc.prop('maxLength', 11);
+
+                }
+
+            });
+
+            btnagregarcliente.on('click',function(e){
+
+                e.preventDefault();
+
+                selectipodocumento.val('');
+                txtnombrerazonsocial.val('');
+                txtdniruc.val('');
+                txtdireccion.val('');
+                txtemail.val('');
+                txttelefono.val('');
+                txttipo.val('');                            
+                $('#cliente_id').val('');
+
+                selectipodocumento.prop('disabled', false);
+                txtnombrerazonsocial.prop('disabled', false);
+                txtdniruc.prop('disabled',false);
+                txtdireccion.prop('disabled',false);
+                txtemail.prop('disabled',false);
+                txttelefono.prop('disabled',false);
+                txttipo.prop('disabled',false);
+                btnguardarcliente.prop('disabled',false);
+
+                $('.cliente_factura').modal('show');
+
+            });
+
+            btneditarcliente.on('click',function(e){
+
+                e.preventDefault();
+
+                var cliente = $('#cliente_select').val();
+
+                if(cliente == ''){
+
+                    bootbox.alert("Debe seleccionar un cliente para que pueda editar.");                    
+                    return false;
+
+                }else{
+
+                    var respuesta = obtenerCliente(function(output){});
+
+                    var direccion        = respuesta.direccion;
+                    var email            = respuesta.email;
+                    var razon_social     = respuesta.razon_social;
+                    var numero_documento = respuesta.numero_documento;
+                    var tipo_documento   = respuesta.tipo_documento;
+                    var distrito         = respuesta.distrito;
+                    var cliente_id       = respuesta.id;
+                    var tipo             = respuesta.tipo;
+                    var telefono         = respuesta.telefono;
+
+                    selectipodocumento.val(tipo_documento);
+                    txtnombrerazonsocial.val(razon_social);
+                    txtdniruc.val(numero_documento);
+                    txtdireccion.val(direccion);
+                    txtemail.val(email);
+                    txtdistrito.val(distrito);
+                    txtclienteid.val(cliente_id);
+                    txttelefono.val(telefono);
+                    txttipo.val(tipo);
+
+                    if(numero_documento == '---')
+                    {
+                        selectipodocumento.prop('disabled', true);
+                        txtnombrerazonsocial.prop('disabled', true);
+                        txtdniruc.prop('disabled',true);
+                        txtdireccion.prop('disabled',true);
+                        txtemail.prop('disabled',true);
+                        txttipo.prop('disabled',true);
+                        txttelefono.prop('disabled',true);                        
+                        btnguardarcliente.prop('disabled',true);
+                    }
+                    else
+                    {
+                        selectipodocumento.prop('disabled', false);
+                        txtnombrerazonsocial.prop('disabled', false);
+                        txtdniruc.prop('disabled',false);
+                        txtdireccion.prop('disabled',false);
+                        txtemail.prop('disabled',false);
+                        txttipo.prop('disabled',false);
+                        txttelefono.prop('disabled',false);                           
+                        btnguardarcliente.prop('disabled',false);
+                    }
+
+                    $('.cliente_factura').modal('show');
+
+                }
+
+            });
+
+            btnguardarcliente.on('click',function (e) {
+
+                e.preventDefault();
+
+                var tipodocumento = selectipodocumento.val();
+                var nrazonsocial  = txtnombrerazonsocial.val();
+                var dniruc        = txtdniruc.val();
+                var direccion     = txtdireccion.val();
+                var email         = txtemail.val();
+                var distrito      = txtdistrito.val();
+                var clienteid     = txtclienteid.val();
+                var telefono      = txttelefono.val();
+                var tipo          = txttipo.val();
+
+                if(tipodocumento == '1'){
+
+                    if( nrazonsocial == '' || dniruc == '' ){
+
+                        bootbox.alert("Debe completar el nombre y el número de documento.");                    
+                        return false;
+
+                    }
+
+                }else if(tipodocumento == '2'){
+
+                    if( nrazonsocial == '' || dniruc == '' || direccion == '' ){
+
+                        bootbox.alert("Debe completar el nombre , el número de documento y la dirección.");                    
+                        return false;
+
+                    }
+
+                }else{
+
+                    bootbox.alert("Debe seleccionar el tipo de documento.");                    
+                    return false;
+
+                }
+
+
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('registrar_cliente_nuevo')}}",
+                  data: { nrazonsocial: nrazonsocial, dniruc: dniruc, direccion: direccion ,distrito: distrito,tipodocumento: tipodocumento,clienteid: clienteid,email:email,tipo:tipo,telefono:telefono}
+                })
+                  .done(function( data ) {
+
+                    var newOption = new Option(data.text, data.id, false, true);
+                    $('#cliente_select').append(newOption).trigger('change');
+                    $('#buscar').trigger("click");
+                    $('.cliente_factura').modal('hide');
+
+
+                });   
+
+
+            });
+
+
+
+            $('body').on('keydown','.solonumeros',function (event) {
+
+
+                if (event.shiftKey == true) {
+                  event.preventDefault();
+                }
+
+                if ((event.keyCode >= 48 && event.keyCode <= 57) || 
+                  (event.keyCode >= 96 && event.keyCode <= 105) || 
+                  event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 ||
+                  event.keyCode == 39 || event.keyCode == 46 || event.keyCode == 190 || event.keyCode == 110) {
+
+                } else {
+                  event.preventDefault();
+                }
+
+                if($(this).val().indexOf('.') !== -1 && event.keyCode == 190)
+                  event.preventDefault(); 
+
+            });
+
+
+            txtformapago.on("change",function(){
+
+                var formapago = this.value;
+
+
+                if(formapago == 4){
+
+                    txtmontoacuenta.prop('required', false);
+                    txtmontoacuenta.prop('readonly', true);
+                    txtmontoacuenta.val(0);
+                    $( "#monto_acuenta" ).remove();   
+
+                    txtnrovoucher.prop('readonly', false);
+                    txtnrovoucher.prop('required', 'required');
+
+                    $( "<div class='invalid-feedback' id='voucher'>Este valor es requerido.</div>" ).insertAfter( "#appbundle_facturaventa_voucher" );
+
+                }else if(formapago == 5){
+
+                    txtnrovoucher.prop('required', false);
+                    txtnrovoucher.prop('readonly', true);
+                    $( "#voucher" ).remove();
+
+                    txtmontoacuenta.prop('readonly', false);
+                    txtmontoacuenta.prop('required', 'required');
+
+                    $( "<div class='invalid-feedback' id='monto_acuenta'>Este valor es requerido.</div>" ).insertAfter( "#appbundle_facturaventa_venta_ventaFormaPago_0_montoACuenta" );
+                }else{
+
+                    txtmontoacuenta.prop('required', false);
+                    txtmontoacuenta.prop('readonly', true);
+                    txtmontoacuenta.val(0);
+                    $( "#monto_acuenta" ).remove();                    
+                    txtnrovoucher.prop('required', false);
+                    txtnrovoucher.prop('readonly', true);
+                    $( "#voucher" ).remove();
+                }
+
+            });
+
+            txtbuscar.on('keyup',function(e){
+
+                if(e.keyCode == 13){
+                    btnbuscar.click();
+                }
+
+            });
+
+
+            btnbuscar.on('click',function () {
+
+                var fecha = $('#appbundle_facturaventa_fecha').val();
+                var moneda = $('#appbundle_facturaventa_venta_ventaFormaPago_0_moneda').val();
+
+                var cliente = obtenerCliente();
+                var tipo_cliente = cliente.tipo;
+
+                var modo = 'false';
+                if ($("#producto-slider").hasClass("d-none")) {
+                   modo = 'true';
+                }
+
+                var $this = $(this);
+                var cargandoTexto = '<i class="fa fa-circle-o-notch fa-spin"></i>';
+                if ($(this).html() !== cargandoTexto) {
+                  $this.data('original-text', $(this).html());
+                  $this.html(cargandoTexto);
+                }
+
+                if(modo == 'false'){
+                    $('#producto-slider').html(cargandoTexto);
+                }else{
+                    $('#producto-lista').html(cargandoTexto);
+                }
+
+                var textobuscar = txtbuscar.val();
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('buscar_productos')}}",
+                  data: { textobuscar: textobuscar,modo:modo,moneda: moneda,fecha: fecha,tipo_cliente:tipo_cliente}
+                })
+                  .done(function( data ) {
+
+                    setTimeout(function() {
+                      $this.html($this.data('original-text'));
+                    }, 100);
+
+                    if(data.error){
+
+                        bootbox.alert(data.error);
+                        $('#appbundle_facturaventa_venta_ventaFormaPago_0_moneda').val(1);
+                        $('#buscar').trigger("click");               
+
+                    }
+                    else
+                    {
+
+                        if(modo == 'false'){
+                            $('#producto-slider').html(data);
+                        }else{
+                            $('#producto-lista').html(data);
+                        }
+
+                    }
+
+                    if(moneda == 2){
+                        $('.simbolo_moneda').html('$ ');
+                        $('#total_simbolo_moneda').html(' $');
+                        $('#igv_simbolo_moneda').html(' $');
+                    }else
+                    {
+                        $('.simbolo_moneda').html('S./ ');
+                        $('#total_simbolo_moneda').html(' S./');
+                        $('#igv_simbolo_moneda').html(' S./');                    
+                    }   
+
+                    if(tipo_cliente == 'mayorista')
+                    {
+                        $('.x_mayor').html('P.Un.: ');
+                    }
+                    else
+                    {
+                        $('.x_mayor').html('X Mayor: ');
+                    }                
+
+                });   
+
+            });
+
+            $('body').on('change','.precioinput',function(){
+
+                var valor   = this.value;
+                var id      = this.id.replace(/[^0-9]/g, '');
+
+                var precio      = $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_precio').val();
+                var cantidad    = $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_cantidad').val();
+
+                var total_linea = Number(cantidad) * Number(precio);
+
+                $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_subtotal').val(total_linea.toFixed(2));
+
+                var total = 0;
+                var impuestos = 0;
+                $(".subtotalinput").each( function () {
+                    var subtotal = Number($(this).val());
+                    total += Number($(this).val());
+
+                    if($('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                        impuestos += 0.18*(subtotal/1.18);
+                    }                    
+
+                });
+
+                if(!$('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                    impuestos = total * 0.18;
+                    total = total + impuestos;
+                } 
+
+                $('#total').html(total.toFixed(2));
+                $('#impuestos').html(impuestos.toFixed(2));                                   
+
+            });
+
+            $('body').on('focusin','.cantidadinput',function(){
+
+                $(this).data('val', $(this).val());
+
+            }).on('change','.cantidadinput',function(e){
+
+                var valor   = this.value;
+                var id      = this.id.replace(/[^0-9]/g, '');
+                var cantidadEntregada    = $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_cantidadEntregada').val();
+
+                var productoid = $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_cantidad').data('productoid');
+
+                if(Number(valor)  < Number(cantidadEntregada)){
+                    bootbox.alert('No se puede ingresar un valor menor al valor que ya fue entregado para este producto.');
+                    var prev = $(this).data('val');
+                    $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_cantidad').val(prev);
+                    return false;
+                }
+
+                var precio  = 0;
+                var precio_x_rango = obtenerPrecioXRango(productoid,valor);
+
+                if(precio_x_rango)
+                {
+                    //precio = $.number( precio_x_rango, 2, '.', ',' );
+                    $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_precio').val(precio_x_rango);
+
+                }
+
+                precio          = $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_precio').val();
+                var cantidad    = $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_cantidad').val();
+
+                var total_linea = Number(cantidad) * Number(precio);
+                
+                $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_subtotal').val(total_linea.toFixed(2));
+
+                var total = 0;
+                var impuestos = 0;
+                $(".subtotalinput").each( function () {
+                    var subtotal = Number($(this).val());
+                    total += Number($(this).val());
+
+                    if($('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                        impuestos += 0.18*(subtotal/1.18);
+                    }  
+
+                });
+
+                if(!$('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                    impuestos = total * 0.18;
+                    total = total + impuestos;
+                } 
+
+                $('#total').html(total.toFixed(2));
+                $('#impuestos').html(impuestos.toFixed(2)); 
+
+            });
+
+            var date_diff_indays = function(date1, date2) {
+                dt1 = new Date(date1);
+                dt2 = new Date(date2);
+                return Math.floor((Date.UTC(dt2.getFullYear(), dt2.getMonth(), dt2.getDate()) - Date.UTC(dt1.getFullYear(), dt1.getMonth(), dt1.getDate()) ) /(1000 * 60 * 60 * 24));
+            }
+
+            $("form").submit(function(event){
+
+                deshabilitarBotones();
+
+                var prd = $(".venta-cuenta").find(".row.prod");
+           
+
+                if(prd.length == 0){
+
+                    bootbox.alert("No existen productos agregados!");
+                    habilitarBotones();                    
+                    return false;
+
+                }else{
+
+
+                    var fechaValue = $('#appbundle_facturaventa_fecha').val();
+                    fecha = fechaValue.split('/');
+
+                    var today = new Date();
+                    var dd = today.getDate();
+
+                    var mm = today.getMonth()+1; 
+                    var yyyy = today.getFullYear();
+                    if(dd<10) 
+                    {
+                        dd='0'+dd;
+                    } 
+
+                    if(mm<10) 
+                    {
+                        mm='0'+mm;
+                    }
+
+                    var dif = date_diff_indays(fecha[1]+'/'+fecha[0]+'/'+fecha[2],mm+'/'+dd+'/'+yyyy);
+
+                    //console.log(dif);
+
+
+
+                    //Validamos que haya stock suficiente para cada uno de los productos que se van a vender
+                    var btn = $(this).find("input[type=submit]:focus" );
+                    var alerta = 0;
+                    if(btn.attr('id') == 'vender'){
+
+                        $('#btn_vender').val('SI');
+
+                        if(txttipodocumento.val() == 'factura' || txttipodocumento.val() == 'boleta'){
+
+                            if(dif > 5 || dif < 0 ){
+
+                                bootbox.alert("No puede seleccionar una fecha menor a 5 días o mayor a la fecha actual.");
+                                habilitarBotones();
+                                $('#btn_vender').val('');
+                                return false;
+
+                            }
+
+                        }
+
+
+
+                        // if(!$('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                        //     bootbox.alert("Las ventas deben incluir el IGV. Marque la opción 'Incluir IGV'.");
+                        //     habilitarBotones();
+                        //     return false;
+                        // }                        
+
+                        if(!ventaNegativo){
+
+                            $(".prod").each( function () {
+
+                                var prod_id = $(this).attr('id').replace(/[^0-9]/g, '');
+                                var prod_cantidad = $(this).find(".cantidadinput").val();
+
+                                var resp = obtenerStockProducto(prod_id);
+                                //console.log(prod_id);
+
+                                var stock        = resp.stock;
+                                var nomproducto  = resp.nombre;
+
+                                if(stock < prod_cantidad){
+                                    alerta++;
+                                    $(this).addClass('bg-danger text-white');
+                                }
+
+                            });
+
+                            if(alerta > 0){
+
+                                bootbox.alert("Los productos marcados ya no tienen stock. No se puede realizar la venta. Corrija las cantidades.");
+                                habilitarBotones();
+                                $('#btn_vender').val('');
+                                return false;                            
+                            }
+                        }                      
+
+                    }
+
+
+                    //fin de validacion de stock
+
+                    var respuesta = obtenerCliente(function(output){});
+
+                    var direccion        = respuesta.direccion;
+                    var razon_social     = respuesta.razon_social;
+                    var numero_documento = respuesta.numero_documento;
+                    var tipo_documento   = respuesta.tipo_documento;
+
+                    if(txttipodocumento.val() == 'boleta')
+                    {
+
+                        if(tipo_documento != 1 || numero_documento.length != 8 || razon_social == '' ){
+
+                            if(tipo_documento != 1){
+
+                                bootbox.alert("Corriga el tipo de documento , se debe seleccionar un cliente con  DNI.");
+                                habilitarBotones();
+                                $('#btn_vender').val('');
+                                return false;
+
+                            }else if(numero_documento.length != 8){
+
+                                var btn = $(this).find("input[type=submit]:focus" );
+
+                                if(btn.attr('id') == 'vender'){
+
+                                    var total       = $('#total').text().replace(/,/g , '');          
+                                    total           = Number(total);
+
+                                    if(total > 700){
+
+                                        bootbox.alert("Es obligatorio el ingreso de un cliente con DNI pues el monto supera los 700 Nuevos Soles.");
+                                        habilitarBotones();
+                                        $('#btn_vender').val('');
+                                        return false;   
+
+                                    }   
+
+                                }
+
+
+                          
+
+                            }else if(razon_social == ''){
+
+                                bootbox.alert("El nombre no debe estar vacío.");
+                                habilitarBotones();
+                                $('#btn_vender').val('');
+                                return false;  
+
+                            }
+
+
+                        }
+
+                    }
+                    else if(txttipodocumento.val() == 'factura')
+                    {
+
+                        if(tipo_documento != 2 || numero_documento.length != 11 || razon_social == '' || direccion == '' ){
+
+                            if(tipo_documento != 2){
+
+                                bootbox.alert("Corriga el tipo de documento , se debe seleccionar un cliente con RUC.");
+                                habilitarBotones();
+                                return false;
+
+                            }else if(numero_documento.length != 11){
+
+                                bootbox.alert("El número de documento debe contener 11 dígitos.");
+                                habilitarBotones();
+                                $('#btn_vender').val('');
+                                return false;                                
+
+                            }else if(razon_social == ''){
+
+                                bootbox.alert("El nombre no debe estar vacío.");
+                                habilitarBotones();
+                                $('#btn_vender').val('');
+                                return false;  
+
+                            }else if(direccion == ''){
+
+                                bootbox.alert("La dirección no debe estar vacía.");
+                                habilitarBotones();
+                                $('#btn_vender').val('');
+                                return false;  
+
+                            }
+
+
+                        }
+
+
+                    }
+                    else
+                    {
+
+                        if(tipo_documento != 1){
+
+                            bootbox.alert("Corriga el tipo de documento , se debe seleccionar DNI.");
+                            habilitarBotones();
+                            $('#btn_vender').val('');
+                            return false;
+
+                        }else if(numero_documento.length != 8){
+
+                     
+
+                        }else if(razon_social == ''){
+
+                            bootbox.alert("El nombre no debe estar vacío.");
+                            habilitarBotones();
+                            $('#btn_vender').val('');
+                            return false;  
+
+                        }
+
+
+                    }
+
+
+                    if (this.checkValidity() === false) 
+                    {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        habilitarBotones();
+
+                    }else{
+
+                        deshabilitarBotones();
+
+                        return true;
+                    }                    
+                    
+                }
+
+            });
+
+
+            var timer = 0;
+            var delay = 200;
+            var prevent = false;
+
+            $('body')
+                .on('click','.producto a',function() {
+
+                    var self = this;
+
+                    timer = setTimeout(function() {
+
+                        if (!prevent) {
+                            
+                            var precio = $('span', self ).text();
+                            var nombre = $('.nombre', self ).html();
+                            var producto_id = $('.atributos', self ).attr('id');
+                            var unidad = $('.unidades', self ).attr('id');
+                            var proforma = '{{ facturaVenta.venta.id }}';
+                            
+
+                            if($('#row_'+producto_id).length == 0 )
+                            {
+                                var cantidad = 1;
+                                var total_linea = Number(cantidad) * Number(precio);
+
+                                // if($('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                                //     var total_linea = Number(cantidad) * Number(precio);
+                                // }else{
+                                //     precio = precio/1.18;
+                                //     var total_linea = Number(cantidad) * Number(precio);
+                                // }                                 
+                                 
+
+                                $('.venta-impuestos').before('<div class="row prod" id="row_'+producto_id+'"><input type="hidden" class="productoid" id="productoid_'+producto_id+'" name="productoid_'+producto_id+'" value="'+producto_id+'"/><div class="col-md-1 "><a href="javascript:eliminar('+producto_id+')" ><i class="fa fa-remove fa-lg"></i></a></div><div class="col-md-4 p-0" >'+ nombre +' <select id="appbundle_facturaventa_venta_detalleVenta_'+i+'_productoXLocal" name="appbundle_facturaventa[venta][detalleVenta]['+i+'][productoXLocal]" class="form-control d-none"><option value="'+producto_id+'" selected="selected"></option></select></div><div class="col-md-2 p-0"><input type="text" class="form-control precioinput solonumeros" name="appbundle_facturaventa[venta][detalleVenta]['+i+'][precio]" id="appbundle_facturaventa_venta_detalleVenta_'+i+'_precio" value="'+Number(precio).toFixed(2)+'" ></div><div class="col-md-1 p-0"><input type="text" class="form-control cantidadinput solonumeros" id="appbundle_facturaventa_venta_detalleVenta_'+i+'_cantidad" name="appbundle_facturaventa[venta][detalleVenta]['+i+'][cantidad]"  value="'+cantidad+'"  data-productoid="'+producto_id+'"></div><div class="col-md-1 p-0"><input type="text" id="appbundle_facturaventa_venta_detalleVenta_'+i+'_cantidadEntregada" name="appbundle_facturaventa[venta][detalleVenta]['+i+'][cantidadEntregada]" class="form-control" readonly="readonly" value=""></div><div class="col-md-1">'+unidad+'</div><div class="col-md-2 subtotal" id="subtotal_'+producto_id+'" ><input type="text" id="appbundle_facturaventa_venta_detalleVenta_'+i+'_subtotal" name="appbundle_facturaventa[venta][detalleVenta]['+i+'][subtotal]" class="form-control subtotalinput solonumeros" readonly="readonly" value="'+Number(total_linea).toFixed(2)+'" ><select id="appbundle_facturaventa_venta_detalleVenta_'+i+'_venta" name="appbundle_facturaventa[venta][detalleVenta]['+i+'][venta]" class="form-control d-none"><option value="'+proforma+'" selected></option></select></div></div><hr class="linea-separadora prod-linea" id="linea_'+producto_id+'" >');
+
+
+                                i = i + 1;
+
+
+                            }
+                            else
+                            {
+                                var cantidadinput = $( ".cantidadinput" );
+                                var precioinput   = $( ".precioinput" );
+                                var subtotalinput = $( ".subtotalinput" );
+
+                                var cantidad_nueva  = Number($('#row_'+producto_id).find(cantidadinput).val()) + 1;
+
+
+                                $('#row_'+producto_id).find(cantidadinput).val(cantidad_nueva);
+
+                                var precio_x_rango = obtenerPrecioXRango(producto_id,cantidad_nueva);
+
+                                if(precio_x_rango)
+                                {
+                                    $('#row_'+producto_id).find(precioinput).val(precio_x_rango);
+                                }                                                                            
+                                
+                                var cantidad    = $('#row_'+producto_id).find(cantidadinput).val();
+
+                                if($('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                                    var precio  = $('#row_'+producto_id).find(precioinput).val();
+                                }else{
+                                    var precio  = $('#row_'+producto_id).find(precioinput).val();
+                                }
+
+                                var total_linea = cantidad * precio;
+
+                            
+                                $('#row_'+producto_id).find(subtotalinput).val(total_linea.toFixed(2));
+
+                            }
+
+                            var total = 0;
+                            var impuestos = 0;
+                            $(".subtotalinput").each( function () {
+                                var subtotal = Number($(this).val());
+                                total += Number($(this).val());
+
+                                if($('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                                    impuestos += 0.18*(subtotal/1.18);
+                                }
+
+                                
+                            });
+
+                            if(!$('#appbundle_facturaventa_incluirIgv').is(":checked")){
+                                impuestos = total * 0.18;
+                                total = total + impuestos;
+                            } 
+                            
+                            $('#total').html(total.toFixed(2));
+                            $('#impuestos').html(impuestos.toFixed(2));
+                        }
+                        prevent = false;
+                    },delay);
+                });
+                // .on('dblclick','.producto a',function() {
+
+                //     var nomproducto = $('.imagen', this ).attr('imgnombre');
+                //     var ruta        = $('.imagen', this ).attr('imglink');
+                    
+                //     var img500x500 = '<img class="img-fluid imagen" src="'+ruta+'"  />';
+
+                //     clearTimeout(timer);
+                //     prevent = true;
+
+                //     $('#modalImagen').find('.modal-title').text(nomproducto);
+                //     $('#modalImagen').find('.modal-body .row').html(img500x500);
+
+                //     $('#modalImagen').modal('toggle');
+                // });
+
+
+            btnlimpiar.on('click',function(){
+
+                //location.reload();
+
+            });
+
+            btn_buscar.on("click", function(){
+
+                var data = {
+                  ruc   : txtdniruc.val(),
+                  token  : '5JFQh5toA0sWhj-YV3NXmt4dzE4JvJjwgYzzPJtYHgA',
+                }
+
+                $.ajax({
+                    method: "GET",
+                    url: "{{ path('obtenerdatosempresa')}}",
+                    data: data,
+                    success: function(data){
+
+                        txtnombrerazonsocial.val(data.nombre_o_razon_social);
+                        txtdireccion.val(data.direccion_completa);
+                        txtdistrito.val(data.distrito_id);
+                    }
+
+                });
+            });
+
+
+            var d           = new Date();
+            var currDay     = d.getDate();
+            var currMonth   = d.getMonth();
+            var currYear    = d.getFullYear();
+            var startDate   = new Date(currYear, currMonth, currDay);
+
+            $(".setcurrentdate").datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'es',
+                autoclose: true            
+              
+            });
+            //$(".setcurrentdate").datepicker("setDate", startDate);
+
+
+            //Validar que no se seleccione una fecha menor a 5 dias
+
+
+            // Selecciona el cliente
+            $(".select2").select2({
+                language: "es",
+                ajax: {
+                    url: "{{ path('obtenerclientes')}}",
+                    dataType: 'json',
+                    delay: 100,
+                    type: "GET",
+                    data: function (params) {
+                      return {
+                        q: params.term,
+                        page: params.page
+                      };
+                    },
+                    processResults: function (data,params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+
+                    },
+                    cache: true
+                },
+                placeholder: 'Buscar cliente por nombres,apellidos,razon social,DNI o RUC',
+                minimumInputLength: 3,
+            });
+
+            $('.select2').on('select2:select', function (e) {
+
+                var data = e.params.data;
+
+                var tipo_cliente = data.tipo;
+                var moneda = $('#appbundle_facturaventa_venta_ventaFormaPago_0_moneda').val();
+                var fecha  = $('#appbundle_facturaventa_fecha').val();
+
+                var modo = 'false';
+                if ($("#producto-slider").hasClass("d-none")) {
+                   modo = 'true';
+                }
+
+                var cargandoTexto = '<i class="fa fa-circle-o-notch fa-spin"></i>';
+
+                if(modo == 'false'){
+                    $('#producto-slider').html(cargandoTexto);
+                }else{
+                    $('#producto-lista').html(cargandoTexto);
+                }
+
+                var textobuscar = '';                
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('buscar_productos')}}",
+                  data: { textobuscar: textobuscar,modo: modo,moneda:moneda,fecha:fecha,tipo_cliente:tipo_cliente}
+                })
+                  .done(function( data ) {
+
+                    if(data.error){
+
+                        bootbox.alert(data.error);
+                        $('#appbundle_facturaventa_venta_ventaFormaPago_0_moneda').val(1);
+                        $('#buscar').trigger("click");               
+
+                    }
+                    else
+                    {
+
+                        if(modo == 'false'){
+                            $('#producto-slider').html(data);
+                        }else{
+                            $('#producto-lista').html(data);
+                        }
+
+                    }
+
+                    if(moneda == 2){
+                        $('.simbolo_moneda').html('$ ');
+                        $('#total_simbolo_moneda').html(' $');
+                        $('#igv_simbolo_moneda').html(' $');
+                    }else
+                    {
+                        $('.simbolo_moneda').html('S./ ');
+                        $('#total_simbolo_moneda').html(' S./');
+                        $('#igv_simbolo_moneda').html(' S./');                    
+                    }             
+
+                    if(tipo_cliente == 'mayorista')
+                    {
+                        $('.x_mayor').html('P.Un.: ');
+                    }
+                    else
+                    {
+                        $('.x_mayor').html('X Mayor: ');
+                    }
+                
+                });  
+                
+            });
+
+            //Funcionalidad para incluir IGV
+            $('#appbundle_facturaventa_incluirIgv').on('change',function(){
+
+                if ($(this).is(":checked"))
+                {
+                    // console.log('si');                    
+
+                    // $(".precioinput").each( function () {
+
+                    //     var id      = this.id.replace(/[^0-9]/g, '');
+
+                    //     var precio      = $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_precio').val();
+                    //     var cantidad    = $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_cantidad').val();
+
+                    //     var precio_con_igv = Number(precio) + Number(precio)*0.18;
+                    //     var total_linea = Number(cantidad) * Number(precio_con_igv.toFixed(2));
+
+                    //     $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_precio').val(precio_con_igv.toFixed(2));
+                    //     $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_subtotal').val(total_linea.toFixed(2));
+
+              
+                    // });
+
+                    var total = 0;
+                    var impuestos = 0;
+                    $(".subtotalinput").each( function () {
+                        var subtotal = Number($(this).val());
+                        total += Number($(this).val());
+
+                        impuestos += 0.18*(subtotal/1.18);
+                        
+                    });
+
+                    $('#total').html(total.toFixed(2));
+                    $('#impuestos').html(impuestos.toFixed(2));
+
+                }
+                else
+                {
+                    // console.log('no');
+
+                    // $(".precioinput").each( function () {
+
+                    //     var id      = this.id.replace(/[^0-9]/g, '');
+
+                    //     var precio      = $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_precio').val();
+                    //     var cantidad    = $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_cantidad').val();
+
+                    //     var precio_sin_igv = Number(precio)/1.18;
+
+                    //     var total_linea = Number(cantidad) * Number(precio_sin_igv.toFixed(2));
+
+                    //     $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_precio').val(precio_sin_igv.toFixed(2));
+                    //     $('#appbundle_facturaventa_venta_detalleVenta_'+id+'_subtotal').val(total_linea.toFixed(2));                
+
+                    // });
+
+                    var total = 0;
+                    var impuestos = 0;
+                    $(".subtotalinput").each( function () {
+                        var subtotal = Number($(this).val());
+                        total += Number($(this).val());
+                       
+                    });
+
+                    impuestos = total * 0.18;
+                    total = total + impuestos;
+
+                    $('#total').html(total.toFixed(2));
+                    $('#impuestos').html(impuestos.toFixed(2));
+
+                }
+                
+            });
+
+            $('body').on('click','#modo_lista',function (event) {
+                $('#producto-slider').toggleClass('d-none');
+                $('#producto-lista').toggleClass('d-none');
+
+            });
+
+
+        });
+    </script>
+
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Servicio</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ servicio.id }}</td>
+            </tr>
+            <tr>
+                <th>Codigo</th>
+                <td>{{ servicio.codigo }}</td>
+            </tr>
+            <tr>
+                <th>Nombres</th>
+                <td>{{ servicio.nombres }}</td>
+            </tr>
+            <tr>
+                <th>Apellidopaterno</th>
+                <td>{{ servicio.apellidoPaterno }}</td>
+            </tr>
+            <tr>
+                <th>Apellidomaterno</th>
+                <td>{{ servicio.apellidoMaterno }}</td>
+            </tr>
+            <tr>
+                <th>Alias</th>
+                <td>{{ servicio.alias }}</td>
+            </tr>
+            <tr>
+                <th>Direccion</th>
+                <td>{{ servicio.direccion }}</td>
+            </tr>
+            <tr>
+                <th>Celular</th>
+                <td>{{ servicio.celular }}</td>
+            </tr>
+            <tr>
+                <th>Telefono</th>
+                <td>{{ servicio.telefono }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ servicio.email }}</td>
+            </tr>
+            <tr>
+                <th>Estado</th>
+                <td>{% if servicio.estado %}Yes{% else %}No{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('servicio_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('servicio_edit', { 'id': servicio.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

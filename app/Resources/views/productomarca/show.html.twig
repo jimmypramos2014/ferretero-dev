@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Productomarca</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ productoMarca.id }}</td>
+            </tr>
+            <tr>
+                <th>Nombre</th>
+                <td>{{ productoMarca.nombre }}</td>
+            </tr>
+            <tr>
+                <th>Descripcion</th>
+                <td>{{ productoMarca.descripcion }}</td>
+            </tr>
+            <tr>
+                <th>Estado</th>
+                <td>{% if productoMarca.estado %}Yes{% else %}No{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('productomarca_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('productomarca_edit', { 'id': productoMarca.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

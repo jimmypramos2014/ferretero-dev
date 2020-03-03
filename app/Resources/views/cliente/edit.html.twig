@@ -1,0 +1,210 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="container">
+
+    <form id="form" action="{{ path('cliente_edit', {'id': cliente.id}) }}" class="form-horizontal needs-validation" role="form" method="post"  novalidate>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Información general</div>
+            <div class="card-body">
+
+
+                <div class="form-row d-none">
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.codigo,{'attr':{'readonly':'readonly'}}) }}          
+                     
+                    </div>
+                             
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.tipoDocumento) }}
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                     
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.ruc) }}
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                      
+                    </div>                       
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.razonSocial) }}
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                     
+                    </div>
+                    
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.condicion) }}            
+                     
+                    </div>
+                    
+
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.ciudad) }}
+                      
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.telefono) }}
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.celular) }}
+                     
+                    </div>
+               
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        {% set departamento_id    = '' %}
+                        {% set provincia_id = '' %}
+                        {% if edit_form.vars.value.distrito %}
+                            {% set departamento_id    = edit_form.vars.value.distrito.provincia.departamento.id %}
+                            {% set provincia_id = edit_form.vars.value.distrito.provincia.id %}
+                        {% endif %}                
+                        {{ form_row(edit_form.departamento,{'value': departamento_id|trim }) }}
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.provincia, {'value': provincia_id|trim }) }}
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.distrito) }}
+                    </div>                       
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-4">
+                        {{ form_row(edit_form.direccion) }}
+                      
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.email) }}
+                       
+                    </div>
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.web) }}
+                      
+                    </div>
+               
+                </div>
+                <div class="form-row">
+
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.local) }}
+                      
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        {{ form_row(edit_form.sexo) }}
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>                
+                    </div>   
+
+                    <div class="form-group col-md-3">
+                        {{ form_row(edit_form.tipo) }}            
+                     
+                    </div>
+                                                 
+                </div>
+
+
+            </div>
+        </div>
+
+        {{ form_row(edit_form.estado) }}
+        {{ form_widget(edit_form._token) }}
+        
+        <div class="mt-4">
+            <p class="pull-right">
+                <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('cliente_index')}}'" />            
+                <input type="submit" class="btn btn-small btn-primary" value="Guardar" />
+            </p>
+        </div>
+        
+
+    </form>
+
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}  
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var region_select            = $("#appbundle_cliente_departamento");
+            var provincia_select         = $("#appbundle_cliente_provincia");    
+            var distrito_select          = $("#appbundle_cliente_distrito");
+
+
+            region_select.on("change", function(){
+
+                var data = {
+                  region      : this.value,
+                  autorizado  : 'si',
+                }
+
+                provincia_select.val('').attr("disabled", "disabled");
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('obtener_provincia_desde_region')}}",
+                  data: data,
+                  success: function(data){
+                    provincia_select.html(data).removeAttr("disabled");
+                  }
+
+                });
+            });
+
+            provincia_select.on("change", function(){
+
+                var data = {
+                  provincia   : this.value,
+                  autorizado  : 'si',
+                }
+
+                distrito_select.val('').attr("disabled", "disabled");
+
+                $.ajax({
+                  method: "POST",
+                  url: "{{ path('obtener_distrito_desde_provincia')}}",
+                  data: data,
+                  success: function(data){
+                    distrito_select.html(data).removeAttr("disabled");
+                  }
+
+                });
+            });        
+        });
+
+    </script>
+
+{% endblock %}  

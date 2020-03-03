@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RECIBO</title>
+    <style type="text/css">
+
+        @font-face {
+            font-family: 'Open Sans';
+            src: url({{ 'http://' ~ host ~ '/fonts/OpenSans-Regular.ttf' }} ) format('truetype');
+        }
+
+        body { 
+            font-family: 'Open Sans', sans-serif;
+            font-size:9pt;
+            background-size: 100%;
+        }
+
+
+    </style>    
+</head>
+<body>
+
+    <section class="" style="">
+
+        <table border="0">
+            <tr>
+                <td align="center" style="">
+                    
+                    {% if facturaVenta.local.razonComercial %}          
+                        <span style="font-size: 12pt;"><b>{{ facturaVenta.local.razonComercial ?  facturaVenta.local.razonComercial : facturaVenta.local.empresa.nombre }}</b></span></br>
+                    {% endif %}
+
+                    <span style="font-size: 11pt;"><b>{{ facturaVenta.local.empresa.nombre }}</b></span></br>
+
+                    {% if facturaVenta.local.direccion %}
+                        {{ facturaVenta.local.direccion }}</br>
+                    {% endif %}
+                    
+                    <b>RUC: {{ facturaVenta.local.rucComercial ? facturaVenta.local.rucComercial : facturaVenta.local.empresa.ruc }}</b></br>
+
+                    {% if facturaVenta.local.telefono %}
+                        {{ facturaVenta.local.telefono ?  'Teléfono:' ~ facturaVenta.local.telefono : '' }}</br>
+                    {% endif %}
+
+                    <b>RECIBO DE INGRESO</b></br>
+                    <b>{{facturaVenta.ticket }}</b>
+
+                </td>
+            </tr>
+
+            <tr>
+                <td align="left" style="">
+                    
+                    <b>CLIENTE</b></br>
+                    {{ 'DNI: '~ facturaVenta.cliente.ruc  }}</br>
+                    {{ facturaVenta.cliente.razonSocial  }}</br>
+                    {{ facturaVenta.cliente.direccion }}<br>                    
+                    <b>CAJA:</b> {{ facturaVenta.caja.nombre | upper }}</br>
+
+                    <b>FECHA EMISIÓN:</b> {{ facturaVenta.fecha | date('d/m/Y  H:i') }}</br>
+                    <b>MONEDA:</b> {{ facturaVenta.venta.ventaFormaPago[0].moneda ? facturaVenta.venta.ventaFormaPago[0].moneda.nombre | upper : 'SOLES' }} </br>
+                    <b>IGV:</b> 18%
+
+                </td>
+            </tr>
+
+
+            <tr>
+                <td align="left" style="">
+                    
+                    <b>VENTA</b></br>
+                    MONTO A CUENTA: {{ facturaVenta.venta.ventaFormaPago ? facturaVenta.venta.ventaFormaPago[0].montoACuenta ~ ' soles' : 0  }}</br>
+
+                    {% set saldo = facturaVenta.venta.ventaFormaPago[0].cantidad - facturaVenta.venta.ventaFormaPago[0].montoACuenta %}
+
+                    TOTAL: {{ facturaVenta.venta.ventaFormaPago ? facturaVenta.venta.ventaFormaPago[0].cantidad | number_format(2,'.',',') : 0 }} </br>
+                    SALDO: {{ saldo | number_format(2,'.',',') }} </br>
+
+                </td>
+            </tr>
+
+
+        </table>
+
+        
+        <hr style="border:1px dotted #b8b3b3;" />       
+
+        <table width="100%" border="0">
+
+            <tr>
+                <td align="center" style="font-size:9pt;">
+                    
+                    GRACIAS POR SU PREFERENCIA
+
+                </td>
+            </tr>
+
+        </table>
+
+
+
+    </section>
+   
+
+
+
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}{{ titulo }}{% endblock %}</title>
+        {% block stylesheets %}
+
+            <!-- Bootstrap Core CSS -->
+            <link href="{{asset('template/vendor/bootstrap/css/bootstrap.css')}}" rel="stylesheet">
+
+            <!-- Custom CSS -->
+            <link href="{{asset('template/css/sb-admin.min.css')}}" rel="stylesheet">
+            <link href="{{asset('template/css/ferretero.css')}}" rel="stylesheet">
+
+            <!-- Custom Fonts -->
+            <link href="{{asset('template/vendor/font-awesome/css/font-awesome.min.css')}}" rel="stylesheet" type="text/css">
+
+            <!-- Custom Datatables -->
+            <link href="{{asset('template/vendor/datatables/dataTables.bootstrap4.css')}}" rel="stylesheet" type="text/css">
+            <link href="{{asset('template/vendor/datatables/select.bootstrap4.min.css')}}" rel="stylesheet" type="text/css">
+            
+            <link rel="stylesheet" type="text/css" media="screen" href="{{asset('template/css/chosen.min.css') }}">
+
+            <!-- Datepicker -->
+            <link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css" >
+        {% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    </head>
+    <body class="" id="page-top">
+
+
+          <div class="">
+              <div class="container-fluid">
+
+                  <div class="row">
+                      <div class="col-lg-12">
+                          <h1 class="page-header">{{titulo}}</h1>
+                      </div>
+                      <!-- /.col-lg-12 -->
+                  </div>
+                  <!-- /.row -->
+                  
+                  {% block body %}{% endblock %}
+
+              </div>
+
+          </div>
+
+
+
+        {% block javascripts %}
+            <!-- jQuery -->
+            <script src="{{asset('template/vendor/jquery/jquery.min.js')}}"></script>
+
+            <!-- Bootstrap Core JavaScript -->
+            <script src="{{asset('template/vendor/bootstrap/js/popper.min.js')}}"></script>
+
+            <!-- Bootstrap Core JavaScript -->
+            <script src="{{asset('template/vendor/bootstrap/js/bootstrap.min.js')}}"></script>
+
+            <!-- Custom Theme JavaScript -->
+            <script src="{{asset('template/js/sb-admin.min.js')}}"></script>
+
+            <!-- Custom Theme Alerts -->
+            <script src="{{asset('template/js/bootbox.min.js')}}"></script>
+
+            <!-- Datatables -->
+            <script src="{{asset('template/vendor/datatables/jquery.dataTables.js')}}"></script>
+            <script src="{{asset('template/vendor/datatables/dataTables.bootstrap4.js')}}"></script>
+            <script src="{{asset('template/js/sb-admin-datatables.js')}}"></script>
+
+            <script src="{{asset('template/js/chosen.jquery.min.js') }}"></script>
+            <!-- Datepicker -->   
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
+            <script src="{{asset('template/js/bootstrap-datepicker.es.js')}}" charset="UTF-8"></script>
+            
+            <!-- Jquery mask-->
+            <script src="{{asset('template/js/jquery.mask.min.js')}}" ></script>
+
+            <script type="text/javascript">
+
+
+                    /***ACTIVANDO MENÚ DEL SISTEMA**/              
+                    function stripTrailingSlash(str='') {
+
+                      if(str.substr(-1) == '/') {
+                        return str.substr(0, str.length - 1);
+                      }
+
+                      return str;
+                    }
+
+                    // var i = 0;
+                    function activarSubmenu(_li, submenu_clase) {
+
+                      if (_li.hasClass(submenu_clase)){
+
+                        var _link = _li.parent().siblings();
+
+                        if (_link.hasClass('nav-link-collapse')) {
+                          _link.trigger('click');
+                          activarSubmenu(_link.parent(), submenu_clase);
+                        }
+
+                      }
+                      return false;
+                    }
+
+                    var url         = window.location.pathname;
+
+                    var activePage  = stripTrailingSlash(url);
+
+                    // Obteniendo el ultimo caracter de la url
+                    if(activePage.charAt(activePage.length - 1) == '/')
+                    {
+                      activePage = activePage.substring(0, activePage.length-1);
+                    }
+
+                    $('.navbar-sidenav li a').each(function(){
+                      
+                        var opcion         = $(this);
+                        var opcion_li      = opcion.parent();
+                        var currentPage    = stripTrailingSlash(opcion.attr('href'));
+                       
+                        if(currentPage.charAt(currentPage.length - 1) == '/')
+                        {
+                            currentPage = currentPage.substring(0, currentPage.length-1);
+                        }
+
+                        if (String(activePage+'/').indexOf(String(currentPage+'/'))!=-1){
+                            
+                            opcion_clase = opcion_li.attr('class');
+
+                          
+                            if ( /\o$/.test(opcion_clase) ) {
+                                
+                                activarSubmenu(opcion_li, opcion_clase);
+                            };
+
+                            opcion_li.parent().css('display','block');
+                            opcion_li.addClass('active');
+                            
+                        }                
+                    });
+                    /***FIN ACTIVANDO MENÚ DEL SISTEMA**/
+
+
+              (function() {
+                'use strict';
+                window.addEventListener('load', function() {
+                  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                  var forms = document.getElementsByClassName('needs-validation');
+                  // Loop over them and prevent submission
+                  var validation = Array.prototype.filter.call(forms, function(form) {
+
+                    form.addEventListener('submit', function(event) {
+
+                      if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }
+                      form.classList.add('was-validated');
+                    }, false);
+
+                  });
+                }, false);
+              })();
+
+              $(document).ready(function() {
+
+                $(".chosen-select").chosen({width: "100%",no_results_text: "No se encontraron resultados!",allow_single_deselect: true});
+
+                $('.datepicker').datepicker({
+                    format: 'dd/mm/yyyy',
+                    language: 'es',
+                    autoclose: true
+                });
+
+                $(function () {
+                  $('[data-toggle="tooltip"]').tooltip()
+                })
+
+              });
+
+
+
+            </script>
+
+        {% endblock %}
+    </body>
+</html>

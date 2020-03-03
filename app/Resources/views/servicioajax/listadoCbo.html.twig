@@ -1,0 +1,49 @@
+{% if listado == 'provinciadesderegion' %}
+
+   <option value="" >Seleccionar provincia</option>
+
+   {% for entity in lista_provincia %}
+      <option value="{{ entity.id}}">{{ entity.nombre}}</option>
+   {% endfor %}
+
+{% elseif listado == 'distritodesdeprovincia' %}
+
+   <option value="" >Seleccionar distrito</option>
+
+   {% for entity in lista_distrito %}
+      <option value="{{ entity.id}}">{{ entity.nombre}}</option>
+   {% endfor %}
+
+{% elseif listado == 'localdesdeempresa' %}
+
+   {% for entity in lista_local %}
+      <option value="{{ entity.id}}">{{ entity.nombre}}</option>
+   {% endfor %}
+
+{% elseif listado == 'unidadcompradesdeunidadventa' %}
+
+   {% for entity in lista_unidad %}     
+      
+      <option value="{{ entity.id}}"  {% if entity.id == unidad_id %} selected {% endif %} >{{ entity.nombre}}</option>
+      
+   {% endfor %}
+
+{% elseif listado == 'cajadesdelocal' %}
+   <option value="" >Seleccionar caja</option>
+   {% for entity in lista_caja %}
+      <option value="{{ entity.id}}">{{ entity.nombre}}</option>
+   {% endfor %}
+
+{% elseif listado == 'productodesdelocal' %}
+   <option value="" >Seleccionar producto</option>
+   {% for entity in lista_producto %}
+      <option value="{{ entity.id}}">{{ entity }}</option>
+   {% endfor %}
+
+
+{% endif %}
+
+
+
+
+

@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="container">
+    <form id="form" action="{{ path('caja_apertura', {'id': caja.id}) }}" class="form-horizontal needs-validation" role="form" method="post"  novalidate>
+
+        <div class="card mx-auto mt-5">
+            <div class="card-header">Datos básicos de apertura de caja</div>
+            <div class="card-body">
+
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-2">
+
+                        <label for="montoAnterior" class="">Monto anterior</label>
+                        <p id="montoAnterior" class="bg-success text-white">{{ montoAnterior | number_format(2,'.',',') }}</p>
+                          
+                    </div>
+
+                    <div class="form-group col-md-3">
+
+                        {{ form_row(form.caja) }}
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>   
+                    </div>                    
+                    <div class="form-group col-md-2">
+                        {{ form_label(form.montoApertura) }}
+                        {{ form_widget(form.montoApertura,{'value': montoAnterior | number_format(2,'.',',') }) }}
+
+                        <div class="invalid-feedback">
+                            Este valor es requerido.
+                        </div>               
+                    </div>               
+
+                  
+                </div>
+
+            </div>
+        </div>
+
+        {{ form_widget(form.usuario) }}
+        {{ form_widget(form.estado) }}
+        {{ form_widget(form._token) }}
+        <div class="mt-4">
+            <p class="pull-right">
+                <input type="button" value="Cancelar" class="btn btn-small"  onclick="location.href='{{ path('caja_index')}}'" />            
+                <input type="submit" class="btn btn-small btn-primary" value="Abrir Caja" />
+            </p>
+        </div>
+        
+    </form>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}  
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+  
+        });
+
+    </script>
+
+{% endblock %}  
